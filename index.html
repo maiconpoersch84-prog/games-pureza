@@ -936,10 +936,12 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 .mov-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
 .mov-title{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--neon3);}
 .presenca-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
-.presenca-item{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;transition:all .2s;}
+.presenca-item{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;cursor:default;transition:all .2s;}
 .presenca-item.presente{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35);color:var(--green);}
 .presenca-item.ausente{background:rgba(100,116,139,.08);border-color:var(--border);color:var(--text3);}
 .presenca-item:hover{border-color:var(--border2);}
+.presenca-item span[onclick]{cursor:pointer;transition:transform .15s;}
+.presenca-item span[onclick]:hover{transform:scale(1.08);opacity:.85;}
 
 /* RELATORIO */
 .rel-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;}
@@ -1834,6 +1836,34 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     <div class="modal-btns">
       <button class="btn btn-cancel" onclick="closeModalDirect()">Cancelar</button>
       <button class="btn btn-save" onclick="saveAcolhimento()">💾 Salvar</button>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAR REBOCAMENTO -->
+  <div class="modal" id="modal-rebocado" style="display:none">
+    <h3 style="color:#fbbf24">🚨 CONFIRMAR REBOCAMENTO</h3>
+
+    <div id="rebocado-info" style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;padding:12px 16px;margin-bottom:16px">
+      <div style="font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--text)" id="rebocado-nome">—</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);margin-top:3px" id="rebocado-discord">—</div>
+    </div>
+
+    <div class="form-row">
+      <label>Motivo do rebocamento <span style="font-size:10px;color:var(--text3)">(opcional)</span></label>
+      <input id="rebocado-motivo" placeholder="Ex: inativo há mais de 2 meses, não pontuou...">
+    </div>
+
+    <div style="background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:#fbbf24;font-family:'Share Tech Mono',monospace;margin-top:4px">
+      🚨 O membro será marcado como rebocado e removido da lista de pendentes.
+    </div>
+
+    <input type="hidden" id="rebocado-docid">
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="closeModalDirect()">Cancelar</button>
+      <button class="btn" onclick="executarRebocamento()"
+        style="background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.4);color:#fbbf24;font-weight:700">
+        🚨 Confirmar Rebocamento
+      </button>
     </div>
   </div>
 
@@ -3535,8 +3565,9 @@ function tab(id, el){
   document.querySelectorAll('.nav-item, .nav-sub').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
 
-  // Ativar item clicado
-  if(el) el.classList.add('active');
+  // Ativar item clicado — se não passou el, busca pelo data-page
+  const activeEl = el || document.querySelector(`[data-page="${id}"]`);
+  if(activeEl) activeEl.classList.add('active');
 
   // Ativar página
   const page = document.getElementById('page-'+id);
@@ -3642,7 +3673,14 @@ function mBuscarPorId() {
 function buscarMembroPorId(idValue, opts) {
   if (!idValue || idValue.length < 5) return;
   const membro = (window._state?.members || []).find(m => m.id === idValue);
-  if (!membro) return;
+  if (!membro) {
+    // Ocultar info-box se membro não encontrado
+    if (opts?.infoId) {
+      const el = document.getElementById(opts.infoId);
+      if (el) el.style.display = 'none';
+    }
+    return;
+  }
 
   const subs = [];
   if (membro.subAreas?.instrucao)   subs.push('📚 Instrução');
@@ -3748,6 +3786,8 @@ function mAtualizarTipoUp() {
 
 async function saveMember(){
   const docId=document.getElementById('m-edit-id').value||window._db.genId();
+  // Preservar campos de rebocamento se membro já foi processado
+  const existente = window._state.members.find(x=>x._id===docId);
   const obj={
     m:        document.getElementById('m-nome').value.trim(),
     id:       document.getElementById('m-id').value.trim(),
@@ -3765,6 +3805,12 @@ async function saveMember(){
     ult:     document.getElementById('m-ult').value,
     entrou:  document.getElementById('m-entrou').value||'—',
     obs:     document.getElementById('m-obs').value.trim(),
+    // Preservar campos de rebocamento para não reaparecer na lista
+    ...(existente?.rebocadoConfirmado ? {
+      rebocadoConfirmado: true,
+      rebocadoEm:         existente.rebocadoEm     || '',
+      rebocadoMotivo:     existente.rebocadoMotivo || '',
+    } : {}),
   };
   if(!obj.m){toast('❌ Informe o nome');return;}
   await window._db.dbSet(window._db.COLS.members,docId,obj);
@@ -3780,33 +3826,40 @@ async function deleteMember(docId){
 
 // ── REBOCADO: marca como rebocado e remove do grupo ────────
 async function confirmarRebocado(docId, nome, discordId) {
-  const motivo = window.prompt(
-    `🚨 Confirmar rebocamento de @${nome}${discordId ? ' ('+discordId+')' : ''}\n\nMotivo (opcional):`,
-    ''
-  );
-  if (motivo === null) return; // cancelou
+  document.getElementById('rebocado-docid').value          = docId;
+  document.getElementById('rebocado-nome').textContent     = '@' + nome;
+  document.getElementById('rebocado-discord').textContent  = discordId ? 'ID: ' + discordId : '—';
+  document.getElementById('rebocado-motivo').value         = '';
+  openModal('rebocado');
+}
 
-  // Atualizar membro: ativo=false, pts=false, ult=SEM PONTOS, obs com motivo
+async function executarRebocamento() {
+  const docId  = document.getElementById('rebocado-docid').value;
+  const motivo = document.getElementById('rebocado-motivo').value.trim();
+  const nome   = document.getElementById('rebocado-nome').textContent.replace('@','');
+
   const membro = window._state.members.find(x => x._id === docId);
   if (!membro) return;
 
   const obsAnterior = membro.obs ? membro.obs + ' | ' : '';
-  const dataHoje = new Date().toLocaleDateString('pt-BR');
+  const dataHoje    = new Date().toLocaleDateString('pt-BR');
   const { _id, ...membroSemId } = membro;
   const obj = {
     ...membroSemId,
-    ativo: false,
-    pts:   false,
-    ult:   'SEM PONTOS',
-    obs:   `${obsAnterior}🚨 Rebocado em ${dataHoje}${motivo ? ': ' + motivo : ''}`,
-    rebocadoEm: new Date().toISOString().slice(0,10),
-    rebocadoMotivo: motivo || '',
+    ativo:              false,
+    pts:                false,
+    ult:                'SEM PONTOS',
+    obs:                `${obsAnterior}🚨 Rebocado em ${dataHoje}${motivo ? ': ' + motivo : ''}`,
+    rebocadoEm:         new Date().toISOString().slice(0,10),
+    rebocadoMotivo:     motivo || '',
+    rebocadoConfirmado: true,   // sai da lista de pendentes
   };
 
   await window._db.dbSet(window._db.COLS.members, docId, obj);
   window._state.members = await window._db.dbGetAll(window._db.COLS.members);
+  closeModalDirect();
   window._renderAll();
-  toast(`🚨 @${nome} marcado como rebocado!`);
+  toast(`🚨 @${nome} rebocado${motivo ? ': ' + motivo : ''}!`);
 }
 
 // ── EXCLUIR MEMBRO: sai da área ou da staff ────────────────
@@ -3828,26 +3881,21 @@ function excluirAtualizarMotivo() {
 }
 
 async function executarExclusaoMembro() {
-  const docId  = document.getElementById('excluir-docid').value;
-  const sel    = document.getElementById('excluir-motivo-sel').value;
-  const outro  = document.getElementById('excluir-motivo-outro').value.trim();
-  const obs    = document.getElementById('excluir-obs').value.trim();
-  const nome   = document.getElementById('excluir-nome').textContent.replace('@','');
+  const docId = document.getElementById('excluir-docid').value;
+  const sel   = document.getElementById('excluir-motivo-sel').value;
+  const obs   = document.getElementById('excluir-obs').value.trim();
+  const nome  = document.getElementById('excluir-nome').textContent.replace('@','');
 
   if (!sel) { toast('❌ Selecione o motivo da remoção'); return; }
-  if (sel === 'Outro' && !outro) { toast('❌ Especifique o motivo'); return; }
-
-  const motivo = sel === 'Outro' ? outro : sel;
 
   await window._db.dbDel(window._db.COLS.members, docId);
   window._state.members = await window._db.dbGetAll(window._db.COLS.members);
 
-  // Log opcional no console para rastreabilidade
-  console.log(`[EXCLUÍDO] @${nome} — Motivo: ${motivo}${obs ? ' | Obs: '+obs : ''} — ${new Date().toLocaleDateString('pt-BR')}`);
+  console.log(`[EXCLUÍDO] @${nome} — Motivo: ${sel}${obs ? ' | Obs: '+obs : ''} — ${new Date().toLocaleDateString('pt-BR')}`);
 
   closeModalDirect();
   window._renderAll();
-  toast(`🗑 @${nome} removido. Motivo: ${motivo}`);
+  toast(`🗑 @${nome} removido. Motivo: ${sel}`);
 }
 
 // ===== SUGGESTION =====
@@ -4290,6 +4338,9 @@ function getUltimaPontuacaoMembro(m) {
 }
 
 function isRebocado(m) {
+  // Membro já processado (rebocado confirmado ou excluído) → não aparece na lista
+  if (m.rebocadoConfirmado) return false;
+
   // Verificar primeiro no levelup (fonte de verdade)
   const ult = getUltimaPontuacaoMembro(m);
 
@@ -5154,6 +5205,35 @@ function openPresencaModal(movId, parId) {
   togglePontosField(document.getElementById('pr-presente').value);
   openModal('presenca');
 }
+// Toggle rápido de presença — clique no nome ou emoji do participante
+async function togglePresenca(parId, movId) {
+  const s = window._state;
+  const par = (s.participacoes || []).find(p => p._id === parId);
+  if (!par) return;
+
+  const mov = (s.movs || []).find(m => m._id === movId);
+  const novoPresente = !par.presente;
+
+  // Calcular pontos conforme novo status
+  let pontos = 0;
+  if (novoPresente && mov?.finalizada) {
+    pontos = mov.pontosPadrao || 1;
+  } else if (novoPresente && !mov?.finalizada) {
+    pontos = 0; // pontos são distribuídos ao finalizar
+  }
+
+  const { _id, ...parSemId } = par;
+  const obj = { ...parSemId, presente: novoPresente, pontos };
+
+  await window._db.dbSet(window._db.COLS.participacoes, parId, obj);
+  s.participacoes = await window._db.dbGetAll(window._db.COLS.participacoes);
+  renderMovs();
+  toast(novoPresente
+    ? `✅ ${par.memNome||par.memId} — marcado como presente`
+    : `❌ ${par.memNome||par.memId} — marcado como ausente`
+  );
+}
+
 async function savePresenca(){
   const movId   = document.getElementById('pr-mov-id').value;
   const editId  = document.getElementById('pr-edit-id').value.trim();
@@ -5275,9 +5355,9 @@ function renderMovs(){
           :'';
         const obs = p.obs ? `<span style="font-size:9px;color:var(--text3);font-style:italic" title="${p.obs}">💬</span>` : '';
         return`<div class="presenca-item ${p.presente?'presente':'ausente'}" title="${p.obs||''}">
-            <span>${p.presente?'✅':'❌'}</span>
+            <span style="cursor:pointer;font-size:18px" onclick="togglePresenca('${p._id}','${mv._id}')" title="Clique para alternar presente/ausente">${p.presente?'✅':'❌'}</span>
             ${catBadge}
-            <span style="font-weight:600">${p.memNome||p.memId}</span>
+            <span style="font-weight:600;cursor:pointer;user-select:none" onclick="togglePresenca('${p._id}','${mv._id}')" title="Clique para alternar presente/ausente">${p.memNome||p.memId}</span>
             ${ptsBadge}${obs}${btnEdit}${btnDel}
           </div>`;
       }).join('');
@@ -5556,19 +5636,24 @@ function renderAllDesigner() {
 // ===== RELATÓRIO =====
 function calcParticipacao(){
   const s=window._state;
-  const totalMovs=s.movs.length;
+  // Usar apenas movs finalizadas para o cálculo de participação
+  const movsFinalizadas = (s.movs||[]).filter(m => m.finalizada);
+  const totalMovs = movsFinalizadas.length;
   if(totalMovs===0) return [];
 
-  // agrupa por memId ou memNome
+  const movsIds = new Set(movsFinalizadas.map(m => m._id));
+
+  // agrupa por memId ou memNome, apenas participações de movs finalizadas
   const map={};
-  for(const p of s.participacoes){
+  for(const p of (s.participacoes||[])){
+    if(!movsIds.has(p.movId)) continue; // ignorar movs não finalizadas
     const key=p.memId||p.memNome;
     if(!key) continue;
     if(!map[key]) map[key]={key,nome:p.memNome||p.memId,id:p.memId||'',presencas:0,ausencias:0,pontos:0,movs:[]};
     if(p.presente) map[key].presencas++;
     else map[key].ausencias++;
     map[key].pontos+=(p.pontos||0);
-    const mov=s.movs.find(m=>m._id===p.movId);
+    const mov=movsFinalizadas.find(m=>m._id===p.movId);
     if(mov) map[key].movs.push(mov.nome);
   }
 
@@ -5584,7 +5669,7 @@ function renderRelatorio(){
   const dados=calcParticipacao();
   const q=(document.getElementById('search-rel')?.value||'').toLowerCase();
   const filtered=dados.filter(d=>d.nome.toLowerCase().includes(q)||d.id.includes(q));
-  const totalMovs=s.movs.length;
+  const totalMovs=(s.movs||[]).filter(m=>m.finalizada).length;
   const mediaPct=dados.length>0?Math.round(dados.reduce((a,d)=>a+d.pct,0)/dados.length):0;
   const top=dados[0];
 
@@ -7456,7 +7541,7 @@ async function saveLevelUp() {
   };
   await window._db.dbSet(window._db.COLS.levelup, docId, obj);
   window._state.levelup = await window._db.dbGetAll(window._db.COLS.levelup);
-  renderLevelUp(); closeModalDirect(); toast('⚡ Level Up registrado!');
+  renderLevelUp(); renderRebocamentos(); renderMembers(); closeModalDirect(); toast('⚡ Level Up registrado!');
 }
 
 async function deleteLevelUp(docId) {
@@ -7652,7 +7737,7 @@ function upPodeUpar(cargo, semanas, pts, movs, reuniao) {
   return { pode, prox, metaTotal, itens };
 }
 
-function upPopularSelect(tipoUp) {
+function upPopularSelect(tipoUp = 'meta') {
   const sel = document.getElementById('up-cargo-de');
   if (!sel) return;
   sel.innerHTML = '<option value="">— selecionar cargo —</option>';
@@ -9186,6 +9271,8 @@ async function autoFinalizarMovs() {
     renderMovs();
     renderCronograma();
     renderPontuacoes();
+    renderRebocamentos();
+    renderMembers();
     if (movsPendentes.length === 1) {
       toast(`✅ "${movsPendentes[0].nome}" finalizada automaticamente!`);
     } else {
