@@ -54,7 +54,7 @@ const COLS = {
   members: 'members', suggestions: 'suggestions', subgestao: 'subgestao',
   ausencias: 'ausencias', indicacoes: 'indicacoes', news: 'news', naoverif: 'naoverif',
   movs: 'movs', participacoes: 'participacoes', users: 'users', instrucoes: 'instrucoes',
-  feedbacks: 'feedbacks', funcoes: 'funcoes', notificacoes: 'notificacoes', rpps: 'rpps', cronograma: 'cronograma', acolhimentos: 'acolhimentos', advertencias: 'advertencias', blacklist: 'blacklist', levelup: 'levelup', upamentos: 'upamentos', destaques: 'destaques', pautas: 'pautas'
+  feedbacks: 'feedbacks', funcoes: 'funcoes', notificacoes: 'notificacoes', rpps: 'rpps', cronograma: 'cronograma', acolhimentos: 'acolhimentos', advertencias: 'advertencias', blacklist: 'blacklist', levelup: 'levelup', upamentos: 'upamentos', destaques: 'destaques', pautas: 'pautas', designer: 'designer'
 };
 
 // ===== PERMISSIONS =====
@@ -99,17 +99,17 @@ window._currentUser = null;
 
 // ===== STATE =====
 let members = [], suggestions = [], subgestao = [], ausencias = [],
-    indicacoes = [], news = [], naoverif = [], movs = [], participacoes = [], users = [], instrucoes = [], feedbacks = [], funcoes = [], notificacoes = [], rpps = [], cronograma = [], acolhimentos = [], advertencias = [], blacklist = [], levelup = [], upamentos = [], destaques = [], pautas = [];
+    indicacoes = [], news = [], naoverif = [], movs = [], participacoes = [], users = [], instrucoes = [], feedbacks = [], funcoes = [], notificacoes = [], rpps = [], cronograma = [], acolhimentos = [], advertencias = [], blacklist = [], levelup = [], upamentos = [], destaques = [], pautas = [], designer = [];
 let loading = true;
 
 // ===== LOAD ALL =====
 async function loadAll() {
   showLoading(true);
   try {
-    [members, suggestions, subgestao, ausencias, indicacoes, news, naoverif, movs, participacoes, users, instrucoes, feedbacks, funcoes, notificacoes, rpps, cronograma, acolhimentos, advertencias, blacklist, levelup, upamentos, destaques, pautas] = await Promise.all([
+    [members, suggestions, subgestao, ausencias, indicacoes, news, naoverif, movs, participacoes, users, instrucoes, feedbacks, funcoes, notificacoes, rpps, cronograma, acolhimentos, advertencias, blacklist, levelup, upamentos, destaques, pautas, designer] = await Promise.all([
       dbGetAll(COLS.members), dbGetAll(COLS.suggestions), dbGetAll(COLS.subgestao),
       dbGetAll(COLS.ausencias), dbGetAll(COLS.indicacoes), dbGetAll(COLS.news),
-      dbGetAll(COLS.naoverif), dbGetAll(COLS.movs), dbGetAll(COLS.participacoes), dbGetAll(COLS.users), dbGetAll(COLS.instrucoes), dbGetAll(COLS.feedbacks), dbGetAll(COLS.funcoes), dbGetAll(COLS.notificacoes), dbGetAll(COLS.rpps), dbGetAll(COLS.cronograma), dbGetAll(COLS.acolhimentos), dbGetAll(COLS.advertencias), dbGetAll(COLS.blacklist), dbGetAll(COLS.levelup), dbGetAll(COLS.upamentos), dbGetAll(COLS.destaques), dbGetAll(COLS.pautas)
+      dbGetAll(COLS.naoverif), dbGetAll(COLS.movs), dbGetAll(COLS.participacoes), dbGetAll(COLS.users), dbGetAll(COLS.instrucoes), dbGetAll(COLS.feedbacks), dbGetAll(COLS.funcoes), dbGetAll(COLS.notificacoes), dbGetAll(COLS.rpps), dbGetAll(COLS.cronograma), dbGetAll(COLS.acolhimentos), dbGetAll(COLS.advertencias), dbGetAll(COLS.blacklist), dbGetAll(COLS.levelup), dbGetAll(COLS.upamentos), dbGetAll(COLS.destaques), dbGetAll(COLS.pautas), dbGetAll(COLS.designer)
     ]);
 
     // Seed default data if empty
@@ -130,10 +130,10 @@ async function loadAll() {
     if (funcoes.length === 0) await seedFuncoes();
 
     // Reload after seed
-    [members, suggestions, subgestao, ausencias, indicacoes, news, naoverif, movs, participacoes, users, instrucoes, feedbacks, funcoes, notificacoes, rpps, cronograma, acolhimentos, advertencias, blacklist, levelup, upamentos, destaques, pautas] = await Promise.all([
+    [members, suggestions, subgestao, ausencias, indicacoes, news, naoverif, movs, participacoes, users, instrucoes, feedbacks, funcoes, notificacoes, rpps, cronograma, acolhimentos, advertencias, blacklist, levelup, upamentos, destaques, pautas, designer] = await Promise.all([
       dbGetAll(COLS.members), dbGetAll(COLS.suggestions), dbGetAll(COLS.subgestao),
       dbGetAll(COLS.ausencias), dbGetAll(COLS.indicacoes), dbGetAll(COLS.news),
-      dbGetAll(COLS.naoverif), dbGetAll(COLS.movs), dbGetAll(COLS.participacoes), dbGetAll(COLS.users), dbGetAll(COLS.instrucoes), dbGetAll(COLS.feedbacks), dbGetAll(COLS.funcoes), dbGetAll(COLS.notificacoes), dbGetAll(COLS.rpps), dbGetAll(COLS.cronograma), dbGetAll(COLS.acolhimentos), dbGetAll(COLS.advertencias), dbGetAll(COLS.blacklist), dbGetAll(COLS.levelup), dbGetAll(COLS.upamentos), dbGetAll(COLS.destaques), dbGetAll(COLS.pautas)
+      dbGetAll(COLS.naoverif), dbGetAll(COLS.movs), dbGetAll(COLS.participacoes), dbGetAll(COLS.users), dbGetAll(COLS.instrucoes), dbGetAll(COLS.feedbacks), dbGetAll(COLS.funcoes), dbGetAll(COLS.notificacoes), dbGetAll(COLS.rpps), dbGetAll(COLS.cronograma), dbGetAll(COLS.acolhimentos), dbGetAll(COLS.advertencias), dbGetAll(COLS.blacklist), dbGetAll(COLS.levelup), dbGetAll(COLS.upamentos), dbGetAll(COLS.destaques), dbGetAll(COLS.pautas), dbGetAll(COLS.designer)
     ]);
 
     loading = false;
@@ -504,6 +504,7 @@ window._state = { get members(){return members;}, set members(v){members=v;},
   get upamentos(){return upamentos;}, set upamentos(v){upamentos=v;},
   get destaques(){return destaques;}, set destaques(v){destaques=v;},
   get pautas(){return pautas;}, set pautas(v){pautas=v;},
+  get designer(){return designer;}, set designer(v){designer=v;},
 };
 window._loadAll = loadAll;
 // renderAll será definido no segundo script — usamos wrapper para garantir
@@ -678,6 +679,9 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 .cat-cine{background:rgba(6,182,212,.13);color:var(--cyan2);border:1px solid rgba(6,182,212,.3);}
 .cat-atividades{background:rgba(236,72,153,.12);color:var(--pink);border:1px solid rgba(236,72,153,.25);}
 .cat-outro{background:rgba(234,179,8,.12);color:var(--yellow);border:1px solid rgba(234,179,8,.25);}
+.cat-yellow{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3);}
+.cat-green{background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.3);}
+.active-filter{outline:2px solid currentColor;outline-offset:1px;}
 .sug-date{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);}
 .sug-body{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .sug-text{font-size:14px;font-weight:600;color:var(--text);line-height:1.4;flex:1;}
@@ -1022,8 +1026,67 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     <input type="hidden" id="m-edit-id">
     <div class="form-cols">
       <div class="form-row"><label>Nome / @</label><input id="m-nome" placeholder="ex: thelaw7360"></div>
-      <div class="form-row"><label>ID Discord</label><input id="m-id" placeholder="ex: 407585608048050176"></div>
+      <div class="form-row"><label>ID Discord</label><input id="m-id" placeholder="ex: 407585608048050176" oninput="mBuscarPorId()"></div>
     </div>
+
+    <!-- Posição no Servidor -->
+    <div class="form-cols">
+      <div class="form-row">
+        <label>Posição no Servidor</label>
+        <select id="m-posicao" onchange="mAtualizarPosicao()">
+          <option value="comum">👤 Comum</option>
+          <option value="subgestao">⚡ Sub-Gestão</option>
+          <option value="gestao">🛡️ Gestão</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Sub Áreas</label>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-top:6px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:400">
+            <input type="checkbox" id="m-sub-instrucao" style="accent-color:#a855f7"> 📚 Instrução
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:400">
+            <input type="checkbox" id="m-sub-acolhimento" style="accent-color:#22d3ee"> 🤗 Acolhimento
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:400">
+            <input type="checkbox" id="m-sub-gamenews" style="accent-color:#f97316"> 📰 Game News
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info do membro encontrado pelo ID -->
+    <div id="m-id-info" style="display:none;background:var(--bg2);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:8px 12px;font-size:11px;font-family:'Share Tech Mono',monospace;color:#22c55e;margin-bottom:4px"></div>
+
+    <!-- Cargo atual no servidor -->
+    <div class="form-row">
+      <label>Cargo Atual <span style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace">no servidor</span></label>
+      <select id="m-cargo">
+        <option value="">— Selecionar cargo —</option>
+      </select>
+    </div>
+
+    <!-- Tipo de up + upa por Games -->
+    <div class="form-cols">
+      <div class="form-row">
+        <label>Tipo de Up</label>
+        <select id="m-tipo-up" onchange="mAtualizarTipoUp()">
+          <option value="meta">🎯 Meta</option>
+          <option value="merito">🏅 Mérito</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Upa por Games? <span id="m-games-badge" style="display:none;font-size:10px;background:rgba(34,197,94,.15);color:#22c55e;padding:1px 8px;border-radius:10px;font-family:'Share Tech Mono',monospace;margin-left:4px">✅ PODE UPAR</span></label>
+        <select id="m-upa-games" onchange="mAtualizarBadgeGames()">
+          <option value="sim">✅ Sim — upa por Games</option>
+          <option value="nao">❌ Não</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Info calculada automaticamente -->
+    <div id="m-info-up" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--text3);font-family:'Share Tech Mono',monospace;display:none"></div>
+
     <div class="form-cols">
       <div class="form-row"><label>Ativo?</label>
         <select id="m-ativo"><option value="false">❌ Não</option><option value="true">✅ Sim</option></select>
@@ -1054,7 +1117,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     <div class="form-row"><label>ID do Membro</label><input id="s-id" placeholder="Discord ID"></div>
     <div class="form-cols">
       <div class="form-row"><label>Categoria</label>
-        <select id="s-cat"><option>Temática</option><option>Cine</option><option>Atividades</option><option>Outro</option></select>
+        <select id="s-cat"><option>Temática</option><option>Cine</option><option>Atividades</option><option>Destaques</option><option>Reforma</option><option>Outro</option></select>
       </div>
       <div class="form-row"><label>Data</label><input id="s-data" type="date"></div>
     </div>
@@ -1320,6 +1383,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <option value="encerrado">✅ Encerrado</option>
       </select>
     </div>
+    <div class="form-row"><label>Motivo / Observação</label><input id="rp-motivo" placeholder="ex: viagem, compromissos pessoais..."></div>
     <div class="modal-btns">
       <button class="btn btn-cancel" onclick="closeModalDirect()">Cancelar</button>
       <button class="btn btn-save" onclick="saveRpp()">💾 Salvar</button>
@@ -1446,9 +1510,10 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     <h3 id="modal-inst-title">📚 NOVA INSTRUÇÃO</h3>
     <input type="hidden" id="in-edit-id">
     <div class="form-cols">
-      <div class="form-row"><label>ID Discord do Membro</label><input id="in-id" placeholder="ex: 407585608048050176"></div>
+      <div class="form-row"><label>ID Discord do Membro</label><input id="in-id" placeholder="ex: 407585608048050176" oninput="buscarMembroPorId(this.value,{nomeId:'in-membro',infoId:'in-membro-info'})"></div>
       <div class="form-row"><label>Membro (@)</label><input id="in-membro" placeholder="ex: thelaw7360"></div>
     </div>
+    <div id="in-membro-info" style="display:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11px;font-family:'Share Tech Mono',monospace;margin-bottom:4px"></div>
     <div class="form-cols">
       <div class="form-row"><label>Instrutor (@)</label><input id="in-instrutor" placeholder="ex: will"></div>
       <div class="form-row"><label>Data</label><input id="in-data" type="date"></div>
@@ -1498,8 +1563,9 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     <input type="hidden" id="lu-edit-id">
     <div class="form-cols">
       <div class="form-row"><label>Membro (@)</label><input id="lu-membro" placeholder="ex: thelaw7360"></div>
-      <div class="form-row"><label>ID Discord</label><input id="lu-id" placeholder="ex: 407585190..." oninput="luAutoFill()"></div>
+      <div class="form-row"><label>ID Discord</label><input id="lu-id" placeholder="ex: 407585190..." oninput="luAutoFill();buscarMembroPorId(this.value,{nomeId:'lu-membro',infoId:'lu-membro-info'})"></div>
     </div>
+    <div id="lu-membro-info" style="display:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11px;font-family:'Share Tech Mono',monospace;margin-bottom:4px"></div>
     <div class="form-cols">
       <div class="form-row">
         <label>Pontuação</label>
@@ -1530,6 +1596,8 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
       <div class="form-row"><label>Membro (@)</label><input id="up-membro" placeholder="ex: thelaw7360" oninput="upAutoFill()"></div>
       <div class="form-row"><label>ID Discord</label><input id="up-id" placeholder="ex: 407585..." oninput="upBuscarParticipacoes()"></div>
     </div>
+    <!-- Elegibilidade do membro -->
+    <div id="up-eligibilidade-membro" style="display:none;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:11px;font-family:'Share Tech Mono',monospace;margin-bottom:4px"></div>
     <div class="form-row">
       <label>Cargo Atual</label>
       <select id="up-cargo-de" onchange="upAutoFill()">
@@ -1732,9 +1800,10 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     <h3 id="modal-acolh-title">🤗 NOVO ACOLHIMENTO</h3>
     <input type="hidden" id="ac-edit-id">
     <div class="form-cols">
-      <div class="form-row"><label>ID Discord do Membro</label><input id="ac-id" placeholder="ex: 407585608048050176"></div>
+      <div class="form-row"><label>ID Discord do Membro</label><input id="ac-id" placeholder="ex: 407585608048050176" oninput="buscarMembroPorId(this.value,{nomeId:'ac-membro',infoId:'ac-membro-info'})"></div>
       <div class="form-row"><label>Membro (@)</label><input id="ac-membro" placeholder="ex: thelaw7360"></div>
     </div>
+    <div id="ac-membro-info" style="display:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11px;font-family:'Share Tech Mono',monospace;margin-bottom:4px"></div>
     <div class="form-cols">
       <div class="form-row"><label>Acolhedor (@)</label><input id="ac-acolhedor" placeholder="ex: will"></div>
       <div class="form-row"><label>Data</label><input id="ac-data" type="date"></div>
@@ -1765,6 +1834,52 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     <div class="modal-btns">
       <button class="btn btn-cancel" onclick="closeModalDirect()">Cancelar</button>
       <button class="btn btn-save" onclick="saveAcolhimento()">💾 Salvar</button>
+    </div>
+  </div>
+
+  <!-- MODAL EXCLUIR MEMBRO -->
+  <div class="modal" id="modal-excluir-membro" style="display:none">
+    <h3 style="color:#f87171">🗑️ EXCLUIR MEMBRO</h3>
+
+    <!-- Info do membro -->
+    <div id="excluir-info" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:12px 16px;margin-bottom:16px">
+      <div style="font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--text)" id="excluir-nome">—</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);margin-top:3px" id="excluir-discord">—</div>
+    </div>
+
+    <!-- Motivo -->
+    <div class="form-row">
+      <label>Motivo da remoção <span style="color:#f87171">*</span></label>
+      <select id="excluir-motivo-sel" onchange="excluirAtualizarMotivo()">
+        <option value="">— Selecione o motivo —</option>
+        <option value="Saiu da área de Games">🎮 Saiu da área de Games</option>
+        <option value="Saiu da staff do servidor">👥 Saiu da staff do servidor</option>
+        <option value="Banido do servidor">🔨 Banido do servidor</option>
+        <option value="Saiu do servidor">🚪 Saiu do servidor</option>
+      </select>
+    </div>
+    <div id="excluir-outro-row" style="display:none">
+      <input id="excluir-motivo-outro" style="display:none">
+    </div>
+
+    <!-- Observação opcional -->
+    <div class="form-row">
+      <label>Observação adicional <span style="font-size:10px;color:var(--text3)">(opcional)</span></label>
+      <input id="excluir-obs" placeholder="Ex: membro comunicou a saída em 20/03/2026">
+    </div>
+
+    <!-- Aviso -->
+    <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:#f87171;font-family:'Share Tech Mono',monospace;margin-top:4px">
+      ⚠️ Esta ação é permanente. O membro será removido do painel e de todos os registros.
+    </div>
+
+    <input type="hidden" id="excluir-docid">
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="closeModalDirect()">Cancelar</button>
+      <button class="btn" onclick="executarExclusaoMembro()"
+        style="background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);color:#f87171;font-weight:700">
+        🗑 Confirmar Exclusão
+      </button>
     </div>
   </div>
 
@@ -1886,7 +2001,8 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <option value="gestao">🛡️ Gestão</option>
       </select>
     </div>
-    <div class="form-row"><label>ID Discord do Membro</label><input id="pr-id" placeholder="ex: 407585608048050176"></div>
+    <div class="form-row"><label>ID Discord do Membro</label><input id="pr-id" placeholder="ex: 407585608048050176" oninput="buscarMembroPorId(this.value,{nomeId:'pr-nome',infoId:'pr-membro-info'})"></div>
+    <div id="pr-membro-info" style="display:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11px;font-family:'Share Tech Mono',monospace;margin-bottom:4px"></div>
     <div class="form-row"><label>Nome / @ do Membro</label><input id="pr-nome" placeholder="ex: thelaw7360"></div>
     <div class="form-cols">
       <div class="form-row"><label>Presente?</label>
@@ -1902,6 +2018,33 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
   </div>
 
 </div>
+
+  <!-- Modal Designer -->
+  <div class="modal" id="modal-designer" style="display:none">
+    <h3 id="modal-designer-title">➕ NOVA SUGESTÃO</h3>
+    <input type="hidden" id="ds-edit-id">
+    <input type="hidden" id="ds-tipo">
+    <div class="form-row"><label>Título</label><input id="ds-titulo" placeholder="ex: Tema Sakura — Cherry Blossom"></div>
+    <div class="form-row"><label>Descrição</label><textarea id="ds-desc" placeholder="Detalhes da sugestão..." style="min-height:80px"></textarea></div>
+    <div class="form-cols">
+      <div class="form-row"><label>Autor / @ Responsável</label><input id="ds-autor" placeholder="ex: @thelaw7360"></div>
+      <div class="form-row"><label>Data</label><input id="ds-data" type="date"></div>
+    </div>
+    <div class="form-row"><label>Status</label>
+      <select id="ds-status">
+        <option value="pendente">⏳ Pendente</option>
+        <option value="aprovado">✅ Aprovado</option>
+        <option value="em_andamento">🔄 Em andamento</option>
+        <option value="concluido">🎉 Concluído</option>
+        <option value="recusado">❌ Recusado</option>
+      </select>
+    </div>
+    <div class="form-row"><label>Observação</label><input id="ds-obs" placeholder="opcional"></div>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="closeModalDirect()">Cancelar</button>
+      <button class="btn btn-save" onclick="saveDesigner()">💾 Salvar</button>
+    </div>
+  </div>
 
 <!-- PAINEL DE CONFIGURAÇÃO -->
 <div id="config-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9000;overflow-y:auto;padding:24px">
@@ -2205,7 +2348,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <div class="search-wrap"><input id="search-members" placeholder="Buscar membro..." oninput="renderMembers()"></div>
         <table class="dt">
           <thead><tr>
-            <th>Membro</th><th>Ativo</th><th>Pontos</th><th>Última Pont.</th><th>Entrou</th><th>Obs</th><th>Ações</th>
+            <th>Membro</th><th>Posição</th><th>Sub Áreas</th><th>Cargo</th><th>Up</th><th>Ativo</th><th>Pontos</th><th>Última Pont.</th><th>Entrou</th><th>Ações</th>
           </tr></thead>
           <tbody id="members-tbody"></tbody>
         </table>
@@ -2228,14 +2371,15 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <!-- Cards de categoria -->
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:16px" id="rebo-stats"></div>
 
-        <!-- Filtro por faixa -->
-        <div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap">
+        <!-- Filtro por faixa + busca -->
+        <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap">
           <button class="btn btn-sm rebo-f active-filter" onclick="setReboFilter('todos',this)">Todos</button>
           <button class="btn btn-sm rebo-f" onclick="setReboFilter('sem',this)" style="font-size:10px;color:#f87171">❌ Sem pontos</button>
           <button class="btn btn-sm rebo-f" onclick="setReboFilter('3m',this)" style="font-size:10px;color:#f97316">🔴 3+ meses</button>
           <button class="btn btn-sm rebo-f" onclick="setReboFilter('2m',this)" style="font-size:10px;color:#eab308">🟠 2 meses</button>
           <button class="btn btn-sm rebo-f" onclick="setReboFilter('1m',this)" style="font-size:10px;color:#facc15">🟡 1 mês</button>
         </div>
+        <div class="search-wrap" style="margin-bottom:12px"><input id="search-rebo" placeholder="Buscar membro, cargo, ID..." oninput="renderRebocamentos()"></div>
 
         <div id="rebo-list"></div>
       </div>
@@ -2274,10 +2418,21 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
           <button class="btn btn-add btn-sm" data-perm="edit_sugs" onclick="openSugModal()">➕ Adicionar</button>
         </div>
       </div>
-      <div class="pb tall">
-        <div class="search-wrap"><input id="search-sugs" placeholder="Buscar sugestão..." oninput="renderSuggestions()"></div>
-        <div id="sug-list"></div>
+      <!-- Filtros de categoria -->
+      <div class="pb" style="padding-bottom:0;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <button onclick="setSugFiltro('todos',this)" class="active-filter" id="sug-f-todos" style="background:rgba(77,176,255,.15);border:1px solid rgba(77,176,255,.3);color:#4db0ff;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px">TODOS</button>
+        <button onclick="setSugFiltro('Temática',this)" style="background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.25);color:#c084fc;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">🎭 TEMÁTICA</button>
+        <button onclick="setSugFiltro('Cine',this)" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);color:#22d3ee;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">🎬 CINE</button>
+        <button onclick="setSugFiltro('Atividades',this)" style="background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.25);color:#ec4899;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">🏃 ATIVIDADES</button>
+        <button onclick="setSugFiltro('Destaques',this)" style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);color:#fbbf24;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">⭐ DESTAQUES</button>
+        <button onclick="setSugFiltro('Reforma',this)" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#22c55e;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">🔧 REFORMA</button>
+        <button onclick="setSugFiltro('Outro',this)" style="background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.25);color:#94a3b8;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">📌 OUTRO</button>
+        <button onclick="setSugFiltro('usados',this)" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#22c55e;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px;margin-left:auto">✅ USADOS</button>
       </div>
+      <div class="pb" style="padding-top:10px;padding-bottom:0">
+        <div class="search-wrap"><input id="search-sugs" placeholder="Buscar sugestão..." oninput="renderSuggestions()"></div>
+      </div>
+      <div class="pb tall" id="sug-list"></div>
     </div>
   </div>
 
@@ -2290,6 +2445,9 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
           <span class="pc" id="sub-count">0</span>
           <button class="btn btn-add btn-sm" data-perm="edit_sub" onclick="openSubModal()">➕ Adicionar</button>
         </div>
+      </div>
+      <div class="pb" style="padding-bottom:0">
+        <div class="search-wrap"><input id="search-sub" placeholder="Buscar subgestor, subárea..." oninput="renderSubgestao()"></div>
       </div>
       <div class="pb tall" id="sub-list"></div>
     </div>
@@ -2304,6 +2462,9 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
           <span class="pc" id="aus-count">0</span>
           <button class="btn btn-add btn-sm" data-perm="edit_aus" onclick="openAusModal()">➕ Registrar</button>
         </div>
+      </div>
+      <div class="pb" style="padding-bottom:0">
+        <div class="search-wrap"><input id="search-aus" placeholder="Buscar membro, ocasião..." oninput="renderAusencias()"></div>
       </div>
       <div class="pb tall" id="aus-list"></div>
     </div>
@@ -2520,12 +2681,19 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
       <div class="ph" style="border-left:3px solid #0070d1">
         <div>
           <span class="pt">🎯 Upamentos Registrados</span>
-          <div style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-top:2px">Mudanças de cargo semanais</div>
+          <div style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-top:2px">Apenas membros Meta + Upa por Games podem ser upados aqui</div>
         </div>
         <div class="ph-right">
           <span class="pc" id="up-count">0</span>
           <button class="btn btn-add btn-sm" data-perm="edit_members" onclick="openUpamentoModal()">🎯 Registrar</button>
         </div>
+      </div>
+      <div class="pb" style="padding-bottom:0;display:flex;gap:6px;flex-wrap:wrap">
+        <button onclick="setUpFiltro('todos',this)" class="active-filter" style="background:rgba(77,176,255,.15);border:1px solid rgba(77,176,255,.3);color:#4db0ff;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">TODOS</button>
+        <button onclick="setUpFiltro('meta',this)" style="background:rgba(0,112,209,.12);border:1px solid rgba(0,112,209,.25);color:#4db0ff;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">🎯 META</button>
+        <button onclick="setUpFiltro('merito',this)" style="background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.25);color:#c084fc;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">🏅 MÉRITO</button>
+        <button onclick="setUpFiltro('upou',this)" style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#22c55e;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">✅ UPOU</button>
+        <button onclick="setUpFiltro('nao_upou',this)" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#f87171;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">❌ NÃO UPOU</button>
       </div>
       <div class="pb tall">
         <div class="search-wrap"><input id="search-up" placeholder="Buscar membro ou cargo..." oninput="renderUpamentos()"></div>
@@ -3072,8 +3240,22 @@ var ROLES = new Proxy({}, { get: (_,k) => (window.ROLES||{})[k] });
 var PERMS = new Proxy({}, { get: (_,k) => (window.PERMS||{})[k] });
 
 function fmtDate(d){if(!d)return'—';try{const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('pt-BR');}catch{return d;}}
-function catClass(c){return({Temática:'cat-tematica',Cine:'cat-cine',Atividades:'cat-atividades'}[c]||'cat-outro');}
-function ultBadge(u){
+function catClass(c){return({Temática:'cat-tematica',Cine:'cat-cine',Atividades:'cat-atividades',Destaques:'cat-yellow',Reforma:'cat-green',Outro:'cat-outro'}[c]||'cat-outro');}
+function ultBadge(u, membro){
+  // Se tiver dados reais do levelup, usar
+  if (membro) {
+    const ult = getUltimaPontuacaoMembro(membro);
+    if (ult) {
+      const sem = getPontSemana(0);
+      const fezSemana = ult.data >= sem.inicio && ult.data <= sem.fim;
+      if (fezSemana)  return `<span class="badge b-green">✅ Esta semana</span>`;
+      if (ult.dias <= 14) return `<span class="badge b-cyan">${ult.dias}d atrás</span>`;
+      if (ult.dias <= 30) return `<span class="badge b-yellow">${ult.dias}d atrás</span>`;
+      if (ult.dias <= 60) return `<span class="badge b-orange">${ult.dias}d atrás</span>`;
+      return `<span class="badge b-red">${ult.dias}d atrás</span>`;
+    }
+  }
+  // Fallback campo manual
   const map={'ÚLTIMA SEMANA':'b-green','2 SEMANAS':'b-cyan','1 MÊS':'b-yellow','MAIS DE 3 MESES':'b-red','SEM PONTOS':'b-gray'};
   return`<span class="badge ${map[u]||'b-gray'}">${u||'—'}</span>`;
 }
@@ -3403,21 +3585,187 @@ function openMemberModal(docId){
   document.getElementById('m-edit-id').value=docId||'';
   document.getElementById('modal-member-title').textContent=docId?'✏️ EDITAR MEMBRO':'➕ NOVO MEMBRO';
   const d=docId?window._state.members.find(x=>x._id===docId):{};
-  document.getElementById('m-nome').value=d.m||'';
-  document.getElementById('m-id').value=d.id||'';
-  document.getElementById('m-ativo').value=d.ativo?'true':'false';
-  document.getElementById('m-pts').value=d.pts?'true':'false';
-  document.getElementById('m-ult').value=d.ult||'SEM PONTOS';
-  document.getElementById('m-entrou').value=d.entrou||'';
-  document.getElementById('m-obs').value=d.obs||'';
+  document.getElementById('m-nome').value       = d.m       || '';
+  document.getElementById('m-id').value         = d.id      || '';
+  document.getElementById('m-posicao').value    = d.posicao || 'comum';
+  document.getElementById('m-tipo-up').value    = d.tipoUp  || 'meta';
+  document.getElementById('m-upa-games').value  = d.upaGames|| 'nao';
+  document.getElementById('m-sub-instrucao').checked   = !!(d.subAreas?.instrucao);
+  document.getElementById('m-sub-acolhimento').checked = !!(d.subAreas?.acolhimento);
+  document.getElementById('m-sub-gamenews').checked    = !!(d.subAreas?.gamenews);
+  const infoEl2 = document.getElementById('m-id-info');
+  if (infoEl2) infoEl2.style.display = 'none';
+  mAtualizarTipoUp();
+  document.getElementById('m-cargo').value   = d.cargo  || '';
+  document.getElementById('m-ativo').value   = d.ativo  ? 'true' : 'false';
+  document.getElementById('m-pts').value     = d.pts    ? 'true' : 'false';
+  document.getElementById('m-ult').value     = d.ult    || 'SEM PONTOS';
+  document.getElementById('m-entrou').value  = d.entrou || '';
+  document.getElementById('m-obs').value     = d.obs    || '';
+  mAtualizarBadgeGames();
   openModal('member');
 }
+
+function mAtualizarPosicao() { /* reservado para futuras regras */ }
+
+function mBuscarPorId() {
+  const id = document.getElementById('m-id')?.value.trim();
+  const infoEl = document.getElementById('m-id-info');
+  if (!id || !infoEl) return;
+  const membro = (window._state?.members || []).find(m => m.id === id);
+  if (!membro) { infoEl.style.display = 'none'; return; }
+  const subs = [];
+  if (membro.subAreas?.instrucao)   subs.push('📚 Instrução');
+  if (membro.subAreas?.acolhimento) subs.push('🤗 Acolhimento');
+  if (membro.subAreas?.gamenews)    subs.push('📰 Game News');
+  const posMap = {comum:'👤 Comum', subgestao:'⚡ Sub-Gestão', gestao:'🛡️ Gestão'};
+  infoEl.style.display = '';
+  infoEl.innerHTML = `✅ <strong>${membro.m}</strong> · ${posMap[membro.posicao]||'Comum'} · ${membro.cargo||'sem cargo'}${subs.length?' · '+subs.join(' · '):''}`;
+  document.getElementById('m-nome').value      = membro.m       || '';
+  document.getElementById('m-posicao').value   = membro.posicao || 'comum';
+  document.getElementById('m-tipo-up').value   = membro.tipoUp  || 'meta';
+  document.getElementById('m-upa-games').value = membro.upaGames|| 'nao';
+  document.getElementById('m-sub-instrucao').checked   = !!(membro.subAreas?.instrucao);
+  document.getElementById('m-sub-acolhimento').checked = !!(membro.subAreas?.acolhimento);
+  document.getElementById('m-sub-gamenews').checked    = !!(membro.subAreas?.gamenews);
+  mAtualizarTipoUp();
+  document.getElementById('m-cargo').value   = membro.cargo  || '';
+  document.getElementById('m-ativo').value   = membro.ativo  ? 'true' : 'false';
+  document.getElementById('m-ult').value     = membro.ult    || 'SEM PONTOS';
+  document.getElementById('m-entrou').value  = membro.entrou || '';
+  document.getElementById('m-obs').value     = membro.obs    || '';
+  mAtualizarBadgeGames();
+}
+
+// Função genérica — preenche qualquer modal pelo ID Discord
+// opts: { nomeId, infoId } — IDs dos campos no modal
+function buscarMembroPorId(idValue, opts) {
+  if (!idValue || idValue.length < 5) return;
+  const membro = (window._state?.members || []).find(m => m.id === idValue);
+  if (!membro) return;
+
+  const subs = [];
+  if (membro.subAreas?.instrucao)   subs.push('📚 Instrução');
+  if (membro.subAreas?.acolhimento) subs.push('🤗 Acolhimento');
+  if (membro.subAreas?.gamenews)    subs.push('📰 Game News');
+  const posMap = {comum:'👤 Comum', subgestao:'⚡ Sub-Gestão', gestao:'🛡️ Gestão'};
+  const cargoUp = UP_CARGOS.find(c => c.nome === membro.cargo) || getMeritoCargo(membro.cargo);
+  const cargoCor = cargoUp?.cor || '#94a3b8';
+
+  // Preencher campo de nome se fornecido e estiver vazio
+  if (opts?.nomeId) {
+    const nomeEl = document.getElementById(opts.nomeId);
+    if (nomeEl && !nomeEl.value) nomeEl.value = membro.m || '';
+  }
+
+  // Mostrar info box se fornecido
+  if (opts?.infoId) {
+    const infoEl = document.getElementById(opts.infoId);
+    if (infoEl) {
+      infoEl.style.display = '';
+      infoEl.style.background = 'rgba(34,197,94,.06)';
+      infoEl.style.borderColor = 'rgba(34,197,94,.25)';
+      infoEl.style.color = '#22c55e';
+      infoEl.innerHTML =
+        `✅ <strong>${membro.m}</strong>` +
+        ` · <span style="color:${cargoCor}">${membro.cargo||'sem cargo'}</span>` +
+        ` · ${posMap[membro.posicao]||'Comum'}` +
+        (subs.length ? ` · <span style="color:var(--text3)">${subs.join(' ')}</span>` : '');
+    }
+  }
+
+  toast(`👤 ${membro.m} · ${membro.cargo||'sem cargo'} · ${posMap[membro.posicao]||'Comum'}`);
+}
+
+function mAtualizarBadgeGames() {
+  const val = document.getElementById('m-upa-games')?.value;
+  const badge = document.getElementById('m-games-badge');
+  if (badge) badge.style.display = val === 'sim' ? '' : 'none';
+}
+
+function mAtualizarTipoUp() {
+  const tipoUp = document.getElementById('m-tipo-up')?.value;
+  const cargoSel = document.getElementById('m-cargo');
+  const infoEl = document.getElementById('m-info-up');
+  if (!cargoSel) return;
+
+  // Guardar valor atual
+  const valAtual = cargoSel.value;
+  cargoSel.innerHTML = '<option value="">— Selecionar cargo —</option>';
+
+  if (tipoUp === 'merito') {
+    // Preencher com cargos de mérito
+    const gr = document.createElement('option');
+    gr.disabled = true;
+    gr.textContent = '── 🏅 Cargos de Mérito ──';
+    cargoSel.appendChild(gr);
+    UP_CARGOS_MERITO.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.nome;
+      opt.textContent = c.nome;
+      if (c.nome === valAtual) opt.selected = true;
+      cargoSel.appendChild(opt);
+    });
+    if (infoEl) {
+      infoEl.style.display = '';
+      infoEl.style.background = 'rgba(168,85,247,.08)';
+      infoEl.style.borderColor = 'rgba(168,85,247,.25)';
+      infoEl.style.color = '#c084fc';
+      infoEl.innerHTML = '🏅 Up por Mérito — cargo concedido por destaque especial. Sem requisito de pontuação.';
+    }
+  } else {
+    // Preencher com cargos de meta agrupados
+    let tierAtual = '';
+    UP_CARGOS.forEach(c => {
+      if (c.tier !== tierAtual) {
+        tierAtual = c.tier;
+        const gr = document.createElement('option');
+        gr.disabled = true;
+        gr.textContent = '── ' + UP_TIERS[c.tier].label + ' ──';
+        cargoSel.appendChild(gr);
+      }
+      const opt = document.createElement('option');
+      opt.value = c.nome;
+      opt.textContent = c.nome;
+      if (c.nome === valAtual) opt.selected = true;
+      cargoSel.appendChild(opt);
+    });
+    // Mostrar info da meta ao selecionar cargo
+    const upCargo = UP_CARGOS.find(c => c.nome === cargoSel.value);
+    if (upCargo && infoEl) {
+      const meta = calcUpMeta(upCargo);
+      const prox = getUpProximo(upCargo.nome);
+      infoEl.style.display = '';
+      infoEl.style.background = 'rgba(0,112,209,.07)';
+      infoEl.style.borderColor = 'rgba(0,112,209,.2)';
+      infoEl.style.color = '#4db0ff';
+      infoEl.innerHTML = `🎯 Meta p/ up: <strong>${meta} pts/sem</strong> · ${upCargo.semanas ? `⏳ ${upCargo.semanas} sem no cargo` : '✅ Sem req. de semanas'} · Próximo: <strong>${prox?.nome || '— topo —'}</strong>`;
+    } else if (infoEl) {
+      infoEl.style.display = 'none';
+    }
+  }
+}
+
 async function saveMember(){
   const docId=document.getElementById('m-edit-id').value||window._db.genId();
-  const obj={m:document.getElementById('m-nome').value.trim(),id:document.getElementById('m-id').value.trim(),
-    ativo:document.getElementById('m-ativo').value==='true',pts:document.getElementById('m-pts').value==='true',
-    ult:document.getElementById('m-ult').value,entrou:document.getElementById('m-entrou').value||'—',
-    obs:document.getElementById('m-obs').value.trim()};
+  const obj={
+    m:        document.getElementById('m-nome').value.trim(),
+    id:       document.getElementById('m-id').value.trim(),
+    posicao:  document.getElementById('m-posicao').value,
+    cargo:    document.getElementById('m-cargo').value,
+    tipoUp:   document.getElementById('m-tipo-up').value,
+    upaGames: document.getElementById('m-upa-games').value,
+    subAreas: {
+      instrucao:   document.getElementById('m-sub-instrucao').checked,
+      acolhimento: document.getElementById('m-sub-acolhimento').checked,
+      gamenews:    document.getElementById('m-sub-gamenews').checked,
+    },
+    ativo:   document.getElementById('m-ativo').value==='true',
+    pts:     document.getElementById('m-pts').value==='true',
+    ult:     document.getElementById('m-ult').value,
+    entrou:  document.getElementById('m-entrou').value||'—',
+    obs:     document.getElementById('m-obs').value.trim(),
+  };
   if(!obj.m){toast('❌ Informe o nome');return;}
   await window._db.dbSet(window._db.COLS.members,docId,obj);
   window._state.members=await window._db.dbGetAll(window._db.COLS.members);
@@ -3428,6 +3776,78 @@ async function deleteMember(docId){
   await window._db.dbDel(window._db.COLS.members,docId);
   window._state.members=await window._db.dbGetAll(window._db.COLS.members);
   window._renderAll(); toast('🗑 Membro removido!');
+}
+
+// ── REBOCADO: marca como rebocado e remove do grupo ────────
+async function confirmarRebocado(docId, nome, discordId) {
+  const motivo = window.prompt(
+    `🚨 Confirmar rebocamento de @${nome}${discordId ? ' ('+discordId+')' : ''}\n\nMotivo (opcional):`,
+    ''
+  );
+  if (motivo === null) return; // cancelou
+
+  // Atualizar membro: ativo=false, pts=false, ult=SEM PONTOS, obs com motivo
+  const membro = window._state.members.find(x => x._id === docId);
+  if (!membro) return;
+
+  const obsAnterior = membro.obs ? membro.obs + ' | ' : '';
+  const dataHoje = new Date().toLocaleDateString('pt-BR');
+  const { _id, ...membroSemId } = membro;
+  const obj = {
+    ...membroSemId,
+    ativo: false,
+    pts:   false,
+    ult:   'SEM PONTOS',
+    obs:   `${obsAnterior}🚨 Rebocado em ${dataHoje}${motivo ? ': ' + motivo : ''}`,
+    rebocadoEm: new Date().toISOString().slice(0,10),
+    rebocadoMotivo: motivo || '',
+  };
+
+  await window._db.dbSet(window._db.COLS.members, docId, obj);
+  window._state.members = await window._db.dbGetAll(window._db.COLS.members);
+  window._renderAll();
+  toast(`🚨 @${nome} marcado como rebocado!`);
+}
+
+// ── EXCLUIR MEMBRO: sai da área ou da staff ────────────────
+async function confirmarExcluirMembro(docId, nome, discordId) {
+  // Preencher modal com dados do membro
+  document.getElementById('excluir-docid').value   = docId;
+  document.getElementById('excluir-nome').textContent    = '@' + nome;
+  document.getElementById('excluir-discord').textContent = discordId ? 'ID: ' + discordId : '—';
+  document.getElementById('excluir-motivo-sel').value    = '';
+  document.getElementById('excluir-motivo-outro').value  = '';
+  document.getElementById('excluir-obs').value           = '';
+  document.getElementById('excluir-outro-row').style.display = 'none';
+  openModal('excluir-membro');
+}
+
+function excluirAtualizarMotivo() {
+  const sel = document.getElementById('excluir-motivo-sel').value;
+  document.getElementById('excluir-outro-row').style.display = sel === 'Outro' ? '' : 'none';
+}
+
+async function executarExclusaoMembro() {
+  const docId  = document.getElementById('excluir-docid').value;
+  const sel    = document.getElementById('excluir-motivo-sel').value;
+  const outro  = document.getElementById('excluir-motivo-outro').value.trim();
+  const obs    = document.getElementById('excluir-obs').value.trim();
+  const nome   = document.getElementById('excluir-nome').textContent.replace('@','');
+
+  if (!sel) { toast('❌ Selecione o motivo da remoção'); return; }
+  if (sel === 'Outro' && !outro) { toast('❌ Especifique o motivo'); return; }
+
+  const motivo = sel === 'Outro' ? outro : sel;
+
+  await window._db.dbDel(window._db.COLS.members, docId);
+  window._state.members = await window._db.dbGetAll(window._db.COLS.members);
+
+  // Log opcional no console para rastreabilidade
+  console.log(`[EXCLUÍDO] @${nome} — Motivo: ${motivo}${obs ? ' | Obs: '+obs : ''} — ${new Date().toLocaleDateString('pt-BR')}`);
+
+  closeModalDirect();
+  window._renderAll();
+  toast(`🗑 @${nome} removido. Motivo: ${motivo}`);
 }
 
 // ===== SUGGESTION =====
@@ -3444,20 +3864,39 @@ function openSugModal(docId){
 }
 async function saveSuggestion(){
   const docId=document.getElementById('s-edit-id').value||window._db.genId();
-  const obj={id:document.getElementById('s-id').value.trim(),cat:document.getElementById('s-cat').value,
-    data:document.getElementById('s-data').value,text:document.getElementById('s-text').value.trim(),
-    usado:document.getElementById('s-usado').value==='true'};
+  const usado = document.getElementById('s-usado').value==='true';
+  // Preservar dataUso existente se já tinha, ou setar hoje se marcando como usado agora
+  const existente = window._state.suggestions.find(x=>x._id===docId);
+  const dataUso = usado
+    ? (existente?.dataUso || new Date().toISOString().slice(0,10))
+    : '';
+  const obj={
+    id:     document.getElementById('s-id').value.trim(),
+    cat:    document.getElementById('s-cat').value,
+    data:   document.getElementById('s-data').value,
+    text:   document.getElementById('s-text').value.trim(),
+    usado,
+    dataUso,
+  };
   if(!obj.text){toast('❌ Informe a sugestão');return;}
   await window._db.dbSet(window._db.COLS.suggestions,docId,obj);
   window._state.suggestions=await window._db.dbGetAll(window._db.COLS.suggestions);
   window._renderAll(); closeModalDirect(); toast('✅ Sugestão salva!');
 }
 async function toggleUsado(docId){
-  const item=window._state.suggestions.find(x=>x._id===docId);
-  item.usado=!item.usado;
-  await window._db.dbSet(window._db.COLS.suggestions,docId,item);
-  window._state.suggestions=await window._db.dbGetAll(window._db.COLS.suggestions);
-  window._renderAll(); toast(item.usado?'✅ Marcada como usada!':'↩ Desmarcada!');
+  const item = window._state.suggestions.find(x => x._id === docId);
+  if (!item) return;
+  const novoUsado = !item.usado;
+  const { _id, ...itemSemId } = item;
+  const updated = {
+    ...itemSemId,
+    usado:    novoUsado,
+    dataUso:  novoUsado ? new Date().toISOString().slice(0,10) : '',
+  };
+  await window._db.dbSet(window._db.COLS.suggestions, docId, updated);
+  window._state.suggestions = await window._db.dbGetAll(window._db.COLS.suggestions);
+  renderSuggestions();
+  toast(novoUsado ? `✅ Movido para Usados! Data: ${fmtDate(updated.dataUso)}` : '↩ Devolvido para pendentes!');
 }
 async function deleteSug(docId){
   if(!confirm('Remover?'))return;
@@ -3651,6 +4090,7 @@ function renderAll(){
   renderMovs(); renderRelatorio(); renderRelNews(); renderRelInst();
   renderUsers(); renderInstrucoes(); renderAcolhimentos(); renderAdvertencias(); renderBlacklist(); renderLevelUp(); renderUpamentos(); renderDestaques(); renderPautas(); renderFeedbacks();
   renderNotificacoes(); renderRpp(); renderCronograma(); renderCronAside(); renderPontuacoes();
+  renderAllDesigner();
   applyPermissions();
 }
 
@@ -3819,20 +4259,78 @@ function renderOverview(){
 }
 
 // Retorna true se o membro deve ir para rebocamentos
+// Busca o registro mais recente de levelup para um membro (por memId ou nome)
+// Retorna { diasDesdeUltimoPts, ultimaData } ou null se nunca pontuou
+function getUltimaPontuacaoMembro(m) {
+  const s = window._state;
+  if (!s || !s.levelup) return null;
+  const memId = m.id || '';
+  const nome  = (m.m || '').toLowerCase();
+
+  // Filtrar todos os registros deste membro no levelup
+  const registros = s.levelup.filter(lu =>
+    (memId && lu.memId === memId) ||
+    (nome  && (lu.membro||'').toLowerCase() === nome)
+  );
+  if (!registros.length) return null;
+
+  // Ordenar por data desc e pegar o mais recente com pts > 0
+  const comPts = registros
+    .filter(lu => (lu.pts || 0) > 0)
+    .sort((a, b) => (b.data||'').localeCompare(a.data||''));
+
+  if (!comPts.length) return null;
+
+  const ultimo = comPts[0];
+  const data = ultimo.data; // ISO YYYY-MM-DD
+  if (!data) return null;
+
+  const dias = Math.floor((Date.now() - new Date(data + 'T12:00:00').getTime()) / 86400000);
+  return { dias, data, semana: ultimo.semana || '', pts: ultimo.pts };
+}
+
 function isRebocado(m) {
-  if (!m.pts) return true; // sem pontos = rebocado
-  if (!m.ult) return false; // tem pts mas sem data = não rebocado
-  const diasSem = Math.floor((new Date() - new Date(m.ult + 'T00:00:00')) / 86400000);
-  return diasSem >= 30;
+  // Verificar primeiro no levelup (fonte de verdade)
+  const ult = getUltimaPontuacaoMembro(m);
+
+  if (ult) {
+    // Se tem registro no levelup: rebocado se última pontuação > 30 dias
+    return ult.dias >= 30;
+  }
+
+  // Fallback para campo manual m.ult (compatibilidade com membros antigos)
+  if (!m.pts) return true; // nunca fez pontos = rebocado
+
+  // Se m.ult é um label, converter para dias estimados
+  const ultMap = {
+    'SEM PONTOS': 999, 'ÚLTIMA SEMANA': 3, '2 SEMANAS': 14,
+    '1 MÊS': 35, 'MAIS DE 3 MESES': 100,
+  };
+  if (m.ult && ultMap[m.ult] !== undefined) {
+    return ultMap[m.ult] >= 30;
+  }
+
+  return false; // tem pts sem data = não rebocado (benefício da dúvida)
 }
 
 // Faixa de inatividade para cor e label
 function reboxFaixa(m) {
-  if (!m.pts) return { key:'sem', label:'Sem pontos', cor:'#ef4444', bg:'rgba(239,68,68,.12)', border:'rgba(239,68,68,.3)', ordem:4 };
-  const dias = m.ult ? Math.floor((new Date() - new Date(m.ult + 'T00:00:00')) / 86400000) : 999;
-  if (dias >= 90) return { key:'3m', label:'3+ meses',  cor:'#f97316', bg:'rgba(249,115,22,.12)', border:'rgba(249,115,22,.3)',  ordem:3 };
-  if (dias >= 60) return { key:'2m', label:'2 meses',   cor:'#eab308', bg:'rgba(234,179,8,.12)',  border:'rgba(234,179,8,.3)',   ordem:2 };
-  return             { key:'1m', label:'1 mês',     cor:'#facc15', bg:'rgba(250,204,21,.1)',  border:'rgba(250,204,21,.25)',  ordem:1 };
+  const ult = getUltimaPontuacaoMembro(m);
+
+  if (!ult) {
+    // Sem registro no levelup → fallback campo manual
+    if (!m.pts) return { key:'sem', label:'Sem pontos',  cor:'#ef4444', bg:'rgba(239,68,68,.12)', border:'rgba(239,68,68,.3)', ordem:4 };
+    const ultMap = { 'SEM PONTOS':999, 'ÚLTIMA SEMANA':3, '2 SEMANAS':14, '1 MÊS':35, 'MAIS DE 3 MESES':100 };
+    const dias = m.ult ? (ultMap[m.ult] ?? 999) : 999;
+    if (dias >= 90) return { key:'3m', label:'3+ meses',  cor:'#f97316', bg:'rgba(249,115,22,.12)', border:'rgba(249,115,22,.3)',  ordem:3 };
+    if (dias >= 60) return { key:'2m', label:'2 meses',   cor:'#eab308', bg:'rgba(234,179,8,.12)',  border:'rgba(234,179,8,.3)',   ordem:2 };
+    return               { key:'1m', label:'1 mês',      cor:'#facc15', bg:'rgba(250,204,21,.1)',  border:'rgba(250,204,21,.25)', ordem:1 };
+  }
+
+  const dias = ult.dias;
+  if (dias >= 90) return { key:'3m', label:`3+ meses (${ult.semana||ult.data})`,  cor:'#f97316', bg:'rgba(249,115,22,.12)', border:'rgba(249,115,22,.3)',  ordem:3 };
+  if (dias >= 60) return { key:'2m', label:`2 meses (${ult.semana||ult.data})`,   cor:'#eab308', bg:'rgba(234,179,8,.12)',  border:'rgba(234,179,8,.3)',   ordem:2 };
+  return               { key:'1m', label:`1 mês (${ult.semana||ult.data})`,       cor:'#facc15', bg:'rgba(250,204,21,.1)',  border:'rgba(250,204,21,.25)', ordem:1 };
 }
 
 function renderMembers(){
@@ -3841,22 +4339,46 @@ function renderMembers(){
   // Excluir membros rebocados da aba principal
   const filtered=s.members.filter(m =>
     !isRebocado(m) &&
-    (m.m?.toLowerCase().includes(q)||m.id?.includes(q))
+    (!q || m.m?.toLowerCase().includes(q) || m.id?.includes(q) ||
+           m.cargo?.toLowerCase().includes(q) || m.posicao?.includes(q) ||
+           (m.subAreas?.instrucao && 'instrução'.includes(q)) ||
+           (m.subAreas?.acolhimento && 'acolhimento'.includes(q)) ||
+           (m.subAreas?.gamenews && 'game news'.includes(q))
+    )
   );
   const total = s.members.filter(m => !isRebocado(m)).length;
   document.getElementById('members-count').textContent=filtered.length+'/'+total;
-  document.getElementById('members-tbody').innerHTML=filtered.map(m=>`<tr>
+  document.getElementById('members-tbody').innerHTML=filtered.map(m=>{
+    const cargoUp   = UP_CARGOS.find(c => c.nome === m.cargo) || getMeritoCargo(m.cargo);
+    const cargoCor  = cargoUp ? cargoUp.cor : '#64748b';
+    const posMap    = {comum:'👤 Comum', subgestao:'⚡ Sub-Gestão', gestao:'🛡️ Gestão'};
+    const posCor    = {comum:'#94a3b8', subgestao:'#22d3ee', gestao:'#fbbf24'};
+    const posicao   = m.posicao || 'comum';
+    const subs = [];
+    if (m.subAreas?.instrucao)   subs.push(`<span style="font-size:9px;background:rgba(168,85,247,.12);color:#c084fc;padding:1px 5px;border-radius:5px">📚</span>`);
+    if (m.subAreas?.acolhimento) subs.push(`<span style="font-size:9px;background:rgba(34,211,238,.1);color:#22d3ee;padding:1px 5px;border-radius:5px">🤗</span>`);
+    if (m.subAreas?.gamenews)    subs.push(`<span style="font-size:9px;background:rgba(249,115,22,.1);color:#fb923c;padding:1px 5px;border-radius:5px">📰</span>`);
+    const tipoUpBadge = m.tipoUp === 'merito'
+      ? `<span style="font-size:9px;background:rgba(168,85,247,.15);color:#c084fc;padding:1px 7px;border-radius:8px;font-family:'Share Tech Mono',monospace">🏅 Mérito</span>`
+      : `<span style="font-size:9px;background:rgba(0,112,209,.15);color:#4db0ff;padding:1px 7px;border-radius:8px;font-family:'Share Tech Mono',monospace">🎯 Meta</span>`;
+    const gamesBadge = m.upaGames === 'sim'
+      ? `<span style="font-size:9px;background:rgba(34,197,94,.15);color:#22c55e;padding:1px 7px;border-radius:8px;font-family:'Share Tech Mono',monospace">🎮</span>`
+      : '';
+    return `<tr>
     <td><div class="mname">${m.m}</div><div class="mid">${m.id?.slice(-10)||'—'}…</div></td>
+    <td><span style="font-size:10px;font-weight:600;color:${posCor[posicao]||'#94a3b8'};white-space:nowrap">${posMap[posicao]||'—'}</span></td>
+    <td style="white-space:nowrap">${subs.join(' ')||'<span style="color:var(--text3);font-size:11px">—</span>'}</td>
+    <td><span style="font-size:11px;font-weight:600;color:${cargoCor}">${m.cargo||'—'}</span></td>
+    <td style="white-space:nowrap">${tipoUpBadge} ${gamesBadge}</td>
     <td><span class="badge ${m.ativo?'b-cyan':'b-gray'}">${m.ativo?'● ATIVO':'○ —'}</span></td>
     <td><span class="badge ${m.pts?'b-green':'b-gray'}">${m.pts?'✓':'✗'}</span></td>
-    <td>${ultBadge(m.ult)}</td>
+    <td>${ultBadge(m.ult, m)}</td>
     <td style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3)">${m.entrou||'—'}</td>
-    <td style="font-size:12px;color:var(--text3)">${m.obs||'—'}</td>
     <td><div style="display:flex;gap:4px">
       <button class="btn btn-edit btn-sm" onclick="openMemberModal('${m._id}')">✏️</button>
       <button class="btn btn-del btn-sm" onclick="deleteMember('${m._id}')">🗑</button>
     </div></td>
-  </tr>`).join('');
+  </tr>`;}).join('');
 }
 
 let reboxFiltro = 'todos';
@@ -3869,13 +4391,22 @@ function setReboFilter(f, el) {
 
 function renderRebocamentos() {
   const s = window._state; if(!s) return;
+  const q = (document.getElementById('search-rebo')?.value || '').toLowerCase();
+
+  // Semana atual (para detectar quem fez pontos esta semana)
+  const semAtual = getPontSemana(0);
 
   const rebocados = s.members
     .filter(m => isRebocado(m))
-    .map(m => ({ ...m, faixa: reboxFaixa(m) }))
+    .map(m => {
+      const ult = getUltimaPontuacaoMembro(m);
+      // Verificar se fez pontos na semana atual
+      const fezEstaSemana = ult && ult.data >= semAtual.inicio && ult.data <= semAtual.fim;
+      return { ...m, faixa: reboxFaixa(m), _ult: ult, _fezEstaSemana: fezEstaSemana };
+    })
     .sort((a,b) => b.faixa.ordem - a.faixa.ordem);
 
-  // Stats por faixa
+  // Stats por faixa (sempre sobre todos, sem filtro de texto)
   const stats = { sem:0, '3m':0, '2m':0, '1m':0 };
   rebocados.forEach(m => stats[m.faixa.key] = (stats[m.faixa.key]||0)+1);
 
@@ -3895,10 +4426,16 @@ function renderRebocamentos() {
       <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${f.label}</div>
     </div>`).join('');
 
-  // Lista filtrada
-  const lista = reboxFiltro === 'todos'
-    ? rebocados
-    : rebocados.filter(m => m.faixa.key === reboxFiltro);
+  // Lista filtrada por faixa E por texto de busca
+  const lista = rebocados.filter(m => {
+    const passaFaixa = reboxFiltro === 'todos' || m.faixa.key === reboxFiltro;
+    if (!passaFaixa) return false;
+    if (!q) return true;
+    return (m.m||'').toLowerCase().includes(q) ||
+           (m.id||'').includes(q) ||
+           (m.cargo||'').toLowerCase().includes(q) ||
+           m.faixa.label.toLowerCase().includes(q);
+  });
 
   const listEl = document.getElementById('rebo-list');
   if(!listEl) return;
@@ -3909,23 +4446,43 @@ function renderRebocamentos() {
   }
 
   listEl.innerHTML = lista.map(m => {
-    const f = m.faixa;
-    const dias = m.ult ? Math.floor((new Date() - new Date(m.ult + 'T00:00:00')) / 86400000) : null;
+    const f  = m.faixa;
+    const ult = m._ult; // dados reais do levelup
+    const fezSemana = m._fezEstaSemana;
+    const cu = UP_CARGOS.find(c=>c.nome===m.cargo)||getMeritoCargo(m.cargo);
+
+    // Label da última pontuação
+    let ultLabel = 'Nunca pontuou';
+    if (ult) {
+      ultLabel = `${ult.semana || ult.data} · ${ult.pts} pts · há ${ult.dias} dia${ult.dias===1?'':'s'}`;
+    } else if (m.ult && m.ult !== 'SEM PONTOS') {
+      ultLabel = m.ult;
+    }
+
     return `<div style="background:${f.bg};border:1px solid ${f.border};border-left:4px solid ${f.cor};border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
           <span style="font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--text)">${m.m||'—'}</span>
           <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${m.id||'—'}</span>
+          ${m.cargo ? `<span style="font-size:10px;font-weight:600;color:${cu?.cor||'#64748b'}">${m.cargo}</span>` : ''}
           <span style="background:${f.bg};border:1px solid ${f.border};color:${f.cor};padding:1px 10px;border-radius:10px;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700">${f.label}</span>
+          ${fezSemana ? `<span style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#22c55e;padding:1px 10px;border-radius:10px;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700">✅ FEZ PONTOS ESTA SEMANA</span>` : ''}
         </div>
         <div style="display:flex;gap:12px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);flex-wrap:wrap">
           <span>📅 Entrou: <strong style="color:var(--text2)">${m.entrou||'—'}</strong></span>
-          <span>⏱️ Última pont.: <strong style="color:${f.cor}">${m.ult ? fmtDate(m.ult) + (dias !== null ? ` (${dias} dias atrás)` : '') : 'Nunca'}</strong></span>
-          <span>📊 Pontos: <span class="badge ${m.pts?'b-green':'b-red'} b-sm">${m.pts?'✓ Sim':'✗ Não'}</span></span>
+          <span>⏱️ Última pont.: <strong style="color:${fezSemana?'#22c55e':f.cor}">${ultLabel}</strong></span>
         </div>
         ${m.obs?`<div style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic">💬 ${m.obs}</div>`:''}
       </div>
-      <button class="btn btn-edit btn-sm" onclick="openMemberModal('${m._id}')" title="Editar membro">✏️</button>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+        <button class="btn btn-edit btn-sm" onclick="openMemberModal('${m._id}')" title="Editar membro">✏️ Editar</button>
+        <button onclick="confirmarRebocado('${m._id}','${(m.m||'').replace(/'/g,"\\'")}','${m.id||''}')"
+          style="background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.35);color:#fbbf24;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;white-space:nowrap"
+          title="Marcar como rebocado — remove do grupo">🚨 Rebocado</button>
+        <button onclick="confirmarExcluirMembro('${m._id}','${(m.m||'').replace(/'/g,"\\'")}','${m.id||''}')"
+          style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;white-space:nowrap"
+          title="Excluir membro — saiu da área ou staff">🗑 Excluir</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -3933,7 +4490,9 @@ function renderRebocamentos() {
 function renderNaoVerif(){
   const s=window._state; if(!s)return;
   const q=(document.getElementById('search-nv')?.value||'').toLowerCase();
-  const filtered=s.naoverif.filter(n=>n.membro?.toLowerCase().includes(q)||n.id?.includes(q));
+  const filtered=s.naoverif
+    .filter(n=>n.membro?.toLowerCase().includes(q)||n.id?.includes(q))
+    .sort((a,b)=>(a.membro||'').localeCompare(b.membro||''));
   document.getElementById('nv-count').textContent=filtered.length+'/'+s.naoverif.length;
   document.getElementById('nv-tbody').innerHTML=filtered.map(n=>`<tr>
     <td><div class="mname">${n.membro}</div><div class="mid">${n.id?.slice(-10)||'—'}…</div></td>
@@ -3950,33 +4509,92 @@ function renderNaoVerif(){
   </tr>`).join('');
 }
 
-function renderSuggestions(){
-  const s=window._state; if(!s)return;
-  const q=(document.getElementById('search-sugs')?.value||'').toLowerCase();
-  const filtered=s.suggestions.filter(x=>x.text?.toLowerCase().includes(q)||x.cat?.toLowerCase().includes(q));
-  document.getElementById('sug-count').textContent=filtered.length+'/'+s.suggestions.length;
-  document.getElementById('sug-list').innerHTML=filtered.map(sg=>`
-    <div class="sug-card">
-      <div class="sug-top">
-        <span class="sug-cat ${catClass(sg.cat)}">${sg.cat}</span>
-        <span class="sug-date">${fmtDate(sg.data)}</span>
-      </div>
-      <div class="sug-body">
-        <div class="sug-text">${sg.text}</div>
-        <div class="sug-actions">
-          <span class="badge ${sg.usado?'b-purple':'b-yellow'}">${sg.usado?'✓ USADO':'⏳'}</span>
-          <button class="btn btn-toggle btn-sm" onclick="toggleUsado('${sg._id}')">${sg.usado?'↩':'✅ Usar'}</button>
-          <button class="btn btn-edit btn-sm" onclick="openSugModal('${sg._id}')">✏️</button>
-          <button class="btn btn-del btn-sm" onclick="deleteSug('${sg._id}')">🗑</button>
-        </div>
-      </div>
-    </div>`).join('')||'<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Nenhuma encontrada</div></div>';
+let sugFiltro = 'todos';
+function setSugFiltro(f, el) {
+  sugFiltro = f;
+  document.querySelectorAll('#page-suggestions .pb button').forEach(b => b.classList.remove('active-filter'));
+  if (el) el.classList.add('active-filter');
+  renderSuggestions();
+}
+
+function renderSuggestions() {
+  const s = window._state; if (!s) return;
+  const q = (document.getElementById('search-sugs')?.value || '').toLowerCase();
+  const isUsados = sugFiltro === 'usados';
+
+  // Filtrar por usado/pendente + categoria + busca
+  let lista = s.suggestions.filter(sg => {
+    if (isUsados) return !!sg.usado;
+    if (sg.usado) return false; // se filtro não é usados, só pendentes
+    if (sugFiltro !== 'todos' && sg.cat !== sugFiltro) return false;
+    if (q && !(sg.text?.toLowerCase().includes(q) || sg.cat?.toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  // Se não é usados, excluir os usados
+  if (!isUsados) {
+    lista = s.suggestions.filter(sg => {
+      if (sg.usado) return false;
+      if (sugFiltro !== 'todos' && sg.cat !== sugFiltro) return false;
+      if (q && !(sg.text?.toLowerCase().includes(q) || sg.cat?.toLowerCase().includes(q))) return false;
+      return true;
+    });
+  }
+
+  // Ordenar usados por dataUso desc, pendentes por data desc
+  lista.sort((a,b) => {
+    const ka = isUsados ? (a.dataUso||a.data||'') : (a.data||'');
+    const kb = isUsados ? (b.dataUso||b.data||'') : (b.data||'');
+    return kb.localeCompare(ka);
+  });
+
+  const total = isUsados
+    ? s.suggestions.filter(x => x.usado).length
+    : s.suggestions.filter(x => !x.usado).length;
+
+  document.getElementById('sug-count').textContent = lista.length + '/' + total;
+
+  const CAT_COR = {
+    Temática:   { cor: '#a855f7', bg: 'rgba(168,85,247,.12)' },
+    Cine:       { cor: '#22d3ee', bg: 'rgba(34,211,238,.1)'  },
+    Atividades: { cor: '#ec4899', bg: 'rgba(236,72,153,.1)'  },
+    Destaques:  { cor: '#fbbf24', bg: 'rgba(251,191,36,.1)'  },
+    Reforma:    { cor: '#22c55e', bg: 'rgba(34,197,94,.1)'   },
+    Outro:      { cor: '#94a3b8', bg: 'rgba(100,116,139,.1)' },
+  };
+
+  document.getElementById('sug-list').innerHTML = lista.length === 0
+    ? `<div class="empty"><div class="empty-icon">${isUsados ? '✅' : '🔍'}</div><div class="empty-text">${isUsados ? 'Nenhuma sugestão usada ainda' : 'Nenhuma encontrada'}</div></div>`
+    : lista.map(sg => {
+        const cc = CAT_COR[sg.cat] || CAT_COR.Outro;
+        return `<div class="sug-card" style="border-left:3px solid ${cc.cor}">
+          <div class="sug-top">
+            <span class="sug-cat" style="background:${cc.bg};color:${cc.cor};border:1px solid ${cc.cor}44;padding:2px 10px;border-radius:8px;font-size:10px;font-family:'Share Tech Mono',monospace;font-weight:700">${sg.cat||'—'}</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              ${isUsados && sg.dataUso ? `<span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#22c55e">✅ Usado em ${fmtDate(sg.dataUso)}</span>` : ''}
+              <span class="sug-date">${fmtDate(sg.data)}</span>
+            </div>
+          </div>
+          <div class="sug-body">
+            <div class="sug-text">${sg.text}</div>
+            <div class="sug-actions">
+              <button class="btn btn-toggle btn-sm" onclick="toggleUsado('${sg._id}')" style="${isUsados ? 'background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#f87171' : 'background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3);color:#22c55e'}">${isUsados ? '↩ Devolver' : '✅ Usar'}</button>
+              <button class="btn btn-edit btn-sm" onclick="openSugModal('${sg._id}')">✏️</button>
+              <button class="btn btn-del btn-sm" onclick="deleteSug('${sg._id}')">🗑</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
 }
 
 function renderSubgestao(){
   const s=window._state; if(!s)return;
-  document.getElementById('sub-count').textContent=s.subgestao.length;
-  document.getElementById('sub-list').innerHTML=s.subgestao.map(sg=>`
+  const q=(document.getElementById('search-sub')?.value||'').toLowerCase();
+  const lista = (s.subgestao||[])
+    .filter(sg => !q || sg.name?.toLowerCase().includes(q) || sg.id?.includes(q) || sg.subarea?.toLowerCase().includes(q))
+    .sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  document.getElementById('sub-count').textContent=lista.length+'/'+s.subgestao.length;
+  document.getElementById('sub-list').innerHTML=lista.map(sg=>`
     <div class="sub-card">
       <div class="sub-head">
         <div><div class="sub-name">${sg.name}</div><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-top:2px">${sg.id}</div></div>
@@ -3999,9 +4617,14 @@ function renderSubgestao(){
 
 function renderAusencias(){
   const s=window._state; if(!s)return;
-  document.getElementById('aus-count').textContent=s.ausencias.length;
-  document.getElementById('aus-list').innerHTML=s.ausencias.map(a=>`
-    <div class="aus-card">
+  const q=(document.getElementById('search-aus')?.value||'').toLowerCase();
+  const lista = s.ausencias
+    .filter(a => !q || (a.membro+a.id+a.ocasiao+a.motivo).toLowerCase().includes(q))
+    .sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  document.getElementById('aus-count').textContent=lista.length+'/'+s.ausencias.length;
+  document.getElementById('aus-list').innerHTML=lista.map(a=>{
+    const diasAtras = a.data ? Math.floor((Date.now()-new Date(a.data+'T12:00:00').getTime())/86400000) : null;
+    return `<div class="aus-card">
       <div class="aus-head">
         <div><div style="font-weight:700;color:var(--text)">${a.membro||'—'}</div><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${a.id||'—'}</div></div>
         <div style="display:flex;align-items:center;gap:8px">
@@ -4010,12 +4633,15 @@ function renderAusencias(){
           <button class="btn btn-del btn-sm" onclick="deleteAus('${a._id}')">🗑</button>
         </div>
       </div>
-      <div style="display:flex;gap:14px;font-size:12px;color:var(--text2);flex-wrap:wrap">
-        <span>📅 ${fmtDate(a.data)}</span>${a.ocasiao?`<span>📌 ${a.ocasiao}</span>`:''}
+      <div style="display:flex;gap:14px;font-size:12px;color:var(--text2);flex-wrap:wrap;align-items:center">
+        <span>📅 ${fmtDate(a.data)}</span>
+        ${diasAtras !== null ? `<span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:${diasAtras>7?'#ef4444':'var(--text3)'}">há ${diasAtras}d</span>` : ''}
+        ${a.ocasiao?`<span>📌 ${a.ocasiao}</span>`:''}
       </div>
-      ${a.motivo?`<div style="margin-top:8px;font-size:12px;color:var(--text3);font-style:italic">${a.motivo}</div>`:''}
-      ${a.obs?`<div style="margin-top:4px;font-size:11px;color:var(--text3)">obs: ${a.obs}</div>`:''}
-    </div>`).join('')||'<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">Nenhuma ausência registrada</div></div>';
+      ${a.motivo?`<div style="margin-top:8px;font-size:12px;color:var(--text3);font-style:italic">💬 ${a.motivo}</div>`:''}
+      ${a.obs?`<div style="margin-top:4px;font-size:11px;color:var(--text3)">📝 ${a.obs}</div>`:''}
+    </div>`;
+  }).join('')||'<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">Nenhuma ausência registrada</div></div>';
 }
 
 function renderIndicacoes(){
@@ -4220,6 +4846,10 @@ function applyPermissions(){
     'cron-news':  'edit_cronograma',
     'usuarios':   'manage_users',
     'overview':   'view',
+    'designer-destaques': 'view',
+    'designer-temas':     'view',
+    'designer-reforma':   'view',
+    'designer-usados':    'view',
   };
 
   // Controlar visibilidade dos itens da sidebar por permissão
@@ -4340,6 +4970,7 @@ function openInstModal(docId) {
   document.getElementById('in-edit-id').value = docId || '';
   document.getElementById('modal-inst-title').textContent = docId ? '✏️ EDITAR INSTRUÇÃO' : '📚 NOVA INSTRUÇÃO';
   const d = docId ? (window._state.instrucoes.find(x => x._id === docId) || {}) : {};
+  const infoEl = document.getElementById('in-membro-info'); if(infoEl) infoEl.style.display='none';
   document.getElementById('in-id').value        = d.memId     || '';
   document.getElementById('in-membro').value    = d.membro    || '';
   document.getElementById('in-instrutor').value = d.instrutor || '';
@@ -4477,12 +5108,16 @@ function openMovModal(docId){
 }
 async function saveMov(){
   const docId=document.getElementById('mv-edit-id').value||window._db.genId();
+  // Preservar print existente se estiver editando
+  const existente = window._state.movs.find(x=>x._id===docId);
   const obj={nome:document.getElementById('mv-nome').value.trim(),tipo:document.getElementById('mv-tipo').value,
     data:document.getElementById('mv-data').value,horario:document.getElementById('mv-horario').value,
     resp:document.getElementById('mv-resp').value.trim(),
     aux:document.getElementById('mv-aux').value.trim(),
     pontosPadrao:parseInt(document.getElementById('mv-pontos').value)||0,
-    obs:document.getElementById('mv-obs').value.trim()};
+    obs:document.getElementById('mv-obs').value.trim(),
+    print: existente?.print || '',
+  };
   if(!obj.nome){toast('❌ Informe o nome da mov');return;}
   await window._db.dbSet(window._db.COLS.movs,docId,obj);
   window._state.movs=await window._db.dbGetAll(window._db.COLS.movs);
@@ -4503,6 +5138,7 @@ async function deleteMov(docId){
 function openPresencaModal(movId, parId) {
   const mov = window._state.movs.find(m => m._id === movId);
   const par = parId ? (window._state.participacoes || []).find(p => p._id === parId) : null;
+  const infoElPr = document.getElementById('pr-membro-info'); if(infoElPr) infoElPr.style.display='none';
 
   document.getElementById('pr-mov-id').value  = movId;
   document.getElementById('pr-edit-id').value = parId || '';
@@ -4575,11 +5211,11 @@ async function finalizarMov(movId) {
 
   // Distribuir pontos para presentes
   await Promise.all(pars.map(p =>
-    window._db.dbSet(window._db.COLS.participacoes, p._id, { ...p, pontos: p.presente ? pts : 0 })
+    window._db.dbSet(window._db.COLS.participacoes, p._id, (({_id,...ps})=>({...ps,pontos:p.presente?pts:0}))(p))
   ));
 
   // Marcar mov como finalizada
-  await window._db.dbSet(window._db.COLS.movs, movId, { ...mov, finalizada: true });
+  await window._db.dbSet(window._db.COLS.movs, movId, (({_id,...movF})=>({...movF,finalizada:true}))(mov));
 
   // Recarregar estado
   window._state.participacoes = await window._db.dbGetAll(window._db.COLS.participacoes);
@@ -4788,7 +5424,7 @@ async function mvpSalvar() {
   if (!base64) { toast('⚠️ Selecione uma imagem primeiro.'); return; }
   const mv = (window._state.movs || []).find(m => m._id === movId);
   if (!mv) return;
-  const updated = { ...mv, print: base64 };
+  const {_id:_mvS,...mvS}=mv; const updated = { ...mvS, print: base64 };
   await window._db.dbSet(window._db.COLS.movs, movId, updated);
   window._state.movs = await window._db.dbGetAll(window._db.COLS.movs);
   renderMovs();
@@ -4800,12 +5436,121 @@ async function mvpRemover() {
   const movId = document.getElementById('mvp-mov-id').value;
   const mv    = (window._state.movs || []).find(m => m._id === movId);
   if (!mv || !confirm('Remover o print desta mov?')) return;
-  const updated = { ...mv, print: '' };
+  const {_id:_mvR,...mvR}=mv; const updated = { ...mvR, print: '' };
   await window._db.dbSet(window._db.COLS.movs, movId, updated);
   window._state.movs = await window._db.dbGetAll(window._db.COLS.movs);
   renderMovs();
   closeModalDirect();
   toast('🗑 Print removido.');
+}
+
+// ===== DESIGNER =====
+
+const DS_TIPOS = {
+  destaques: { label: 'Sugestão de Destaques', icon: '⭐', cor: '#f59e0b' },
+  temas:     { label: 'Sugestão de Tema',       icon: '🎭', cor: '#a855f7' },
+  reforma:   { label: 'Sugestão de Reforma',    icon: '🔧', cor: '#22d3ee' },
+};
+
+const DS_STATUS = {
+  pendente:     { label: '⏳ Pendente',     cls: 'b-yellow' },
+  aprovado:     { label: '✅ Aprovado',     cls: 'b-green'  },
+  em_andamento: { label: '🔄 Em andamento', cls: 'b-cyan'   },
+  concluido:    { label: '🎉 Concluído',    cls: 'b-purple' },
+  recusado:     { label: '❌ Recusado',     cls: 'b-red'    },
+};
+
+function openDesignerModal(tipo, docId) {
+  const t = DS_TIPOS[tipo] || DS_TIPOS.temas;
+  document.getElementById('ds-tipo').value  = tipo;
+  document.getElementById('ds-edit-id').value = docId || '';
+  document.getElementById('modal-designer-title').textContent = docId
+    ? `✏️ EDITAR — ${t.label.toUpperCase()}`
+    : `➕ NOVA — ${t.label.toUpperCase()}`;
+  const s = window._state;
+  const d = docId ? (s.designer || []).find(x => x._id === docId) || {} : {};
+  document.getElementById('ds-titulo').value  = d.titulo  || '';
+  document.getElementById('ds-desc').value    = d.desc    || '';
+  document.getElementById('ds-autor').value   = d.autor   || '';
+  document.getElementById('ds-data').value    = d.data    || new Date().toISOString().slice(0,10);
+  document.getElementById('ds-status').value  = d.status  || 'pendente';
+  document.getElementById('ds-obs').value     = d.obs     || '';
+  openModal('designer');
+}
+
+async function saveDesigner() {
+  const docId = document.getElementById('ds-edit-id').value || window._db.genId();
+  const titulo = document.getElementById('ds-titulo').value.trim();
+  if (!titulo) { toast('❌ Informe o título'); return; }
+  const obj = {
+    tipo:   document.getElementById('ds-tipo').value,
+    titulo,
+    desc:   document.getElementById('ds-desc').value.trim(),
+    autor:  document.getElementById('ds-autor').value.trim(),
+    data:   document.getElementById('ds-data').value,
+    status: document.getElementById('ds-status').value,
+    obs:    document.getElementById('ds-obs').value.trim(),
+  };
+  await window._db.dbSet(window._db.COLS.designer, docId, obj);
+  window._state.designer = await window._db.dbGetAll(window._db.COLS.designer);
+  renderDesignerPage(obj.tipo);
+  closeModalDirect();
+  toast('✅ Salvo!');
+}
+
+async function deleteDesigner(docId) {
+  if (!confirm('Remover este item?')) return;
+  const item = (window._state.designer || []).find(x => x._id === docId);
+  await window._db.dbDel(window._db.COLS.designer, docId);
+  window._state.designer = await window._db.dbGetAll(window._db.COLS.designer);
+  if (item) renderDesignerPage(item.tipo);
+  toast('🗑 Removido.');
+}
+
+function renderDesignerPage(tipo) {
+  const s = window._state; if (!s) return;
+  const t   = DS_TIPOS[tipo] || DS_TIPOS.temas;
+  const q   = (document.getElementById(`ds-${tipo}-search`)?.value || '').toLowerCase();
+  const all = (s.designer || []).filter(x => x.tipo === tipo);
+  const lista = q ? all.filter(x => (x.titulo+x.desc+x.autor+x.obs).toLowerCase().includes(q)) : all;
+  lista.sort((a,b) => (b.data||'').localeCompare(a.data||''));
+
+  const countEl = document.getElementById(`ds-${tipo}-count`);
+  if (countEl) countEl.textContent = lista.length;
+
+  const listEl = document.getElementById(`ds-${tipo}-list`);
+  if (!listEl) return;
+
+  if (lista.length === 0) {
+    listEl.innerHTML = `<div class="empty"><div class="empty-icon">${t.icon}</div><div class="empty-text">Nenhuma sugestão ainda</div></div>`;
+    return;
+  }
+
+  listEl.innerHTML = lista.map(item => {
+    const st = DS_STATUS[item.status] || DS_STATUS.pendente;
+    return `<div style="background:var(--bg3);border:1px solid var(--border);border-left:4px solid ${t.cor};border-radius:12px;padding:14px 16px;margin-bottom:8px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+            <span class="badge ${st.cls}" style="font-size:10px">${st.label}</span>
+            ${item.autor ? `<span style="font-size:11px;color:var(--text3)">@${item.autor}</span>` : ''}
+            <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">📅 ${fmtDate(item.data)}</span>
+          </div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">${item.titulo}</div>
+          ${item.desc ? `<div style="font-size:12px;color:var(--text2);margin-bottom:4px;line-height:1.5">${item.desc}</div>` : ''}
+          ${item.obs  ? `<div style="font-size:11px;color:var(--text3);font-style:italic">💬 ${item.obs}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <button class="btn btn-edit btn-sm" onclick="openDesignerModal('${tipo}','${item._id}')">✏️</button>
+          <button class="btn btn-del btn-sm" onclick="deleteDesigner('${item._id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAllDesigner() {
+  Object.keys(DS_TIPOS).forEach(tipo => renderDesignerPage(tipo));
 }
 
 // ===== RELATÓRIO =====
@@ -5073,9 +5818,10 @@ function openFuncModal(docId) {
 async function saveFuncao() {
   const docId = document.getElementById('fn-edit-id').value;
   if (!docId) { toast('❌ Erro: cargo não identificado'); return; }
-  const existing = window._state.funcoes.find(x => x._id === docId);
+  const existingFn = window._state.funcoes.find(x => x._id === docId);
+  const { _id: _fnId, ...existingSemId } = existingFn || {};
   const obj = {
-    ...existing,
+    ...existingSemId,
     titulo: document.getElementById('fn-titulo').value.trim(),
     descricao: document.getElementById('fn-desc').value.trim(),
     responsabilidades: document.getElementById('fn-resp').value.split('\n').map(s => s.trim()).filter(Boolean),
@@ -5339,12 +6085,13 @@ function openRppModal(docId) {
   document.getElementById('rp-edit-id').value = docId || '';
   document.getElementById('modal-rpp-title').textContent = docId ? '✏️ EDITAR RPP' : '🏖️ NOVO RPP';
   const d = docId ? (window._state.rpps.find(x => x._id === docId) || {}) : {};
-  document.getElementById('rp-membro').value  = d.membro || '';
+  document.getElementById('rp-membro').value  = d.membro   || '';
   document.getElementById('rp-id').value      = d.discordId || '';
-  document.getElementById('rp-inicio').value  = d.inicio || new Date().toISOString().slice(0,10);
-  document.getElementById('rp-tempo').value   = d.dias || '';
-  document.getElementById('rp-fim').value     = d.fim || '';
-  document.getElementById('rp-status').value  = d.status || 'ativo';
+  document.getElementById('rp-inicio').value  = d.inicio   || new Date().toISOString().slice(0,10);
+  document.getElementById('rp-tempo').value   = d.dias     || '';
+  document.getElementById('rp-fim').value     = d.fim      || '';
+  document.getElementById('rp-status').value  = d.status   || 'ativo';
+  document.getElementById('rp-motivo').value  = d.motivo   || '';
   openModal('rpp');
 }
 
@@ -5357,6 +6104,7 @@ async function saveRpp() {
     dias:      document.getElementById('rp-tempo').value,
     fim:       document.getElementById('rp-fim').value,
     status:    document.getElementById('rp-status').value,
+    motivo:    document.getElementById('rp-motivo').value.trim(),
   };
   if (!obj.membro) { toast('❌ Informe o membro'); return; }
   if (!obj.inicio) { toast('❌ Informe a data de início'); return; }
@@ -5438,6 +6186,7 @@ function renderRpp() {
             <span>🏁 Fim: <strong>${fmtDate(r.fim)}</strong></span>
             ${r.dias ? `<span class="badge b-cyan" style="font-size:10px">⏱️ ${duracaoLabel[r.dias]||r.dias+' dias'}</span>` : ''}
           </div>
+          ${r.motivo ? `<div style="font-size:12px;color:var(--text3);font-style:italic;margin-bottom:10px">💬 ${r.motivo}</div>` : ''}
 
           ${r.inicio && r.fim ? `
           <div class="rpp-progress">
@@ -5479,10 +6228,11 @@ async function salvarMinhaConta() {
   if (!nova) { toast('❌ Informe a nova senha'); return; }
   if (nova.length < 6) { toast('❌ Senha deve ter mínimo 6 caracteres'); return; }
   if (nova !== conf) { toast('❌ As senhas não coincidem'); return; }
-  const updated = { ...u, senha: nova };
+  const { _id: _uId, ...uSemId } = u;
+  const updated = { ...uSemId, senha: nova };
   await window._db.dbSet(window._db.COLS.users, u._id, updated);
   window._state.users = await window._db.dbGetAll(window._db.COLS.users);
-  window._currentUser = updated;
+  window._currentUser = { ...updated, _id: u._id };
   sessionStorage.setItem('gp_user', JSON.stringify({ _id: updated._id, senha: updated.senha }));
   closeModalDirect();
   toast('✅ Senha alterada com sucesso!');
@@ -5697,8 +6447,9 @@ async function saveCronMov() {
     window._state.movs = await window._db.dbGetAll(window._db.COLS.movs);
     toast(`✅ Mov agendada! ${pts}pt por participante.`);
   } else {
+    const { _id: _movId, ...movExistenteSemId } = movExistente;
     const movAtualizado = {
-      ...movExistente,
+      ...movExistenteSemId,
       nome:         obj.nome,
       tipo:         obj.subtipo || movExistente.tipo,
       data:         obj.data,
@@ -6031,6 +6782,7 @@ function openAcolhModal(docId) {
   document.getElementById('ac-edit-id').value = docId || '';
   document.getElementById('modal-acolh-title').textContent = docId ? '✏️ EDITAR ACOLHIMENTO' : '🤗 NOVO ACOLHIMENTO';
   const d = docId ? (window._state.acolhimentos.find(x => x._id === docId) || {}) : {};
+  const infoElAc = document.getElementById('ac-membro-info'); if(infoElAc) infoElAc.style.display='none';
   document.getElementById('ac-id').value        = d.memId     || '';
   document.getElementById('ac-membro').value    = d.membro    || '';
   document.getElementById('ac-acolhedor').value = d.acolhedor || '';
@@ -6668,6 +7420,7 @@ function openLevelUpModal(docId) {
   document.getElementById('lu-edit-id').value  = docId || '';
   document.getElementById('modal-levelup-title').textContent = docId ? '✏️ EDITAR LEVEL UP' : '⚡ REGISTRAR LEVEL UP';
   const d = docId ? (window._state.levelup.find(x => x._id === docId) || {}) : {};
+  const infoElLu = document.getElementById('lu-membro-info'); if(infoElLu) infoElLu.style.display='none';
   document.getElementById('lu-membro').value = d.membro || '';
   document.getElementById('lu-id').value     = d.memId  || '';
   document.getElementById('lu-pts').value    = d.pts    || '';
@@ -6800,42 +7553,70 @@ function setLuFilter() {}
 
 // Hierarquia completa: { nome, meta, semanas, tier, cor, bg }
 const UP_CARGOS = [
-  // ☘ Iniciantes
-  { nome:'@Heavenly',    meta:20,  semanas:null, tier:'iniciantes',   cor:'#94a3b8', bg:'rgba(148,163,184,.1)'  },
-  { nome:'@Prodigy',     meta:25,  semanas:null, tier:'iniciantes',   cor:'#94a3b8', bg:'rgba(148,163,184,.1)'  },
-  { nome:'@Neurotic',    meta:35,  semanas:null, tier:'iniciantes',   cor:'#94a3b8', bg:'rgba(148,163,184,.1)'  },
-  { nome:'@Relíquia',    meta:45,  semanas:null, tier:'iniciantes',   cor:'#94a3b8', bg:'rgba(148,163,184,.1)'  },
-  { nome:'@Alta Mídia',  meta:55,  semanas:null, tier:'iniciantes',   cor:'#94a3b8', bg:'rgba(148,163,184,.1)'  },
-  { nome:'@Blessed',     meta:60,  semanas:null, tier:'iniciantes',   cor:'#94a3b8', bg:'rgba(148,163,184,.1)'  },
-  { nome:'@Delusions',   meta:70,  semanas:null, tier:'iniciantes',   cor:'#94a3b8', bg:'rgba(148,163,184,.1)'  },
-  { nome:'@Lovely',      meta:80,  semanas:null, tier:'iniciantes',   cor:'#94a3b8', bg:'rgba(148,163,184,.1)'  },
-  // ☘ Operadores — 2 semanas no cargo
-  { nome:'@Rackson',     meta:90,  semanas:2, tier:'operadores',  cor:'#22d3ee', bg:'rgba(34,211,238,.1)'   },
-  { nome:'@Ecstasy',     meta:100, semanas:2, tier:'operadores',  cor:'#22d3ee', bg:'rgba(34,211,238,.1)'   },
-  { nome:'@DropMaster',  meta:110, semanas:2, tier:'operadores',  cor:'#22d3ee', bg:'rgba(34,211,238,.1)'   },
-  { nome:'@Revoada',     meta:120, semanas:2, tier:'operadores',  cor:'#22d3ee', bg:'rgba(34,211,238,.1)'   },
-  { nome:'@Alpha',       meta:130, semanas:2, tier:'operadores',  cor:'#22d3ee', bg:'rgba(34,211,238,.1)'   },
-  { nome:'@RoyalSalute', meta:140, semanas:2, tier:'operadores',  cor:'#22d3ee', bg:'rgba(34,211,238,.1)'   },
-  { nome:'@Diamonds',    meta:150, semanas:2, tier:'operadores',  cor:'#22d3ee', bg:'rgba(34,211,238,.1)'   },
-  { nome:'@Obsessive',   meta:160, semanas:2, tier:'operadores',  cor:'#22d3ee', bg:'rgba(34,211,238,.1)'   },
-  // ☘ Moderadores¹ — 3 semanas no cargo
-  { nome:'@Pills',       meta:170, semanas:3, tier:'mod1',        cor:'#a855f7', bg:'rgba(168,85,247,.1)'   },
-  { nome:'@Imperial',    meta:180, semanas:3, tier:'mod1',        cor:'#a855f7', bg:'rgba(168,85,247,.1)'   },
-  { nome:'@Vida de Artista', meta:190, semanas:3, tier:'mod1',   cor:'#a855f7', bg:'rgba(168,85,247,.1)'   },
-  { nome:'@Overside',    meta:200, semanas:3, tier:'mod1',        cor:'#a855f7', bg:'rgba(168,85,247,.1)'   },
-  // ☘ Moderadores² — 4 semanas no cargo
-  { nome:'@Herdeiro',    meta:220, semanas:4, tier:'mod2',        cor:'#f97316', bg:'rgba(249,115,22,.1)'   },
-  { nome:'@80\'s',       meta:230, semanas:4, tier:'mod2',        cor:'#f97316', bg:'rgba(249,115,22,.1)'   },
-  { nome:'@Hall da Fama',meta:240, semanas:4, tier:'mod2',        cor:'#f97316', bg:'rgba(249,115,22,.1)'   },
-  { nome:'@Mysterious',  meta:250, semanas:4, tier:'mod2',        cor:'#f97316', bg:'rgba(249,115,22,.1)'   },
+  // 🌸 Iniciantes — rosa/pink
+  { nome:'@Heavenly',    meta:20,  semanas:null, tier:'iniciantes', cor:'#ec4899', bg:'rgba(236,72,153,.1)'  },
+  { nome:'@Prodigy',     meta:25,  semanas:null, tier:'iniciantes', cor:'#ec4899', bg:'rgba(236,72,153,.1)'  },
+  { nome:'@Neurotic',    meta:35,  semanas:null, tier:'iniciantes', cor:'#ec4899', bg:'rgba(236,72,153,.1)'  },
+  { nome:'@Relíquia',    meta:45,  semanas:null, tier:'iniciantes', cor:'#ec4899', bg:'rgba(236,72,153,.1)'  },
+  { nome:'@Alta Mídia',  meta:55,  semanas:null, tier:'iniciantes', cor:'#ec4899', bg:'rgba(236,72,153,.1)'  },
+  { nome:'@Blessed',     meta:60,  semanas:null, tier:'iniciantes', cor:'#ec4899', bg:'rgba(236,72,153,.1)'  },
+  { nome:'@Delusions',   meta:70,  semanas:null, tier:'iniciantes', cor:'#ec4899', bg:'rgba(236,72,153,.1)'  },
+  { nome:'@Lovely',      meta:80,  semanas:null, tier:'iniciantes', cor:'#ec4899', bg:'rgba(236,72,153,.1)'  },
+  // 🩵 Operadores — ciano
+  { nome:'@Rackson',     meta:90,  semanas:2, tier:'operadores', cor:'#22d3ee', bg:'rgba(34,211,238,.1)'  },
+  { nome:'@Ecstasy',     meta:100, semanas:2, tier:'operadores', cor:'#22d3ee', bg:'rgba(34,211,238,.1)'  },
+  { nome:'@DropMaster',  meta:110, semanas:2, tier:'operadores', cor:'#22d3ee', bg:'rgba(34,211,238,.1)'  },
+  { nome:'@Revoada',     meta:120, semanas:2, tier:'operadores', cor:'#22d3ee', bg:'rgba(34,211,238,.1)'  },
+  { nome:'@Alpha',       meta:130, semanas:2, tier:'operadores', cor:'#22d3ee', bg:'rgba(34,211,238,.1)'  },
+  { nome:'@RoyalSalute', meta:140, semanas:2, tier:'operadores', cor:'#22d3ee', bg:'rgba(34,211,238,.1)'  },
+  { nome:'@Diamonds',    meta:150, semanas:2, tier:'operadores', cor:'#22d3ee', bg:'rgba(34,211,238,.1)'  },
+  { nome:'@Obsessive',   meta:160, semanas:2, tier:'operadores', cor:'#22d3ee', bg:'rgba(34,211,238,.1)'  },
+  // 💜 Moderadores¹ — roxo
+  { nome:'@Pills',           meta:170, semanas:3, tier:'mod1', cor:'#a855f7', bg:'rgba(168,85,247,.1)' },
+  { nome:'@Imperial',        meta:180, semanas:3, tier:'mod1', cor:'#a855f7', bg:'rgba(168,85,247,.1)' },
+  { nome:'@Vida de Artista', meta:190, semanas:3, tier:'mod1', cor:'#a855f7', bg:'rgba(168,85,247,.1)' },
+  { nome:'@Overside',        meta:200, semanas:3, tier:'mod1', cor:'#a855f7', bg:'rgba(168,85,247,.1)' },
+  // 🟠 Moderadores² — laranja
+  { nome:'@Herdeiro',    meta:220, semanas:4, tier:'mod2', cor:'#f97316', bg:'rgba(249,115,22,.1)' },
+  { nome:'@80\'s',       meta:230, semanas:4, tier:'mod2', cor:'#f97316', bg:'rgba(249,115,22,.1)' },
+  { nome:'@Hall da Fama',meta:240, semanas:4, tier:'mod2', cor:'#f97316', bg:'rgba(249,115,22,.1)' },
+  { nome:'@Mysterious',  meta:250, semanas:4, tier:'mod2', cor:'#f97316', bg:'rgba(249,115,22,.1)' },
 ];
 
 const UP_TIERS = {
-  iniciantes: { label:'☘ Iniciantes',      semanas: null, cor:'#94a3b8' },
-  operadores:  { label:'☘ Operadores',      semanas: 2,    cor:'#22d3ee' },
-  mod1:        { label:'☘ Moderadores¹',    semanas: 3,    cor:'#a855f7' },
-  mod2:        { label:'☘ Moderadores²',    semanas: 4,    cor:'#f97316' },
+  iniciantes: { label:'🌸 Iniciantes',   semanas: null, cor:'#ec4899' },
+  operadores:  { label:'🩵 Operadores',   semanas: 2,    cor:'#22d3ee' },
+  mod1:        { label:'💜 Moderadores¹', semanas: 3,    cor:'#a855f7' },
+  mod2:        { label:'🟠 Moderadores²', semanas: 4,    cor:'#f97316' },
 };
+
+// ── CARGOS DE MÉRITO (up por destaque, não por meta) ─────
+const UP_CARGOS_MERITO = [
+  // Gestão do Servidor — roxo vibrante/magenta
+  { nome:'@Destinado',          cor:'#d946ef', bg:'rgba(217,70,239,.12)' },
+  { nome:'@Loyal',              cor:'#d946ef', bg:'rgba(217,70,239,.12)' },
+  { nome:'@Visionário',         cor:'#d946ef', bg:'rgba(217,70,239,.12)' },
+  { nome:'@Original',           cor:'#d946ef', bg:'rgba(217,70,239,.12)' },
+  // Administradores — laranja/vermelho
+  { nome:'@Luxury',             cor:'#fb923c', bg:'rgba(251,146,60,.12)' },
+  { nome:'@Mainstreet',         cor:'#fb923c', bg:'rgba(251,146,60,.12)' },
+  { nome:'@New Era',            cor:'#fb923c', bg:'rgba(251,146,60,.12)' },
+  { nome:'@Highest',            cor:'#94a3b8', bg:'rgba(148,163,184,.1)' },
+  { nome:'@Bad Blood',          cor:'#ef4444', bg:'rgba(239,68,68,.12)'  },
+  { nome:'@Celebridade',        cor:'#22c55e', bg:'rgba(34,197,94,.12)'  },
+  { nome:'@Intocável',          cor:'#e2e8f0', bg:'rgba(226,232,240,.08)'},
+  { nome:'@Seleção',            cor:'#f472b6', bg:'rgba(244,114,182,.12)'},
+  { nome:'@Contratação do Ano', cor:'#f97316', bg:'rgba(249,115,22,.12)' },
+];
+
+function getMeritoCargo(nome) {
+  return UP_CARGOS_MERITO.find(c => c.nome === nome);
+}
+
+// Retorna lista correta de cargos conforme tipo
+function getCargosDoTipo(tipoUp) {
+  return tipoUp === 'merito' ? UP_CARGOS_MERITO : UP_CARGOS;
+}
 
 function getUpCargo(nome) {
   return UP_CARGOS.find(c => c.nome === nome);
@@ -6871,30 +7652,74 @@ function upPodeUpar(cargo, semanas, pts, movs, reuniao) {
   return { pode, prox, metaTotal, itens };
 }
 
-function upPopularSelect() {
+function upPopularSelect(tipoUp) {
   const sel = document.getElementById('up-cargo-de');
   if (!sel) return;
   sel.innerHTML = '<option value="">— selecionar cargo —</option>';
-  let tierAtual = '';
-  UP_CARGOS.forEach(c => {
-    if(c.tier !== tierAtual) {
-      tierAtual = c.tier;
+
+  if (tipoUp === 'merito') {
+    // Cargos de Mérito — lista simples
+    sel.appendChild(Object.assign(document.createElement('option'), {disabled:true, textContent:'── 🏅 Cargos de Mérito ──'}));
+    UP_CARGOS_MERITO.forEach(c => {
       const opt = document.createElement('option');
-      opt.disabled = true;
-      opt.textContent = '── ' + UP_TIERS[c.tier].label + ' ──';
+      opt.value = c.nome;
+      opt.textContent = c.nome;
       sel.appendChild(opt);
-    }
-    const opt = document.createElement('option');
-    opt.value = c.nome;
-    opt.textContent = `${c.nome} (meta: ${c.meta}pts${c.semanas ? `, ${c.semanas}sem` : ''})`;
-    sel.appendChild(opt);
-  });
+    });
+  } else {
+    // Cargos de Meta — agrupados por tier
+    let tierAtual = '';
+    UP_CARGOS.forEach(c => {
+      if (c.tier !== tierAtual) {
+        tierAtual = c.tier;
+        const opt = document.createElement('option');
+        opt.disabled = true;
+        opt.textContent = '── ' + UP_TIERS[c.tier].label + ' ──';
+        sel.appendChild(opt);
+      }
+      const opt = document.createElement('option');
+      opt.value = c.nome;
+      opt.textContent = `${c.nome} (meta: ${c.meta}pts${c.semanas ? `, ${c.semanas}sem` : ''})`;
+      sel.appendChild(opt);
+    });
+  }
 }
 
 function upBuscarParticipacoes() {
   const memId = document.getElementById('up-id')?.value.trim();
   const s     = window._state;
   if (!s || !memId) return;
+
+  // ── Puxar dados do membro pelo ID ──────────────────────
+  const membro = (s.members || []).find(m => m.id === memId || m.m === memId);
+  if (membro) {
+    // Preencher nome
+    const nomeEl = document.getElementById('up-membro');
+    if (nomeEl && !nomeEl.value) nomeEl.value = membro.m || '';
+    // Re-popular select com cargos do tipo correto e selecionar cargo do membro
+    upPopularSelect(membro.tipoUp || 'meta');
+    const cargoEl = document.getElementById('up-cargo-de');
+    if (cargoEl && membro.cargo) cargoEl.value = membro.cargo;
+    // Mostrar aviso de elegibilidade
+    const elegivel = membro.tipoUp === 'meta' && membro.upaGames === 'sim';
+    const infoUpEl = document.getElementById('up-eligibilidade-membro');
+    if (infoUpEl) {
+      infoUpEl.style.display = '';
+      if (elegivel) {
+        infoUpEl.style.background = 'rgba(34,197,94,.08)';
+        infoUpEl.style.borderColor = 'rgba(34,197,94,.3)';
+        infoUpEl.style.color = '#22c55e';
+        infoUpEl.innerHTML = `✅ <strong>${membro.m}</strong> — 🎯 Meta · 🎮 Upa por Games · Cargo: <strong>${membro.cargo||'—'}</strong>`;
+      } else {
+        infoUpEl.style.background = 'rgba(239,68,68,.08)';
+        infoUpEl.style.borderColor = 'rgba(239,68,68,.25)';
+        infoUpEl.style.color = '#f87171';
+        const motivo = membro.tipoUp !== 'meta' ? '🏅 Tipo Mérito' : '❌ Não marcado para upar por Games';
+        infoUpEl.innerHTML = `⚠️ <strong>${membro.m}</strong> — ${motivo} · Cargo: <strong>${membro.cargo||'—'}</strong>`;
+      }
+    }
+    upAutoFill();
+  }
 
   // Semana de referência: usa campo se preenchido, senão semana atual
   const semRef = document.getElementById('up-semana-ref')?.value.trim();
@@ -6966,7 +7791,6 @@ function upAutoFill() {
   const pts       = parseInt(document.getElementById('up-pts')?.value) || 0;
   const semanas   = parseInt(document.getElementById('up-semanas')?.value) || 0;
   const movs      = parseInt(document.getElementById('up-movs')?.value) || 0;
-  const membro    = document.getElementById('up-membro')?.value.trim();
   const reuniao   = document.querySelector('input[name="up-reuniao"]:checked')?.value || '';
 
   const infoEl  = document.getElementById('up-info-cargo');
@@ -6979,13 +7803,31 @@ function upAutoFill() {
     return;
   }
 
+  // ── MÉRITO ──────────────────────────────────────────────
+  const cargoMerito = getMeritoCargo(cargoNome);
+  if (cargoMerito) {
+    if(infoEl) infoEl.innerHTML = `
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <div><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">CARGO MÉRITO</span><div style="font-weight:700;color:${cargoMerito.cor};font-size:13px">${cargoMerito.nome}</div></div>
+        <div><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">TIPO</span><div style="font-weight:700;color:#c084fc;font-size:12px">🏅 Mérito — por destaque</div></div>
+      </div>`;
+    if(resEl) resEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">🏅</span>
+        <span style="font-size:13px;font-weight:700;color:#c084fc">Up por MÉRITO — cargo concedido por destaque</span>
+      </div>
+      <div style="font-size:11px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-top:4px">Não há checklist de pts/semanas para mérito</div>`;
+    if(saveBtn) saveBtn.disabled = false;
+    return;
+  }
+
+  // ── META ─────────────────────────────────────────────────
   const cargo = getUpCargo(cargoNome);
   if (!cargo) return;
   const prox = getUpProximo(cargoNome);
   const meta = prox ? calcUpMeta(cargo) : cargo.meta;
   const tier = UP_TIERS[cargo.tier];
 
-  // Info do cargo
   if(infoEl) infoEl.innerHTML = `
     <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
       <div><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">CARGO</span><div style="font-weight:700;color:${cargo.cor};font-size:13px">${cargo.nome}</div></div>
@@ -7027,32 +7869,59 @@ function upAutoFill() {
 }
 
 function openUpamentoModal(docId) {
-  upPopularSelect();
-  document.getElementById('up-edit-id').value = docId || '';
-  document.getElementById('modal-upamento-title').textContent = docId ? '✏️ EDITAR UPAMENTO' : '🎯 REGISTRAR UPAMENTO';
   const d = docId ? (window._state.upamentos.find(x => x._id === docId) || {}) : {};
-  document.getElementById('up-membro').value   = d.membro  || '';
-  document.getElementById('up-id').value       = d.memId   || '';
-  document.getElementById('up-cargo-de').value = d.cargoDe || '';
-  document.getElementById('up-pts').value      = d.pts     || '';
-  document.getElementById('up-semanas').value  = d.semanas || '';
+
+  // Ocultar info de elegibilidade anterior
+  const eliEl = document.getElementById('up-eligibilidade-membro');
+  if (eliEl) eliEl.style.display = 'none';
+
+  // Detectar tipo — do registro existente ou do membro cadastrado
+  const memId = d.memId || '';
+  const membro = memId ? (window._state.members || []).find(m => m.id === memId) : null;
+  const tipoUp = d.tipoUp || membro?.tipoUp || 'meta';
+
+  upPopularSelect(tipoUp);
+
+  document.getElementById('up-edit-id').value = docId || '';
+  document.getElementById('modal-upamento-title').textContent = docId
+    ? `✏️ EDITAR ${tipoUp === 'merito' ? '🏅 MÉRITO' : '🎯 META'}`
+    : `➕ REGISTRAR ${tipoUp === 'merito' ? '🏅 MÉRITO' : '🎯 META'}`;
+  document.getElementById('up-membro').value     = d.membro  || '';
+  document.getElementById('up-id').value         = d.memId   || '';
+  document.getElementById('up-cargo-de').value   = d.cargoDe || '';
+  document.getElementById('up-pts').value        = d.pts     || '';
+  document.getElementById('up-semanas').value    = d.semanas || '';
   document.getElementById('up-semana-ref').value = d.semanaRef || d.semana || '';
-  document.getElementById('up-movs').value     = d.movs    || '';
-  // Limpar badges auto
-  const badgeEl    = document.getElementById('up-movs-auto-badge');
-  const reunBadge  = document.getElementById('up-reuniao-badge');
-  if(badgeEl) badgeEl.style.display = 'none';
-  if(reunBadge) reunBadge.style.display = 'none';
+  document.getElementById('up-movs').value       = d.movs    || '';
+
+  // Mostrar/ocultar campos de meta (pts, semanas, movs, reunião) para mérito
+  const isMerito = tipoUp === 'merito';
+  const camposMeta = ['up-pts', 'up-semanas', 'up-movs'];
+  camposMeta.forEach(id => {
+    const row = document.getElementById(id)?.closest('.form-row,.form-cols');
+    // Deixar sempre visível — mérito pode ter dados parciais
+  });
+
+  // Badge no modal indicando o tipo
+  const titleEl = document.getElementById('modal-upamento-title');
+  if (titleEl) {
+    titleEl.style.color = isMerito ? '#c084fc' : '#4db0ff';
+  }
+
+  const badgeEl   = document.getElementById('up-movs-auto-badge');
+  const reunBadge = document.getElementById('up-reuniao-badge');
+  if (badgeEl)   badgeEl.style.display   = 'none';
+  if (reunBadge) reunBadge.style.display = 'none';
   const movsEl = document.getElementById('up-movs');
-  if(movsEl) movsEl.style.color = '';
-  document.getElementById('up-semana').value   = d.semana  || '';
-  document.getElementById('up-resp').value     = d.resp    || '';
-  // Reunião
+  if (movsEl) movsEl.style.color = '';
+  document.getElementById('up-semana').value = d.semana || '';
+  document.getElementById('up-resp').value   = d.resp   || '';
+
   const reuniaoVal = d.reuniao || '';
   document.querySelectorAll('input[name="up-reuniao"]').forEach(r => { r.checked = r.value === reuniaoVal; });
   const resEl = document.getElementById('up-resultado');
-  if(resEl) resEl.innerHTML = '<span style="font-family:\'Share Tech Mono\',monospace;font-size:11px;color:var(--text3)">Selecione o cargo atual</span>';
-  if(d.cargoDe) setTimeout(upAutoFill, 50);
+  if (resEl) resEl.innerHTML = '<span style="font-family:\'Share Tech Mono\',monospace;font-size:11px;color:var(--text3)">Selecione o cargo atual</span>';
+  if (d.cargoDe) setTimeout(upAutoFill, 50);
   openModal('upamento');
 }
 
@@ -7063,31 +7932,54 @@ async function saveUpamento() {
   const semanas  = parseInt(document.getElementById('up-semanas').value) || 0;
   const movs     = parseInt(document.getElementById('up-movs').value) || 0;
   const reuniao  = document.querySelector('input[name="up-reuniao"]:checked')?.value || '';
+  const memId    = document.getElementById('up-id').value.trim();
   const cargo    = getUpCargo(cargoNome);
   const prox     = cargo ? getUpProximo(cargoNome) : null;
   if (!document.getElementById('up-membro').value.trim()) { toast('❌ Informe o membro'); return; }
   if (!cargoNome) { toast('❌ Selecione o cargo atual'); return; }
-  if (!pts)       { toast('❌ Informe a pontuação semanal'); return; }
-  if (!movs)      { toast('❌ Informe as participações em movs'); return; }
-  if (!reuniao)   { toast('❌ Indique se esteve na reunião setorial'); return; }
+
+  // Buscar tipo do membro ANTES das validações
+  const membro = (window._state.members || []).find(m => m.id === memId || m.m === document.getElementById('up-membro').value.trim());
+  const tipoUp   = membro?.tipoUp   || 'meta';
+  const upaGames = membro?.upaGames || 'nao';
+
+  // Validações de meta apenas para membros Meta (não Mérito)
+  if (tipoUp !== 'merito') {
+    if (!pts)     { toast('❌ Informe a pontuação semanal'); return; }
+    if (!movs)    { toast('❌ Informe as participações em movs'); return; }
+    if (!reuniao) { toast('❌ Indique se esteve na reunião setorial'); return; }
+  }
+
   const check = cargo && prox ? upPodeUpar(cargo, semanas, pts, movs, reuniao) : { pode: false };
   const obj = {
     membro:    document.getElementById('up-membro').value.trim(),
-    memId:     document.getElementById('up-id').value.trim(),
+    memId,
     cargoDe:   cargoNome,
     cargoPara: prox ? prox.nome : cargoNome,
     pts, semanas, movs, reuniao,
+    tipoUp,
+    upaGames,
     semanaRef: document.getElementById('up-semana-ref').value.trim(),
     metaTotal: cargo && prox ? calcUpMeta(cargo) : (cargo?.meta || 0),
-    upou:      check.pode,
+    upou:      tipoUp === 'merito' ? true : check.pode,
     semana:    document.getElementById('up-semana').value.trim(),
     resp:      document.getElementById('up-resp').value.trim(),
     data:      new Date().toISOString().slice(0,10),
   };
+
+  // Alertar se não é elegível por games
+  if (tipoUp !== 'meta') {
+    toast('⚠️ Membro do tipo Mérito — registrado mas não apto para up por Games.');
+  } else if (upaGames !== 'sim') {
+    toast('⚠️ Membro não marcado para upar por Games — registrado mas verifique.');
+  }
+
   await window._db.dbSet(window._db.COLS.upamentos, docId, obj);
   window._state.upamentos = await window._db.dbGetAll(window._db.COLS.upamentos);
   renderUpamentos(); closeModalDirect();
-  toast(obj.upou ? '✅ Upamento registrado!' : '📋 Registro salvo (não upou)');
+  if (tipoUp === 'meta' && upaGames === 'sim') {
+    toast(obj.upou ? '✅ Upamento registrado! Elegível ✓' : '📋 Registro salvo (critérios pendentes)');
+  }
 }
 
 async function deleteUpamento(docId) {
@@ -7098,16 +7990,28 @@ async function deleteUpamento(docId) {
 }
 
 function upChecklistHtml(u) {
-  const cargo = getUpCargo(u.cargoDe);
+  // Mérito — sem checklist de meta
+  if (u.tipoUp === 'merito') {
+    const cm = getMeritoCargo(u.cargoDe);
+    return `<div style="margin-top:8px;padding:8px 10px;background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.2);border-radius:8px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:12px">🏅</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#c084fc;font-weight:700">MÉRITO</span>
+      <span style="font-size:10px;color:var(--text3)">Up por destaque — sem requisito de pontuação</span>
+      ${cm ? `<span style="font-size:10px;color:${cm.cor};font-weight:700">${cm.nome}</span>` : ''}
+    </div>`;
+  }
+
+  // Meta — checklist completo
+  const cargo = getUpCargo(u.cargoDe) || getMeritoCargo(u.cargoDe);
   const prox  = getUpProximo(u.cargoDe);
   if (!cargo || !prox) return '';
   const metaTotal = calcUpMeta(cargo);
   const minSem    = cargo.semanas || 0;
-  const c1 = (u.pts||0)    >= metaTotal;
+  const c1 = (u.pts||0)     >= metaTotal;
   const c2 = (u.semanas||0) >= minSem;
-  const c3 = (u.movs||0)   >= 6;
+  const c3 = (u.movs||0)    >= 6;
   const c4 = u.reuniao === 'sim';
-  const elegivel  = c1 && c2 && c3 && c4;
+  const elegivel = c1 && c2 && c3 && c4;
   const cor = elegivel ? '#22c55e' : 'var(--text3)';
   const bg  = elegivel ? 'rgba(34,197,94,.07)' : 'rgba(71,85,105,.07)';
   const brd = elegivel ? 'rgba(34,197,94,.2)'  : 'var(--border)';
@@ -7121,6 +8025,14 @@ function upChecklistHtml(u) {
       ? '<span style="margin-left:4px;font-size:10px;font-weight:700;color:#22c55e">🎯 ELEGÍVEL!</span>'
       : '<span style="margin-left:4px;font-size:10px;color:#f87171">Critérios pendentes</span>'}
   </div>`;
+}
+
+let upFiltro = 'todos';
+function setUpFiltro(f, el) {
+  upFiltro = f;
+  document.querySelectorAll('#page-upamentos .pb button').forEach(b => b.classList.remove('active-filter'));
+  if (el) el.classList.add('active-filter');
+  renderUpamentos();
 }
 
 function renderUpamentos() {
@@ -7159,14 +8071,23 @@ function renderUpamentos() {
 
   // Lista de registros
   const lista = (s.upamentos || [])
-    .filter(u => u.membro?.toLowerCase().includes(q) || u.cargoDe?.toLowerCase().includes(q) || u.cargoPara?.toLowerCase().includes(q))
+    .filter(u => {
+      // Busca por texto
+      if (q && !(u.membro?.toLowerCase().includes(q) || u.cargoDe?.toLowerCase().includes(q) || u.cargoPara?.toLowerCase().includes(q))) return false;
+      // Filtro por tipo
+      if (upFiltro === 'meta')     return u.tipoUp === 'meta'   || (!u.tipoUp);
+      if (upFiltro === 'merito')   return u.tipoUp === 'merito';
+      if (upFiltro === 'upou')     return !!u.upou;
+      if (upFiltro === 'nao_upou') return !u.upou;
+      return true;
+    })
     .sort((a,b) => (b.data||'').localeCompare(a.data||''));
 
   document.getElementById('up-count').textContent = lista.length;
   document.getElementById('up-list').innerHTML = lista.length === 0
     ? '<div class="empty"><div class="empty-icon">🎯</div><div class="empty-text">Nenhum upamento registrado</div></div>'
     : lista.map(u => {
-        const cargo = getUpCargo(u.cargoDe) || { cor:'#64748b', bg:'rgba(100,116,139,.1)' };
+        const cargo = getUpCargo(u.cargoDe) || getMeritoCargo(u.cargoDe) || { cor:'#64748b', bg:'rgba(100,116,139,.1)' };
         const upouCor = u.upou ? '#22c55e' : '#e53935';
         return `<div style="background:var(--bg3);border:1px solid var(--border);border-left:4px solid ${u.upou?'#22c55e':'#475569'};border-radius:12px;padding:14px 16px;margin-bottom:8px">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
@@ -7176,6 +8097,12 @@ function renderUpamentos() {
                 ${u.memId?`<span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${u.memId}</span>`:''}
                 <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${u.semana||fmtDate(u.data)}</span>
                 <span style="background:${u.upou?'rgba(34,197,94,.15)':'rgba(229,57,53,.1)'};color:${upouCor};padding:1px 10px;border-radius:10px;font-size:10px;font-family:'Share Tech Mono',monospace;font-weight:700">${u.upou?'✅ UPOU':'❌ NÃO UPOU'}</span>
+                ${u.tipoUp === 'merito'
+                  ? `<span style="background:rgba(168,85,247,.15);color:#c084fc;padding:1px 8px;border-radius:8px;font-size:9px;font-family:'Share Tech Mono',monospace">🏅 MÉRITO</span>`
+                  : `<span style="background:rgba(0,112,209,.15);color:#4db0ff;padding:1px 8px;border-radius:8px;font-size:9px;font-family:'Share Tech Mono',monospace">🎯 META</span>`}
+                ${u.upaGames === 'sim' || (!u.upaGames && !u.tipoUp)
+                  ? `<span style="background:rgba(34,197,94,.12);color:#22c55e;padding:1px 8px;border-radius:8px;font-size:9px;font-family:'Share Tech Mono',monospace">🎮 GAMES</span>`
+                  : ''}
               </div>
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
                 <span style="background:var(--bg2);border:1px solid ${cargo.cor}44;color:${cargo.cor};padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600">${u.cargoDe||'—'}</span>
@@ -8243,11 +9170,11 @@ async function autoFinalizarMovs() {
 
     // Distribuir pontos para presentes
     await Promise.all(pars.map(p =>
-      window._db.dbSet(window._db.COLS.participacoes, p._id, { ...p, pontos: p.presente ? pts : 0 })
+      window._db.dbSet(window._db.COLS.participacoes, p._id, (({_id,...ps})=>({...ps,pontos:p.presente?pts:0}))(p))
     ));
 
     // Marcar como finalizada
-    await window._db.dbSet(window._db.COLS.movs, mv._id, { ...mv, finalizada: true });
+    await window._db.dbSet(window._db.COLS.movs, mv._id, (({_id,...mvF})=>({...mvF,finalizada:true}))(mv));
     atualizou = true;
 
     console.log(`[AUTO] Mov finalizada: "${mv.nome}" — ${presentes.length} presentes, ${pts}pt cada`);
