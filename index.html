@@ -54,7 +54,7 @@ const COLS = {
   members: 'members', suggestions: 'suggestions', subgestao: 'subgestao',
   ausencias: 'ausencias', indicacoes: 'indicacoes', news: 'news', naoverif: 'naoverif',
   movs: 'movs', participacoes: 'participacoes', users: 'users', instrucoes: 'instrucoes',
-  feedbacks: 'feedbacks', funcoes: 'funcoes', notificacoes: 'notificacoes', rpps: 'rpps', cronograma: 'cronograma', acolhimentos: 'acolhimentos', advertencias: 'advertencias', blacklist: 'blacklist', levelup: 'levelup', upamentos: 'upamentos', destaques: 'destaques', pautas: 'pautas', designer: 'designer'
+  feedbacks: 'feedbacks', funcoes: 'funcoes', notificacoes: 'notificacoes', rpps: 'rpps', cronograma: 'cronograma', acolhimentos: 'acolhimentos', advertencias: 'advertencias', blacklist: 'blacklist', levelup: 'levelup', upamentos: 'upamentos', destaques: 'destaques', pautas: 'pautas', designer: 'designer', historico: 'historico'
 };
 
 // ===== PERMISSIONS =====
@@ -99,20 +99,18 @@ window._currentUser = null;
 
 // ===== STATE =====
 let members = [], suggestions = [], subgestao = [], ausencias = [],
-    indicacoes = [], news = [], naoverif = [], movs = [], participacoes = [], users = [], instrucoes = [], feedbacks = [], funcoes = [], notificacoes = [], rpps = [], cronograma = [], acolhimentos = [], advertencias = [], blacklist = [], levelup = [], upamentos = [], destaques = [], pautas = [], designer = [];
+    indicacoes = [], news = [], naoverif = [], movs = [], participacoes = [], users = [], instrucoes = [], feedbacks = [], funcoes = [], notificacoes = [], rpps = [], cronograma = [], acolhimentos = [], advertencias = [], blacklist = [], levelup = [], upamentos = [], destaques = [], pautas = [], designer = [], historico = [];
 let loading = true;
 
 // ===== LOAD ALL =====
 async function loadAll() {
   showLoading(true);
   try {
-    [members, suggestions, subgestao, ausencias, indicacoes, news, naoverif, movs, participacoes, users, instrucoes, feedbacks, funcoes, notificacoes, rpps, cronograma, acolhimentos, advertencias, blacklist, levelup, upamentos, destaques, pautas, designer] = await Promise.all([
+    [members, suggestions, subgestao, ausencias, indicacoes, news, naoverif, movs, participacoes, users, instrucoes, feedbacks, funcoes, notificacoes, rpps, cronograma, acolhimentos, advertencias, blacklist, levelup, upamentos, destaques, pautas, designer, historico] = await Promise.all([
       dbGetAll(COLS.members), dbGetAll(COLS.suggestions), dbGetAll(COLS.subgestao),
       dbGetAll(COLS.ausencias), dbGetAll(COLS.indicacoes), dbGetAll(COLS.news),
-      dbGetAll(COLS.naoverif), dbGetAll(COLS.movs), dbGetAll(COLS.participacoes), dbGetAll(COLS.users), dbGetAll(COLS.instrucoes), dbGetAll(COLS.feedbacks), dbGetAll(COLS.funcoes), dbGetAll(COLS.notificacoes), dbGetAll(COLS.rpps), dbGetAll(COLS.cronograma), dbGetAll(COLS.acolhimentos), dbGetAll(COLS.advertencias), dbGetAll(COLS.blacklist), dbGetAll(COLS.levelup), dbGetAll(COLS.upamentos), dbGetAll(COLS.destaques), dbGetAll(COLS.pautas), dbGetAll(COLS.designer)
+      dbGetAll(COLS.naoverif), dbGetAll(COLS.movs), dbGetAll(COLS.participacoes), dbGetAll(COLS.users), dbGetAll(COLS.instrucoes), dbGetAll(COLS.feedbacks), dbGetAll(COLS.funcoes), dbGetAll(COLS.notificacoes), dbGetAll(COLS.rpps), dbGetAll(COLS.cronograma), dbGetAll(COLS.acolhimentos), dbGetAll(COLS.advertencias), dbGetAll(COLS.blacklist), dbGetAll(COLS.levelup), dbGetAll(COLS.upamentos), dbGetAll(COLS.destaques), dbGetAll(COLS.pautas), dbGetAll(COLS.designer), dbGetAll(COLS.historico)
     ]);
-
-    // Seed default data if empty
     if (members.length === 0) await seedMembers();
     if (suggestions.length === 0) await seedSuggestions();
     if (subgestao.length === 0) await seedSubgestao();
@@ -130,10 +128,10 @@ async function loadAll() {
     if (funcoes.length === 0) await seedFuncoes();
 
     // Reload after seed
-    [members, suggestions, subgestao, ausencias, indicacoes, news, naoverif, movs, participacoes, users, instrucoes, feedbacks, funcoes, notificacoes, rpps, cronograma, acolhimentos, advertencias, blacklist, levelup, upamentos, destaques, pautas, designer] = await Promise.all([
+    [members, suggestions, subgestao, ausencias, indicacoes, news, naoverif, movs, participacoes, users, instrucoes, feedbacks, funcoes, notificacoes, rpps, cronograma, acolhimentos, advertencias, blacklist, levelup, upamentos, destaques, pautas, designer, historico] = await Promise.all([
       dbGetAll(COLS.members), dbGetAll(COLS.suggestions), dbGetAll(COLS.subgestao),
       dbGetAll(COLS.ausencias), dbGetAll(COLS.indicacoes), dbGetAll(COLS.news),
-      dbGetAll(COLS.naoverif), dbGetAll(COLS.movs), dbGetAll(COLS.participacoes), dbGetAll(COLS.users), dbGetAll(COLS.instrucoes), dbGetAll(COLS.feedbacks), dbGetAll(COLS.funcoes), dbGetAll(COLS.notificacoes), dbGetAll(COLS.rpps), dbGetAll(COLS.cronograma), dbGetAll(COLS.acolhimentos), dbGetAll(COLS.advertencias), dbGetAll(COLS.blacklist), dbGetAll(COLS.levelup), dbGetAll(COLS.upamentos), dbGetAll(COLS.destaques), dbGetAll(COLS.pautas), dbGetAll(COLS.designer)
+      dbGetAll(COLS.naoverif), dbGetAll(COLS.movs), dbGetAll(COLS.participacoes), dbGetAll(COLS.users), dbGetAll(COLS.instrucoes), dbGetAll(COLS.feedbacks), dbGetAll(COLS.funcoes), dbGetAll(COLS.notificacoes), dbGetAll(COLS.rpps), dbGetAll(COLS.cronograma), dbGetAll(COLS.acolhimentos), dbGetAll(COLS.advertencias), dbGetAll(COLS.blacklist), dbGetAll(COLS.levelup), dbGetAll(COLS.upamentos), dbGetAll(COLS.destaques), dbGetAll(COLS.pautas), dbGetAll(COLS.designer), dbGetAll(COLS.historico)
     ]);
 
     loading = false;
@@ -505,6 +503,7 @@ window._state = { get members(){return members;}, set members(v){members=v;},
   get destaques(){return destaques;}, set destaques(v){destaques=v;},
   get pautas(){return pautas;}, set pautas(v){pautas=v;},
   get designer(){return designer;}, set designer(v){designer=v;},
+  get historico(){return historico;}, set historico(v){historico=v;},
 };
 window._loadAll = loadAll;
 // renderAll será definido no segundo script — usamos wrapper para garantir
@@ -2312,6 +2311,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
           </div>
           <div class="nav-group-body">
             <div class="nav-sub" id="tab-users" onclick="tab('usuarios',this)" data-page="usuarios">🔐 Usuários</div>
+            <div class="nav-sub" onclick="tab('historico',this)" data-page="historico">📜 Histórico</div>
           </div>
         </div>
 
@@ -3228,6 +3228,42 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     </div>
   </div>
 
+  <!-- HISTÓRICO -->
+  <div id="page-historico" class="page">
+    <div class="panel">
+      <div class="ph" style="border-left:3px solid #a855f7">
+        <div>
+          <span class="pt">📜 Histórico</span>
+          <div style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-top:2px">Registro automático de eventos do painel</div>
+        </div>
+        <div class="ph-right">
+          <span class="pc" id="hist-count">0</span>
+          <button class="btn btn-sm" onclick="limparHistorico()" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;font-family:'Share Tech Mono',monospace;font-size:10px">🗑 Limpar</button>
+        </div>
+      </div>
+
+      <!-- Stats por tipo -->
+      <div class="pb" style="padding-bottom:0">
+        <div id="hist-stats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px"></div>
+      </div>
+
+      <!-- Filtros por tipo -->
+      <div class="pb" style="padding-bottom:0;display:flex;gap:6px;flex-wrap:wrap">
+        <button onclick="setHistFiltro('todos',this)" class="active-filter" style="background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3);color:#c084fc;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">TODOS</button>
+        <button onclick="setHistFiltro('add',this)" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#22c55e;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">✅ ADICIONADOS</button>
+        <button onclick="setHistFiltro('rebocado',this)" style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);color:#fbbf24;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">🚨 REBOCADOS</button>
+        <button onclick="setHistFiltro('removido',this)" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">🗑 REMOVIDOS</button>
+        <button onclick="setHistFiltro('notif',this)" style="background:rgba(77,176,255,.1);border:1px solid rgba(77,176,255,.25);color:#4db0ff;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">🔔 NOTIFICAÇÕES</button>
+      </div>
+
+      <div class="pb" style="padding-bottom:0">
+        <div class="search-wrap"><input id="search-hist" placeholder="Buscar membro, ID, motivo..." oninput="renderHistorico()"></div>
+      </div>
+
+      <div class="pb tall" id="hist-list"></div>
+    </div>
+  </div>
+
     </div><!-- /main-content -->
 
     <!-- PAINEL LATERAL CRONOGRAMA -->
@@ -3813,8 +3849,18 @@ async function saveMember(){
     } : {}),
   };
   if(!obj.m){toast('❌ Informe o nome');return;}
+  const isNovo = !existente;
   await window._db.dbSet(window._db.COLS.members,docId,obj);
   window._state.members=await window._db.dbGetAll(window._db.COLS.members);
+  // Registrar no histórico apenas quando é novo membro
+  if (isNovo) {
+    registrarHistorico('add', {
+      memId:  obj.id,
+      nome:   obj.m,
+      motivo: `Adicionado ao painel`,
+      extra:  `Cargo: ${obj.cargo||'—'} · Posição: ${obj.posicao||'comum'}`,
+    });
+  }
   window._renderAll(); closeModalDirect(); toast('✅ Membro salvo!');
 }
 async function deleteMember(docId){
@@ -3859,6 +3905,12 @@ async function executarRebocamento() {
   window._state.members = await window._db.dbGetAll(window._db.COLS.members);
   closeModalDirect();
   window._renderAll();
+  registrarHistorico('rebocado', {
+    memId:  membro.id || '',
+    nome:   nome,
+    motivo: motivo || 'Sem motivo informado',
+    extra:  `Cargo: ${membro.cargo||'—'} · Rebocado em ${dataHoje}`,
+  });
   toast(`🚨 @${nome} rebocado${motivo ? ': ' + motivo : ''}!`);
 }
 
@@ -3888,6 +3940,9 @@ async function executarExclusaoMembro() {
 
   if (!sel) { toast('❌ Selecione o motivo da remoção'); return; }
 
+  // Buscar dados do membro antes de deletar
+  const membroDel = window._state.members.find(x => x._id === docId);
+
   await window._db.dbDel(window._db.COLS.members, docId);
   window._state.members = await window._db.dbGetAll(window._db.COLS.members);
 
@@ -3895,6 +3950,12 @@ async function executarExclusaoMembro() {
 
   closeModalDirect();
   window._renderAll();
+  registrarHistorico('removido', {
+    memId:  membroDel?.id || '',
+    nome:   nome,
+    motivo: sel,
+    extra:  obs ? `Obs: ${obs}` : `Cargo: ${membroDel?.cargo||'—'}`,
+  });
   toast(`🗑 @${nome} removido. Motivo: ${sel}`);
 }
 
@@ -4138,7 +4199,7 @@ function renderAll(){
   renderMovs(); renderRelatorio(); renderRelNews(); renderRelInst();
   renderUsers(); renderInstrucoes(); renderAcolhimentos(); renderAdvertencias(); renderBlacklist(); renderLevelUp(); renderUpamentos(); renderDestaques(); renderPautas(); renderFeedbacks();
   renderNotificacoes(); renderRpp(); renderCronograma(); renderCronAside(); renderPontuacoes();
-  renderAllDesigner();
+  renderAllDesigner(); renderHistorico();
   applyPermissions();
 }
 
@@ -4345,14 +4406,12 @@ function isRebocado(m) {
   const ult = getUltimaPontuacaoMembro(m);
 
   if (ult) {
-    // Se tem registro no levelup: rebocado se última pontuação > 30 dias
+    // Se tem registro no levelup: rebocado se última pontuação >= 30 dias
     return ult.dias >= 30;
   }
 
-  // Fallback para campo manual m.ult (compatibilidade com membros antigos)
-  if (!m.pts) return true; // nunca fez pontos = rebocado
-
-  // Se m.ult é um label, converter para dias estimados
+  // Sem registro no levelup — usar fallback do campo manual m.ult
+  // SÓ marcar como rebocado se m.ult indicar claramente inatividade longa
   const ultMap = {
     'SEM PONTOS': 999, 'ÚLTIMA SEMANA': 3, '2 SEMANAS': 14,
     '1 MÊS': 35, 'MAIS DE 3 MESES': 100,
@@ -4361,7 +4420,9 @@ function isRebocado(m) {
     return ultMap[m.ult] >= 30;
   }
 
-  return false; // tem pts sem data = não rebocado (benefício da dúvida)
+  // Sem levelup e sem label reconhecido → NÃO rebocado (benefício da dúvida)
+  // Membros novos ou sem histórico ficam na aba principal
+  return false;
 }
 
 // Faixa de inatividade para cor e label
@@ -4996,6 +5057,133 @@ function renderUsers(){
   }).join('')||'<div class="empty"><div class="empty-icon">🔐</div><div class="empty-text">Nenhum usuário cadastrado</div></div>';
 }
 
+// ═══════════════════════════════════════════════════
+// HISTÓRICO
+// ═══════════════════════════════════════════════════
+
+// Tipos de evento:
+//   add      → membro adicionado
+//   rebocado → membro rebocado (confirmado)
+//   removido → membro excluído do painel
+//   notif    → entrada/saída na área (via notificações)
+
+async function registrarHistorico(tipo, dados) {
+  // dados: { memId, nome, motivo, extra }
+  const agora = new Date();
+  const obj = {
+    tipo,
+    memId:    dados.memId    || '',
+    nome:     dados.nome     || '—',
+    motivo:   dados.motivo   || '',
+    extra:    dados.extra    || '',
+    autor:    window._currentUser?.nome || window._currentUser?.usuario || 'Sistema',
+    data:     agora.toISOString().slice(0,10),
+    hora:     agora.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
+    dataHora: agora.toISOString(),
+  };
+  try {
+    await window._db.dbSet(window._db.COLS.historico, window._db.genId(), obj);
+    if (window._state) {
+      window._state.historico = await window._db.dbGetAll(window._db.COLS.historico);
+    }
+  } catch(e) { console.warn('[Histórico] erro ao registrar:', e); }
+}
+
+let histFiltro = 'todos';
+function setHistFiltro(f, el) {
+  histFiltro = f;
+  document.querySelectorAll('#page-historico .pb button').forEach(b => b.classList.remove('active-filter'));
+  if (el) el.classList.add('active-filter');
+  renderHistorico();
+}
+
+function renderHistorico() {
+  const s = window._state; if (!s) return;
+  const q = (document.getElementById('search-hist')?.value || '').toLowerCase();
+  const lista = (s.historico || [])
+    .filter(h => {
+      if (histFiltro !== 'todos' && h.tipo !== histFiltro) return false;
+      if (!q) return true;
+      return (h.nome||'').toLowerCase().includes(q) ||
+             (h.memId||'').includes(q) ||
+             (h.motivo||'').toLowerCase().includes(q) ||
+             (h.extra||'').toLowerCase().includes(q);
+    })
+    .sort((a,b) => (b.dataHora||'').localeCompare(a.dataHora||''));
+
+  const countEl = document.getElementById('hist-count');
+  if (countEl) countEl.textContent = lista.length + '/' + (s.historico||[]).length;
+
+  // Stats por tipo (sempre sobre todos, não filtrados)
+  const todos = s.historico || [];
+  const statsEl = document.getElementById('hist-stats');
+  if (statsEl) {
+    const contagens = {
+      add:      todos.filter(h => h.tipo === 'add').length,
+      rebocado: todos.filter(h => h.tipo === 'rebocado').length,
+      removido: todos.filter(h => h.tipo === 'removido').length,
+      notif:    todos.filter(h => h.tipo === 'notif').length,
+    };
+    statsEl.innerHTML = [
+      { key:'add',      icon:'✅', label:'Adicionados',  cor:'#22c55e', bg:'rgba(34,197,94,.08)',   border:'rgba(34,197,94,.25)'   },
+      { key:'rebocado', icon:'🚨', label:'Rebocados',    cor:'#fbbf24', bg:'rgba(251,191,36,.08)',  border:'rgba(251,191,36,.25)'  },
+      { key:'removido', icon:'🗑️', label:'Removidos',    cor:'#f87171', bg:'rgba(239,68,68,.08)',   border:'rgba(239,68,68,.25)'   },
+      { key:'notif',    icon:'🔔', label:'Notificações', cor:'#4db0ff', bg:'rgba(77,176,255,.08)',  border:'rgba(77,176,255,.25)'  },
+    ].map(t => `
+      <div style="background:${t.bg};border:1px solid ${t.border};border-top:3px solid ${t.cor};border-radius:10px;padding:10px 12px;text-align:center;cursor:pointer" onclick="setHistFiltro('${t.key}', document.querySelector('[onclick*=\\'${t.key}\\']'))">
+        <div style="font-size:18px;margin-bottom:4px">${t.icon}</div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:${t.cor}">${contagens[t.key]}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${t.label}</div>
+      </div>`).join('');
+  }
+
+  const listEl = document.getElementById('hist-list');
+  if (!listEl) return;
+
+  if (lista.length === 0) {
+    listEl.innerHTML = '<div class="empty"><div class="empty-icon">📜</div><div class="empty-text">Nenhum evento registrado</div></div>';
+    return;
+  }
+
+  const tipoConfig = {
+    add:      { icon:'✅', label:'Adicionado',   cor:'#22c55e', bg:'rgba(34,197,94,.08)',   border:'rgba(34,197,94,.25)'  },
+    rebocado: { icon:'🚨', label:'Rebocado',     cor:'#fbbf24', bg:'rgba(251,191,36,.08)', border:'rgba(251,191,36,.25)' },
+    removido: { icon:'🗑️', label:'Removido',     cor:'#f87171', bg:'rgba(239,68,68,.08)',   border:'rgba(239,68,68,.25)'  },
+    notif:    { icon:'🔔', label:'Notificação',  cor:'#4db0ff', bg:'rgba(77,176,255,.08)',  border:'rgba(77,176,255,.25)' },
+  };
+
+  listEl.innerHTML = lista.map(h => {
+    const tc = tipoConfig[h.tipo] || tipoConfig.notif;
+    return `<div style="background:${tc.bg};border:1px solid ${tc.border};border-left:4px solid ${tc.cor};border-radius:10px;padding:12px 16px;margin-bottom:8px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+            <span style="font-size:16px">${tc.icon}</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;background:${tc.bg};border:1px solid ${tc.border};color:${tc.cor};padding:1px 8px;border-radius:6px">${tc.label.toUpperCase()}</span>
+            <span style="font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--text)">@${h.nome}</span>
+            ${h.memId ? `<span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${h.memId}</span>` : ''}
+          </div>
+          <div style="display:flex;gap:14px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);flex-wrap:wrap">
+            <span>📅 ${h.data} às ${h.hora}</span>
+            ${h.autor ? `<span>👤 por @${h.autor}</span>` : ''}
+          </div>
+          ${h.motivo ? `<div style="margin-top:6px;font-size:12px;color:var(--text3);font-style:italic">💬 ${h.motivo}</div>` : ''}
+          ${h.extra  ? `<div style="margin-top:4px;font-size:11px;color:var(--text3)">📝 ${h.extra}</div>`  : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function limparHistorico() {
+  if (!confirm('Limpar todo o histórico? Esta ação não pode ser desfeita.')) return;
+  const s = window._state;
+  await Promise.all((s.historico||[]).map(h => window._db.dbDel(window._db.COLS.historico, h._id)));
+  s.historico = [];
+  renderHistorico();
+  toast('🗑 Histórico limpo!');
+}
+
 // ===== INSTRUÇÃO =====
 function handlePrintUpload(input) {
   const file = input.files[0];
@@ -5159,15 +5347,23 @@ function openMovModal(docId){
 }
 async function saveMov(){
   const docId=document.getElementById('mv-edit-id').value||window._db.genId();
-  // Preservar print existente se estiver editando
+  // Preservar campos existentes críticos ao editar
   const existente = window._state.movs.find(x=>x._id===docId);
-  const obj={nome:document.getElementById('mv-nome').value.trim(),tipo:document.getElementById('mv-tipo').value,
-    data:document.getElementById('mv-data').value,horario:document.getElementById('mv-horario').value,
-    resp:document.getElementById('mv-resp').value.trim(),
-    aux:document.getElementById('mv-aux').value.trim(),
-    pontosPadrao:parseInt(document.getElementById('mv-pontos').value)||0,
-    obs:document.getElementById('mv-obs').value.trim(),
-    print: existente?.print || '',
+  const obj={
+    nome:         document.getElementById('mv-nome').value.trim(),
+    tipo:         document.getElementById('mv-tipo').value,
+    data:         document.getElementById('mv-data').value,
+    horario:      document.getElementById('mv-horario').value,
+    resp:         document.getElementById('mv-resp').value.trim(),
+    aux:          document.getElementById('mv-aux').value.trim(),
+    pontosPadrao: parseInt(document.getElementById('mv-pontos').value)||0,
+    obs:          document.getElementById('mv-obs').value.trim(),
+    // Preservar campos que não devem ser sobrescritos pelo modal
+    print:        existente?.print      || '',
+    finalizada:   existente?.finalizada || false,
+    cronId:       existente?.cronId     || '',
+    origem:       existente?.origem     || '',
+    semana:       existente?.semana     || '',
   };
   if(!obj.nome){toast('❌ Informe o nome da mov');return;}
   await window._db.dbSet(window._db.COLS.movs,docId,obj);
@@ -6087,7 +6283,8 @@ function openNotifModal(docId) {
 }
 
 async function saveNotif() {
-  const docId = document.getElementById('nt-edit-id').value || window._db.genId();
+  const docId    = document.getElementById('nt-edit-id').value || window._db.genId();
+  const isNova   = !document.getElementById('nt-edit-id').value;
   const obj = {
     titulo: document.getElementById('nt-titulo').value.trim(),
     cat:    document.getElementById('nt-cat').value,
@@ -6098,6 +6295,23 @@ async function saveNotif() {
   if (!obj.titulo) { toast('❌ Informe o título'); return; }
   await window._db.dbSet(window._db.COLS.notificacoes, docId, obj);
   window._state.notificacoes = await window._db.dbGetAll(window._db.COLS.notificacoes);
+
+  // Registrar no histórico quando for notificação nova de entrada/saída
+  if (isNova) {
+    const titulo = obj.titulo.toLowerCase();
+    const isEntrada = titulo.includes('entrou') || titulo.includes('entrada') || titulo.includes('ingressou') || titulo.includes('chegou') || titulo.includes('bem-vindo') || titulo.includes('bem vindo');
+    const isSaida   = titulo.includes('saiu') || titulo.includes('saída') || titulo.includes('saída') || titulo.includes('deixou') || titulo.includes('foi embora') || titulo.includes('desligou');
+
+    if (isEntrada || isSaida) {
+      registrarHistorico('notif', {
+        memId:  '',
+        nome:   obj.dest || obj.titulo,
+        motivo: isSaida ? '🚪 Saiu da área' : '✅ Entrou na área',
+        extra:  obj.titulo + (obj.obs ? ' — ' + obj.obs : ''),
+      });
+    }
+  }
+
   renderNotificacoes(); closeModalDirect(); toast('✅ Notificação salva!');
 }
 
