@@ -3864,10 +3864,10 @@ async function saveMember(){
   window._renderAll(); closeModalDirect(); toast('✅ Membro salvo!');
 }
 async function deleteMember(docId){
-  if(!confirm('Remover este membro?'))return;
-  await window._db.dbDel(window._db.COLS.members,docId);
-  window._state.members=await window._db.dbGetAll(window._db.COLS.members);
-  window._renderAll(); toast('🗑 Membro removido!');
+  const membro = window._state.members.find(x => x._id === docId);
+  if (!membro) return;
+  // Reutilizar o modal de exclusão com motivo
+  confirmarExcluirMembro(docId, membro.m || '—', membro.id || '');
 }
 
 // ── REBOCADO: marca como rebocado e remove do grupo ────────
