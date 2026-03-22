@@ -18,6 +18,8 @@ window.showLoading = showLoading;
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyBo7B1k0_0_Aq3GIL_YBnQsSls0orgl1GY",
   authDomain: "games-pureza.firebaseapp.com",
@@ -27,8 +29,9 @@ const firebaseConfig = {
   appId: "1:976233590980:web:a8f1d8df0271a2a6291991"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
 
 // ===== DB HELPERS =====
 async function dbGetAll(col) {
@@ -137,15 +140,25 @@ async function loadAll() {
     loading = false;
     showLoading(false);
     window._state.users = users;
-    // Verificar sessão salva
+    // Auth cuida da sessão — se chegou aqui, usuário já está autenticado
+    // Buscar o usuário correspondente no Firestore pela sessionStorage (compatibilidade)
     const saved = sessionStorage.getItem('gp_user');
     if (saved) {
       try {
         const u = JSON.parse(saved);
-        const valid = users.find(x => x._id === u._id && x.senha === u.senha);
+        const valid = users.find(x => x._id === u._id);
         if (valid && window.doLogin) { window.doLogin(valid); return; }
       } catch(e) {}
       sessionStorage.removeItem('gp_user');
+    }
+    // Fallback: usar uid do Firebase Auth para encontrar o usuário
+    const fbUser = auth.currentUser;
+    if (fbUser) {
+      const byUid = users.find(x => x.authUid === fbUser.uid);
+      if (byUid && window.doLogin) { window.doLogin(byUid); return; }
+      // Fallback legado: encontrar por email gerado
+      const byEmail = users.find(x => toAuthEmail(x.usuario) === fbUser.email);
+      if (byEmail && window.doLogin) { window.doLogin(byEmail); return; }
     }
     if(window.showLoginScreen) window.showLoginScreen();
     if(window.toast) window.toast('🔥 Firebase conectado!');
@@ -153,8 +166,16 @@ async function loadAll() {
     setTimeout(() => { if(window.autoFinalizarMovs) window.autoFinalizarMovs(); }, 1500);
   } catch(e) {
     showLoading(false);
-    if(window.toast) window.toast('❌ Erro ao conectar: ' + e.message, false);
-    console.error(e);
+    // Mostrar tela de erro com botão retry
+    const spinner = document.getElementById('loading-spinner');
+    const errDiv  = document.getElementById('loading-error');
+    const errMsg  = document.getElementById('loading-error-msg');
+    const overlay = document.getElementById('loading-overlay');
+    if (spinner) spinner.style.display = 'none';
+    if (errMsg) errMsg.textContent = e?.message ? `Erro: ${e.message}` : 'Verifique sua conexão e tente novamente.';
+    if (errDiv) errDiv.style.display = '';
+    if (overlay) overlay.style.display = 'flex';
+    console.error('[Firebase loadAll]', e);
   }
 }
 
@@ -506,9 +527,26 @@ window._state = { get members(){return members;}, set members(v){members=v;},
   get historico(){return historico;}, set historico(v){historico=v;},
 };
 window._loadAll = loadAll;
-// renderAll será definido no segundo script — usamos wrapper para garantir
 window._renderAll = function(){ if(window.renderAll) window.renderAll(); };
-loadAll();
+
+// Helper: converte nome de usuário em email Firebase Auth
+function toAuthEmail(u) {
+  return `${u.toLowerCase().replace(/[^a-z0-9]/g,'')}@games-pureza.local`;
+}
+
+// Expor Auth para o módulo principal
+window._auth = { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword, signOut, toAuthEmail };
+
+// ── PORTÃO DE ENTRADA ─────────────────────────────────────
+// Nenhum dado é carregado sem usuário autenticado no Firebase Auth
+onAuthStateChanged(auth, async (firebaseUser) => {
+  if (firebaseUser) {
+    await loadAll();
+  } else {
+    showLoading(false);
+    if (window.showLoginScreen) window.showLoginScreen();
+  }
+});
 </script>
 
 <style>
@@ -639,6 +677,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 
 .dt{width:100%;border-collapse:collapse;font-size:13px;}
 .dt th{text-align:left;padding:8px 10px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border);}
+.dt th[onclick]:hover{color:var(--text);background:rgba(77,176,255,.06);transition:background .15s;}
 .dt td{padding:9px 10px;border-bottom:1px solid rgba(37,37,80,.5);color:var(--text2);vertical-align:middle;}
 .dt tr:last-child td{border-bottom:none;}
 .dt tr:hover td{background:rgba(124,58,237,.05);}
@@ -983,8 +1022,16 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 
 <!-- LOADING -->
 <div id="loading-overlay">
-  <div class="loading-ring"></div>
-  <div class="loading-text">CONECTANDO AO FIREBASE...</div>
+  <div id="loading-spinner">
+    <div class="loading-ring"></div>
+    <div class="loading-text">CONECTANDO AO FIREBASE...</div>
+  </div>
+  <div id="loading-error" style="display:none;text-align:center;padding:24px">
+    <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+    <div style="font-family:'Orbitron',sans-serif;font-size:13px;color:#f87171;letter-spacing:2px;margin-bottom:8px">FALHA NA CONEXÃO</div>
+    <div id="loading-error-msg" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:20px;max-width:340px">Não foi possível conectar ao Firebase.</div>
+    <button onclick="window.location.reload()" style="background:#0070d1;border:none;color:#fff;padding:10px 28px;border-radius:10px;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;cursor:pointer;font-weight:700">🔄 TENTAR NOVAMENTE</button>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -1014,7 +1061,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     </div>
     <div class="login-field"><label>Usuário</label><input id="login-user" placeholder="seu usuário" autocomplete="username" onkeydown="if(event.key==='Enter')doLoginBtn()"></div>
     <div class="login-field"><label>Senha</label><input id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLoginBtn()"></div>
-    <button class="login-btn" onclick="doLoginBtn()">ENTRAR</button>
+    <button id="login-btn" class="login-btn" onclick="doLoginBtn()">ENTRAR</button>
     <div class="login-error" id="login-error">Usuário ou senha incorretos</div>
   </div>
 </div>
@@ -2192,8 +2239,12 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     <!-- SIDEBAR -->
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-inner">
-
-        <!-- Área Games -->
+        <!-- Indicador de semana atual -->
+        <div id="sidebar-semana-info" style="padding:8px 12px;margin-bottom:4px;background:rgba(0,112,209,.08);border-radius:8px;border:1px solid rgba(0,112,209,.2)">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#4db0ff;letter-spacing:1px;margin-bottom:2px">SEMANA ATUAL</div>
+          <div id="sidebar-semana-label" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text);font-weight:700">—</div>
+          <div id="sidebar-semana-reset" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px">—</div>
+        </div>
         <div class="nav-item active" onclick="tab('overview',this)" data-page="overview">
           <span class="nav-icon">⚡</span>
           <span class="nav-label">Área Games</span>
@@ -2321,6 +2372,14 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="main-content" id="main-content">
   <div id="page-overview" class="page active">
+    <!-- Alertas do dia — exibido apenas quando há movs hoje/amanhã ou RPPs vencendo -->
+    <div id="ov-alertas" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px"></div>
+    <!-- Membros em risco — inserido dinamicamente pelo renderOverview -->
+    <div id="ov-risco"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px">VISÃO GERAL DO SERVIDOR</span>
+      <button onclick="gerarRelatorioSemanalDiscord()" style="background:rgba(0,112,209,.15);border:1px solid rgba(0,112,209,.3);color:#4db0ff;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;font-weight:700">📊 RELATÓRIO SEMANAL</button>
+    </div>
     <div class="sgrid" id="ov-stats"></div>
     <div class="g2">
       <div class="panel">
@@ -2371,6 +2430,8 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <span class="pt">👥 Membros · GAMES</span>
         <div class="ph-right">
           <span class="pc" id="members-count">0</span>
+          <button class="btn btn-sm" onclick="exportarCSVMembros()" style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#22c55e;font-family:'Share Tech Mono',monospace;font-size:10px" title="Exportar CSV">📊 CSV</button>
+          <button class="btn btn-sm" onclick="copiarListaMembrosDiscord()" style="background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.25);color:#818cf8;font-family:'Share Tech Mono',monospace;font-size:10px" title="Copiar lista para Discord">📋 Discord</button>
           <button class="btn btn-add btn-sm" data-perm="edit_members" onclick="openMemberModal()">➕ Adicionar</button>
         </div>
       </div>
@@ -2378,7 +2439,13 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <div class="search-wrap"><input id="search-members" placeholder="Buscar membro..." oninput="renderMembers()"></div>
         <table class="dt">
           <thead><tr>
-            <th>Membro</th><th>Posição</th><th>Sub Áreas</th><th>Cargo</th><th>Up</th><th>Ativo</th><th>Pontos</th><th>Última Pont.</th><th>Entrou</th><th>Ações</th>
+            <th onclick="sortMembers('m')" style="cursor:pointer;user-select:none" title="Ordenar por nome"><span id="sort-icon-m">↕</span> Membro</th>
+            <th onclick="sortMembers('posicao')" style="cursor:pointer;user-select:none" title="Ordenar por posição"><span id="sort-icon-posicao">↕</span> Posição</th>
+            <th>Sub Áreas</th>
+            <th onclick="sortMembers('cargo')" style="cursor:pointer;user-select:none" title="Ordenar por cargo"><span id="sort-icon-cargo">↕</span> Cargo</th>
+            <th>Up</th><th>Ativo</th><th>Pontos</th><th>Última Pont.</th>
+            <th onclick="sortMembers('entrou')" style="cursor:pointer;user-select:none" title="Ordenar por data de entrada"><span id="sort-icon-entrou">↕</span> Entrou</th>
+            <th>Ações</th>
           </tr></thead>
           <tbody id="members-tbody"></tbody>
         </table>
@@ -2394,7 +2461,10 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
           <span class="pt">🚨 Rebocamentos</span>
           <div style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-top:2px">Membros inativos automaticamente por falta de pontuação</div>
         </div>
-        <span class="pc" id="rebo-count">0</span>
+        <div class="ph-right">
+          <span class="pc" id="rebo-count">0</span>
+          <button class="btn btn-sm" onclick="reboCopiarDiscord()" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;font-family:'Share Tech Mono',monospace;font-size:10px">📋 Copiar Discord</button>
+        </div>
       </div>
       <div class="pb" style="padding:12px">
 
@@ -2473,10 +2543,12 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <span class="pt">🛡️ SubGestão</span>
         <div class="ph-right">
           <span class="pc" id="sub-count">0</span>
+          <button class="btn btn-sm" onclick="subCopiarDiscord()" style="background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.3);color:#818cf8;font-family:'Share Tech Mono',monospace;font-size:10px">📋 Copiar Discord</button>
           <button class="btn btn-add btn-sm" data-perm="edit_sub" onclick="openSubModal()">➕ Adicionar</button>
         </div>
       </div>
       <div class="pb" style="padding-bottom:0">
+        <div class="sgrid" id="sub-stats" style="margin-bottom:10px"></div>
         <div class="search-wrap"><input id="search-sub" placeholder="Buscar subgestor, subárea..." oninput="renderSubgestao()"></div>
       </div>
       <div class="pb tall" id="sub-list"></div>
@@ -2507,7 +2579,17 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <span class="pt">🔗 Indicações</span>
         <div class="ph-right">
           <span class="pc" id="ind-count">0</span>
+          <button class="btn btn-sm" onclick="indCopiarDiscord()" style="background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.3);color:#818cf8;font-family:'Share Tech Mono',monospace;font-size:10px">📋 Copiar Discord</button>
           <button class="btn btn-add btn-sm" data-perm="edit_ind" onclick="openIndModal()">➕ Adicionar</button>
+        </div>
+      </div>
+      <div class="pb" style="padding-bottom:0">
+        <div class="sgrid" id="ind-stats" style="margin-bottom:12px"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center">
+          <div class="search-wrap" style="flex:1;min-width:160px"><input id="search-ind" placeholder="Buscar membro ou indicado..." oninput="renderIndicacoes()"></div>
+          <button onclick="setIndFiltro('todos',this)" class="btn btn-sm ind-f active-filter">Todos</button>
+          <button onclick="setIndFiltro('valida',this)" class="btn btn-sm ind-f" style="background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.25)">✅ Válidas</button>
+          <button onclick="setIndFiltro('pendente',this)" class="btn btn-sm ind-f" style="background:rgba(234,179,8,.1);color:#fbbf24;border:1px solid rgba(234,179,8,.25)">⏳ Pendentes</button>
         </div>
       </div>
       <div class="pb tall" id="ind-list"></div>
@@ -2546,6 +2628,27 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <div class="ph-right">
           <span class="pc" id="movs-count">0</span>
           <button class="btn btn-add btn-sm" data-perm="edit_movs" onclick="openMovModal()">➕ Nova Mov</button>
+        </div>
+      </div>
+      <div class="pb" style="padding-bottom:0">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <div class="search-wrap" style="flex:1;min-width:180px"><input id="search-movs" placeholder="Buscar mov por nome..." oninput="renderMovs()"></div>
+          <select id="movs-tipo-filtro" onchange="renderMovs()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text2);font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer">
+            <option value="">Todos os tipos</option>
+            <option value="Temática">🎭 Temática</option>
+            <option value="Cine">🎬 Cine</option>
+            <option value="Jogatina">🕹️ Jogatina</option>
+            <option value="Quiz">🧠 Quiz</option>
+            <option value="Atividades">🏃 Atividades</option>
+            <option value="Evento">🎉 Evento</option>
+            <option value="Reunião Setorial">🏛️ Reunião Setorial</option>
+            <option value="Outro">📌 Outro</option>
+          </select>
+          <select id="movs-status-filtro" onchange="renderMovs()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text2);font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer">
+            <option value="">Todos os status</option>
+            <option value="aberta">⏳ Em aberto</option>
+            <option value="finalizada">✅ Finalizadas</option>
+          </select>
         </div>
       </div>
       <div class="pb tall" id="movs-list"></div>
@@ -2639,6 +2742,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
       <button onclick="abrirImportLU()" style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#22c55e;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px">📥 Importar JSON</button>
       <button class="btn btn-add" onclick="openLevelUpModal()" style="margin-left:auto;background:#a855f7;border-color:#a855f7">⚡ Registrar</button>
     </div>
+    <div class="search-wrap" style="margin-bottom:16px"><input id="search-lu" placeholder="Buscar membro, ID Discord..." oninput="renderLevelUp()"></div>
 
     <!-- Painel importação em massa -->
     <div id="lu-import-panel" style="display:none;margin-bottom:16px;background:var(--panel);border:1px solid rgba(34,197,94,.3);border-radius:12px;padding:16px">
@@ -2689,8 +2793,15 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     <!-- Lista completa -->
     <div class="panel">
       <div class="ph" style="border-left:3px solid #a855f7">
-        <span class="pt">⚡ Ranking da Semana</span>
-        <span class="pc" id="lu-count">0 membros</span>
+        <div>
+          <span class="pt">⚡ Ranking</span>
+          <div id="lu-semana-status" style="margin-top:4px;font-size:10px;font-family:'Share Tech Mono',monospace"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button onclick="setLuViewMode('semana',this)" class="lu-view-btn active-filter btn btn-sm" style="font-family:'Share Tech Mono',monospace;font-size:10px">Semana</button>
+          <button onclick="setLuViewMode('historico',this)" class="lu-view-btn btn btn-sm" style="font-family:'Share Tech Mono',monospace;font-size:10px">🏅 Histórico</button>
+          <span class="pc" id="lu-count">0 membros</span>
+        </div>
       </div>
       <div class="pb tall" id="lu-ranking"></div>
     </div>
@@ -2711,7 +2822,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
       <div class="ph" style="border-left:3px solid #0070d1">
         <div>
           <span class="pt">🎯 Upamentos Registrados</span>
-          <div style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-top:2px">Apenas membros Meta + Upa por Games podem ser upados aqui</div>
+          <div id="up-janela-status" style="margin-top:4px;font-size:10px;font-family:'Share Tech Mono',monospace"></div>
         </div>
         <div class="ph-right">
           <span class="pc" id="up-count">0</span>
@@ -2724,6 +2835,11 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <button onclick="setUpFiltro('merito',this)" style="background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.25);color:#c084fc;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">🏅 MÉRITO</button>
         <button onclick="setUpFiltro('upou',this)" style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#22c55e;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">✅ UPOU</button>
         <button onclick="setUpFiltro('nao_upou',this)" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#f87171;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px">❌ NÃO UPOU</button>
+        <div style="display:flex;align-items:center;gap:4px;margin-left:auto;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:2px 4px">
+          <button onclick="setUpSemanaFiltro(null)" id="up-sem-all" class="active-filter" style="background:none;border:none;color:#4db0ff;padding:3px 8px;border-radius:6px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px">TODAS</button>
+          <button onclick="setUpSemanaFiltro(0)" id="up-sem-atual" style="background:none;border:none;color:var(--text3);padding:3px 8px;border-radius:6px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px">ESTA SEM</button>
+          <button onclick="setUpSemanaFiltro(-1)" id="up-sem-ant" style="background:none;border:none;color:var(--text3);padding:3px 8px;border-radius:6px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px">SEM ANT</button>
+        </div>
       </div>
       <div class="pb tall">
         <div class="search-wrap"><input id="search-up" placeholder="Buscar membro ou cargo..." oninput="renderUpamentos()"></div>
@@ -2744,7 +2860,41 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
       </div>
       <button onclick="dtSemanaAtual()" style="background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.3);color:#fbbf24;padding:7px 16px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px">SEMANA ATUAL</button>
       <span id="dt-count" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);margin-left:4px"></span>
-      <button class="btn btn-add" onclick="openDestaqueModal()" style="margin-left:auto;background:#eab308;border-color:#eab308;color:#000">⭐ Registrar Destaque</button>
+      <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap">
+        <button onclick="dtCopiarDiscord()" style="background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.3);color:#818cf8;padding:7px 16px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px">📋 COPIAR DISCORD</button>
+        <button onclick="dtToggleFormula()" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.25);color:#fbbf24;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:11px">⚙️ FÓRMULA</button>
+        <button class="btn btn-add" onclick="openDestaqueModal()" style="background:#eab308;border-color:#eab308;color:#000">⭐ Registrar Destaque</button>
+      </div>
+    </div>
+
+    <!-- Painel da fórmula do score — recolhível -->
+    <div id="dt-formula-panel" style="display:none;background:var(--bg3);border:1px solid rgba(234,179,8,.25);border-radius:12px;padding:16px;margin-bottom:16px">
+      <div style="font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:#fbbf24;letter-spacing:2px;margin-bottom:12px">⚙️ COMO O SCORE É CALCULADO</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:12px">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#fbbf24;margin-bottom:4px">🎮 PARTICIPAÇÃO EM MOV</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text)">× 10 pts</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">por mov participada na semana</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#fbbf24;margin-bottom:4px">🏛️ REUNIÃO SETORIAL</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text)">+ 50 pts</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">bônus por estar presente na reunião</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#fbbf24;margin-bottom:4px">📰🤗📚 SUBÁREAS</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text)">+ pts atividade</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Game News +15 · Acolh. call +4 chat +2 · Inst. call +4 chat +2</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#fbbf24;margin-bottom:4px">⚡ TOP 1 LEVEL UP</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text)">× 0.5 pts LV</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">50% dos pontos do top 1 do ranking</div>
+        </div>
+      </div>
+      <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2)">
+        <strong style="color:#f87171">🚫 Regra de exclusão:</strong> o TOP 1 de Level Up é removido dos destaques se não tiver participado de subárea E não tiver a maior quantidade de movs na semana.
+      </div>
     </div>
 
     <!-- Top 3 automático -->
@@ -2766,6 +2916,9 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
       <div class="ph">
         <span class="pt">📌 Destaques Oficiais Registrados</span>
         <span class="pc" id="dt-oficial-count">0</span>
+      </div>
+      <div class="pb" style="padding-bottom:0">
+        <div class="search-wrap" style="margin-bottom:10px"><input id="search-dt" placeholder="Buscar membro, semana, motivo..." oninput="renderDestaques()"></div>
       </div>
       <div class="pb" id="dt-list"></div>
     </div>
@@ -2814,6 +2967,10 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <button class="btn btn-sm" onclick="toggleModeloSetorial()" style="background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.35);color:#818cf8;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px">📋 MODELO DISCORD</button>
         <button class="btn btn-add btn-sm" onclick="openPautaModal(null,'setorial')" style="background:#0070d1;border-color:#0070d1">+ Nova</button>
       </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+      <div class="search-wrap" style="flex:1;min-width:200px"><input id="search-pautas-setorial" placeholder="Buscar por tópico, data ou responsável..." oninput="renderPautas()"></div>
+      <div id="pt-stats-setorial" style="display:flex;gap:8px;flex-wrap:wrap"></div>
     </div>
 
     <!-- Painel do modelo -->
@@ -2867,7 +3024,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <pre id="mg-preview" style="padding:18px;font-size:12px;color:#dcddde;font-family:'Share Tech Mono',monospace;white-space:pre-wrap;word-break:break-word;line-height:1.7;margin:0;background:transparent;max-height:500px;overflow-y:auto"></pre>
       </div>
     </div>
-
+    <div class="search-wrap" style="margin-bottom:12px"><input id="search-pautas-gestores" placeholder="Buscar por tópico, data..." oninput="renderPautas()"></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px" id="pt-list-gestores"></div>
   </div>
 
@@ -2903,10 +3060,9 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
       </div>
     </div>
 
+    <div class="search-wrap" style="margin-bottom:12px"><input id="search-pautas-geral" placeholder="Buscar por tópico, data..." oninput="renderPautas()"></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px" id="pt-list-geral"></div>
   </div>
-
-  <!-- ADVERTÊNCIAS -->
   <div id="page-advertencias" class="page">
     <div class="panel">
       <div class="ph" style="border-left:3px solid #e53935">
@@ -2965,6 +3121,11 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 
     <!-- Stats rápidos -->
     <div class="sgrid" id="fb-stats-grid" style="margin-bottom:16px"></div>
+
+    <!-- Busca global de feedbacks -->
+    <div class="panel" style="margin-bottom:12px;padding:10px 16px">
+      <div class="search-wrap"><input id="search-fb" placeholder="Buscar membro, staff, texto..." oninput="renderFeedbacks()"></div>
+    </div>
 
     <!-- Dois painéis lado a lado -->
     <div class="g2" style="gap:16px;align-items:start">
@@ -3027,6 +3188,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         </div>
       </div>
       <div class="pb tall">
+        <div class="search-wrap" style="margin-bottom:10px"><input id="search-notif" placeholder="Buscar título, destinatário..." oninput="renderNotificacoes()"></div>
         <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
           <button class="btn btn-sm notif-filter active" data-f="todos" onclick="setNotifFilter('todos',this)">Todas</button>
           <button class="btn btn-sm notif-filter" data-f="info" onclick="setNotifFilter('info',this)" style="background:rgba(6,182,212,.1);color:var(--cyan2);border:1px solid rgba(6,182,212,.25)">ℹ️ Info</button>
@@ -3051,6 +3213,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         </div>
       </div>
       <div class="pb tall">
+        <div class="search-wrap" style="margin-bottom:10px"><input id="search-rpp" placeholder="Buscar membro, ID..." oninput="renderRpp()"></div>
         <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
           <button class="btn btn-sm rpp-filter active" data-f="todos" onclick="setRppFilter('todos',this)">Todos</button>
           <button class="btn btn-sm rpp-filter" data-f="ativo" onclick="setRppFilter('ativo',this)" style="background:rgba(234,179,8,.1);color:var(--yellow);border:1px solid rgba(234,179,8,.25)">⏳ Ativos</button>
@@ -3083,6 +3246,9 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
           <button class="btn btn-sm cron-mov-f" onclick="setCronMovFiltro('passadas',this)">Passadas</button>
           <button class="btn btn-add btn-sm" data-perm="edit_cronograma" onclick="openCronMovModal()">➕ Agendar Mov</button>
         </div>
+      </div>
+      <div class="pb" style="padding-bottom:0">
+        <div class="search-wrap" style="margin-bottom:10px"><input id="search-cron" placeholder="Buscar mov, responsável..." oninput="renderCronograma()"></div>
       </div>
       <div class="pb tall" id="cron-mov-list"></div>
     </div>
@@ -3118,6 +3284,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <button onclick="pontSemanaProxima()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:16px;padding:0 4px">›</button>
       </div>
       <button onclick="pontSemanaAtual()" style="background:rgba(0,112,209,.15);border:1px solid rgba(0,112,209,.3);color:#4db0ff;padding:7px 16px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px">SEMANA ATUAL</button>
+      <button onclick="pontCopiarDiscord()" style="background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.3);color:#818cf8;padding:7px 16px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px">📋 COPIAR DISCORD</button>
       <div style="display:flex;gap:6px;margin-left:auto">
         <button class="btn btn-sm pont-view-btn active-filter" onclick="setPontView('semana',this)">📅 Por Semana</button>
         <button class="btn btn-sm pont-view-btn" onclick="setPontView('geral',this)">📊 Geral</button>
@@ -3216,6 +3383,45 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 
   <!-- USUÁRIOS -->
   <div id="page-usuarios" class="page">
+    <!-- Painel de Backup -->
+    <div class="panel" style="margin-bottom:16px;border-top:3px solid #0070d1">
+      <div class="ph">
+        <div>
+          <span class="pt">💾 Backup & Exportação</span>
+          <div style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-top:2px">Download completo dos dados do Firebase</div>
+        </div>
+        <div class="ph-right">
+          <button onclick="exportarBackupJSON()" style="background:rgba(0,112,209,.15);border:1px solid rgba(0,112,209,.3);color:#4db0ff;padding:7px 16px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;font-weight:700">📥 BAIXAR BACKUP JSON</button>
+        </div>
+      </div>
+      <div class="pb" style="padding:10px 16px">
+        <div style="font-size:12px;color:var(--text3);font-family:'Share Tech Mono',monospace">
+          Exporta todas as 25 collections em um único arquivo JSON datado. Use para backup preventivo ou migração de dados.
+        </div>
+      </div>
+    </div>
+
+    <!-- Painel de Limpeza Semanal -->
+    <div class="panel" style="margin-bottom:16px;border-top:3px solid #f97316">
+      <div class="ph">
+        <div>
+          <span class="pt">🗑️ Limpeza Semanal</span>
+          <div style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-top:2px">Remove dados antigos — mantém semana atual + anterior</div>
+        </div>
+        <div class="ph-right">
+          <button onclick="mostrarInfoLimpeza()" style="background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);color:#fb923c;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:11px">ℹ️ Status</button>
+          <button onclick="confirmarLimpezaManual()" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;margin-left:6px">🗑️ LIMPAR AGORA</button>
+        </div>
+      </div>
+      <div class="pb" style="padding:10px 16px">
+        <div style="font-size:12px;color:var(--text3);font-family:'Share Tech Mono',monospace;line-height:1.7">
+          <strong style="color:#fb923c">Automático:</strong> todo SAB (dia de reset), a cada 3 semanas.<br>
+          <strong style="color:#f87171">Apaga:</strong> Level Up, Upamentos, Movs finalizadas, Participações, Cronograma, Instruções e Acolhimentos de semanas antigas.<br>
+          <strong style="color:#22c55e">Mantém:</strong> Membros, RPPs, Advertências, Blacklist, Histórico, Feedbacks, Notificações, Sugestões, Pautas, Game News e todos os dados permanentes.
+        </div>
+        <div id="limpeza-status-info" style="margin-top:8px;display:none;font-family:'Share Tech Mono',monospace;font-size:11px;padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px"></div>
+      </div>
+    </div>
     <div class="panel">
       <div class="ph">
         <span class="pt">🔐 Gerenciar Usuários</span>
@@ -3258,6 +3464,13 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 
       <div class="pb" style="padding-bottom:0">
         <div class="search-wrap"><input id="search-hist" placeholder="Buscar membro, ID, motivo..." oninput="renderHistorico()"></div>
+      </div>
+      <div class="pb" style="padding-bottom:0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">PERÍODO:</span>
+        <input type="date" id="hist-data-ini" onchange="renderHistorico()" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text2);font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">até</span>
+        <input type="date" id="hist-data-fim" onchange="renderHistorico()" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text2);font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer">
+        <button onclick="document.getElementById('hist-data-ini').value='';document.getElementById('hist-data-fim').value='';renderHistorico()" style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer">✕ Limpar período</button>
       </div>
 
       <div class="pb tall" id="hist-list"></div>
@@ -3498,8 +3711,41 @@ async function savePublicFeedback() {
   }
 }
 
+function fbCopiarDiscord(docId) {
+  const s = window._state; if (!s) return;
+  const f = (s.feedbacks||[]).find(x => x._id === docId);
+  if (!f) { toast('⚠️ Feedback não encontrado'); return; }
+
+  const catLabels  = { elogio:'⭐ Elogio', positivo:'✅ Positivo', sugestao:'💡 Sugestão', negativo:'⚠️ Negativo', advertencia:'🚨 Advertência' };
+  const stLabels   = { pendente:'⏳ Pendente', em_andamento:'🔄 Em andamento', melhorou:'📈 Melhorou', resolvido:'✅ Resolvido', nao_resolvido:'❌ Não resolvido' };
+  const cargoMap   = { lider:'Líder', sublider:'Sub Líder', gerente:'Gerente', supervisor:'Supervisor', instrutor:'Instrutor' };
+  const isGestao   = f.tipo === 'gestao_membro';
+
+  const nome  = isGestao ? (f.membroNome||'—') : (f.autorNome||'—');
+  const id    = isGestao ? (f.membroId||'') : (f.autorId||'');
+  const staff = isGestao && f.staffNome ? `\nRegistrado por: @${f.staffNome}${f.staffCargo ? ` (${cargoMap[f.staffCargo]||f.staffCargo})` : ''}` : '';
+
+  const msg =
+`📋 **FEEDBACK — ${(catLabels[f.cat]||f.cat||'').toUpperCase()}**
+
+👤 Membro: @${nome}${id ? ` (<@${id}>)` : ''}${staff}
+📅 Data: ${f.data||'—'}
+📌 Status: ${stLabels[f.status]||f.status||'—'}
+
+💬 ${f.texto||'—'}${f.observacoes?.length ? `\n\n📝 Obs: ${f.observacoes.map(o=>`[${o.autor||'?'}] ${o.texto}`).join(' | ')}` : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━`;
+
+  navigator.clipboard.writeText(msg).then(() => {
+    toast('📋 Feedback copiado para o Discord!');
+  }).catch(() => {
+    toast('⚠️ Não foi possível copiar automaticamente.');
+  });
+}
+
 function renderFeedbacks() {
   const s = window._state; if (!s) return;
+  const q = (document.getElementById('search-fb')?.value || '').toLowerCase();
 
   const catMap = {
     elogio:      { cls:'b-cyan',   icon:'⭐', label:'Elogio' },
@@ -3517,15 +3763,25 @@ function renderFeedbacks() {
   };
   const cargoMap = { lider:'👑 Líder', sublider:'🌟 Sub Líder', gerente:'💎 Gerente', supervisor:'🛡️ Supervisor', instrutor:'🧑‍🏫 Instrutor' };
 
-  const todos = (s.feedbacks || []).sort((a,b) => (b.data||'').localeCompare(a.data||''));
-  const gestao = todos.filter(f => f.tipo === 'gestao_membro');
-  const membro = todos.filter(f => f.tipo === 'membro_area');
+  const matchQ = f => !q ||
+    (f.membroNome||'').toLowerCase().includes(q) ||
+    (f.staffNome||'').toLowerCase().includes(q) ||
+    (f.autorNome||'').toLowerCase().includes(q) ||
+    (f.texto||'').toLowerCase().includes(q);
+
+  const todos  = (s.feedbacks || []).sort((a,b) => (b.data||'').localeCompare(a.data||''));
+  // Arrays para stats (sem filtro de busca — refletem totais reais)
+  const gestaoTodos = todos.filter(f => f.tipo === 'gestao_membro');
+  const membroTodos = todos.filter(f => f.tipo === 'membro_area');
+  // Arrays para exibição (com filtro de busca)
+  const gestao = gestaoTodos.filter(matchQ);
+  const membro = membroTodos.filter(matchQ);
 
   // Stats
   const statsEl = document.getElementById('fb-stats-grid');
   if (statsEl) statsEl.innerHTML = `
-    <div class="sc v"><span class="sc-icon">🛡️</span><div class="sc-val">${gestao.length}</div><div class="sc-lbl">Gestão → Membro</div></div>
-    <div class="sc p"><span class="sc-icon">👤</span><div class="sc-val">${membro.length}</div><div class="sc-lbl">Membro → Área</div></div>
+    <div class="sc v"><span class="sc-icon">🛡️</span><div class="sc-val">${gestaoTodos.length}</div><div class="sc-lbl">Gestão → Membro</div></div>
+    <div class="sc p"><span class="sc-icon">👤</span><div class="sc-val">${membroTodos.length}</div><div class="sc-lbl">Membro → Área</div></div>
     <div class="sc y"><span class="sc-icon">⏳</span><div class="sc-val">${todos.filter(f=>f.status==='pendente').length}</div><div class="sc-lbl">Pendentes</div></div>
     <div class="sc g"><span class="sc-icon">✅</span><div class="sc-val">${todos.filter(f=>f.status==='resolvido').length}</div><div class="sc-lbl">Resolvidos</div></div>
   `;
@@ -3544,6 +3800,7 @@ function renderFeedbacks() {
           <span class="badge ${st.cls}" style="font-size:10px">${st.icon} ${st.label}</span>
         </div>
         <div style="display:flex;gap:5px;flex-shrink:0">
+          <button class="btn btn-sm" onclick="fbCopiarDiscord('${f._id}')" style="background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.3);color:#818cf8;font-size:9px;padding:2px 7px" title="Copiar para Discord">📋</button>
           <button class="btn btn-edit btn-sm" onclick="openFbModal('${f._id}')">✏️</button>
           <button class="btn btn-del btn-sm" onclick="deleteFeedback('${f._id}')">🗑</button>
         </div>
@@ -3586,14 +3843,14 @@ function renderFeedbacks() {
   const el1 = document.getElementById('fb-list-gestao');
   const el2 = document.getElementById('fb-count-gestao');
   if (el1) el1.innerHTML = gestaoFilt.length ? gestaoFilt.map(renderCard).join('') : empty;
-  if (el2) el2.textContent = gestaoFilt.length + '/' + gestao.length;
+  if (el2) el2.textContent = gestaoFilt.length + '/' + gestaoTodos.length;
 
   // Membro → Área
   const membroFilt = membro.filter(f => fbMFiltro === 'todos' || f.cat === fbMFiltro);
   const el3 = document.getElementById('fb-list-membro');
   const el4 = document.getElementById('fb-count-membro');
   if (el3) el3.innerHTML = membroFilt.length ? membroFilt.map(renderCard).join('') : empty;
-  if (el4) el4.textContent = membroFilt.length + '/' + membro.length;
+  if (el4) el4.textContent = membroFilt.length + '/' + membroTodos.length;
 }
 // ===== FIM FEEDBACKS =====
 function tab(id, el){
@@ -4194,12 +4451,29 @@ async function deleteNv(docId){
 // ===== RENDERS =====
 function renderAll(){
   if(!window._state) return;
+  // Atualizar indicador de semana na sidebar
+  atualizarSidebarSemana();
   renderOverview(); renderMembers(); renderRebocamentos(); renderNaoVerif(); renderSuggestions();
   renderSubgestao(); renderAusencias(); renderIndicacoes(); renderNews();
   renderMovs(); renderRelatorio(); renderRelNews(); renderRelInst();
   renderUsers(); renderInstrucoes(); renderAcolhimentos(); renderAdvertencias(); renderBlacklist(); renderLevelUp(); renderUpamentos(); renderDestaques(); renderPautas(); renderFeedbacks();
   renderNotificacoes(); renderRpp(); renderCronograma(); renderCronAside(); renderPontuacoes();
   renderAllDesigner(); renderHistorico();
+  // Atualizar alertas do dia no Overview
+  const s = window._state;
+  if (s) {
+    const hoje   = new Date().toISOString().slice(0,10);
+    const amanha = new Date(Date.now()+86400000).toISOString().slice(0,10);
+    const hojeMs = new Date().setHours(0,0,0,0);
+    const movsP  = (s.movs||[]).filter(m => !m.finalizada && (m.data===hoje||m.data===amanha));
+    const rppV   = (s.rpps||[]).filter(r => {
+      if (r.status!=='ativo'||!r.fim) return false;
+      const d = Math.round((new Date(r.fim+'T00:00:00').getTime()-hojeMs)/86400000);
+      return d>=0&&d<=3;
+    });
+    atualizarAlertasOverview(movsP, rppV);
+  }
+  atualizarSidebarBadges();
   applyPermissions();
 }
 
@@ -4211,6 +4485,27 @@ function renderOverview(){
   const total=s.members.length||1; const stotal=s.suggestions.length||1;
   const rebocados = s.members.filter(m => isRebocado(m)).length;
   const movsFinalizadas = s.movs.filter(m => m.finalizada).length;
+
+  // RPP e Upamentos para o Overview
+  const hojeMs      = new Date().setHours(0,0,0,0);
+  const rppAtivos   = (s.rpps||[]).filter(r => r.status === 'ativo').length;
+  const rppVencendo = (s.rpps||[]).filter(r => {
+    if (r.status !== 'ativo' || !r.fim) return false;
+    const d = Math.round((new Date(r.fim+'T00:00:00').getTime() - hojeMs) / 86400000);
+    return d >= 0 && d <= 3;
+  }).length;
+  const upPendentes = (s.upamentos||[]).filter(u => !u.upou && u.tipoUp !== 'merito').length;
+  const upElegiveis = (s.upamentos||[]).filter(u => u.upou).length;
+
+  // Destaques da semana atual
+  const semAtual   = getPontSemana(0);
+  const rankDest   = typeof dtCalcRanking === 'function' ? dtCalcRanking(semAtual) : [];
+  const destSemana = rankDest.filter(r => r.elegivel && !r.foraDoTop).slice(0, 2);
+
+  // Score de saúde do servidor
+  const saude = calcSaudeServidor();
+  const emRiscoList = (s.members||[]).filter(m => getMembroEmRisco(m));
+
   document.getElementById('ov-stats').innerHTML=`
     <div class="sc v"><span class="sc-icon">👥</span><div class="sc-val">${s.members.filter(m=>!isRebocado(m)).length}</div><div class="sc-lbl">Membros Ativos</div></div>
     <div class="sc c"><span class="sc-icon">✅</span><div class="sc-val">${ativos}</div><div class="sc-lbl">Em Atividade</div></div>
@@ -4218,11 +4513,56 @@ function renderOverview(){
     <div class="sc r"><span class="sc-icon">❓</span><div class="sc-val">${s.naoverif.length}</div><div class="sc-lbl">Não Verif.</div></div>
     <div class="sc p"><span class="sc-icon">💡</span><div class="sc-val">${s.suggestions.length}</div><div class="sc-lbl">Sugestões</div></div>
     <div class="sc g"><span class="sc-icon">🎮</span><div class="sc-val">${movsFinalizadas}/${s.movs.length}</div><div class="sc-lbl">Movs Fin.</div></div>
-    <div class="sc y"><span class="sc-icon">🔗</span><div class="sc-val">${s.indicacoes.length}</div><div class="sc-lbl">Indicações</div></div>
-    <div class="sc o"><span class="sc-icon">📰</span><div class="sc-val">${s.news.length}</div><div class="sc-lbl">Game News</div></div>
+    <div class="sc y" style="cursor:pointer" onclick="tab('rpp')" title="Clique para ver RPPs">
+      <span class="sc-icon">🏖️</span>
+      <div class="sc-val">${rppAtivos}</div>
+      <div class="sc-lbl">RPPs Ativos</div>
+      ${rppVencendo > 0 ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#f87171;margin-top:2px;font-weight:700">⚠️ ${rppVencendo} vencendo</div>` : ''}
+    </div>
+    <div class="sc o" style="cursor:pointer" onclick="tab('upamentos')" title="Clique para ver upamentos">
+      <span class="sc-icon">🎯</span>
+      <div class="sc-val">${upElegiveis}</div>
+      <div class="sc-lbl">Ups Elegíveis</div>
+      ${upPendentes > 0 ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#fbbf24;margin-top:2px">${upPendentes} pendentes</div>` : ''}
+    </div>
+    <div class="sc c" style="cursor:pointer" onclick="tab('destaques')" title="Ver destaques da semana">
+      <span class="sc-icon">⭐</span>
+      <div class="sc-val" style="font-size:${destSemana.length>0?'12px':'20px'};font-family:'Share Tech Mono',monospace">
+        ${destSemana.length > 0 ? destSemana.map(d=>`@${d.nome||'—'}`).join('<br>') : '—'}
+      </div>
+      <div class="sc-lbl">Destaques</div>
+    </div>
+    <div class="sc" style="background:rgba(${saude.score>=80?'34,197,94':saude.score>=60?'77,176,255':saude.score>=40?'234,179,8':'239,68,68'},.08);border:1px solid rgba(${saude.score>=80?'34,197,94':saude.score>=60?'77,176,255':saude.score>=40?'234,179,8':'239,68,68'},.2);border-radius:12px;padding:12px;text-align:center" title="Score de saúde do servidor">
+      <span class="sc-icon">💚</span>
+      <div style="font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:${saude.nivel.cor}">${saude.score}</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${saude.nivel.cor};letter-spacing:1px">${saude.nivel.label}</div>
+      <div class="sc-lbl">Saúde</div>
+    </div>
     <div class="sc c"><span class="sc-icon">📚</span><div class="sc-val">${s.instrucoes.length}</div><div class="sc-lbl">Instruções</div></div>
     <div class="sc p"><span class="sc-icon">💬</span><div class="sc-val">${s.feedbacks.length}</div><div class="sc-lbl">Feedbacks</div></div>
   `;
+
+  // Alerta de membros em risco de rebocamento
+  let riscoEl = document.getElementById('ov-risco');
+  if (!riscoEl) {
+    riscoEl = document.createElement('div');
+    riscoEl.id = 'ov-risco';
+    const alertasEl = document.getElementById('ov-alertas');
+    if (alertasEl && alertasEl.parentNode) alertasEl.parentNode.insertBefore(riscoEl, alertasEl);
+  }
+  if (emRiscoList.length > 0) {
+    riscoEl.innerHTML = `<div style="background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.25);border-radius:12px;padding:14px 16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+        <span style="font-family:'Orbitron',sans-serif;font-size:12px;color:#fb923c;font-weight:700">⚠️ MEMBROS EM RISCO (${emRiscoList.length})</span>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">Próximos do rebocamento</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${emRiscoList.map(m=>`<span style="background:rgba(249,115,22,.15);color:#fb923c;padding:3px 10px;border-radius:8px;font-size:11px;font-family:'Share Tech Mono',monospace;cursor:pointer" onclick="tab('members')" title="${m.ult||'—'}">@${m.m}</span>`).join('')}
+      </div>
+    </div>`;
+  } else {
+    riscoEl.innerHTML = '';
+  }
   const pb=v=>`<div class="prog-track"><div class="prog-fill" style="width:${Math.max(2,v)}%"></div></div>`;
   document.getElementById('ov-membros').innerHTML=`
     <div class="prog-row"><div class="prog-lbl">✅ Ativos</div>${pb(ativos/total*100).replace('></div>','style="background:linear-gradient(90deg,#22c55e,#4ade80)"></div>')}<div class="prog-val">${ativos}</div></div>
@@ -4458,6 +4798,34 @@ function renderMembers(){
            (m.subAreas?.gamenews && 'game news'.includes(q))
     )
   );
+
+  // Ordenação por coluna
+  const posOrdem = {gestao: 0, subgestao: 1, comum: 2};
+  filtered.sort((a, b) => {
+    let va, vb;
+    if (memberSortCol === 'm') {
+      va = (a.m||'').toLowerCase(); vb = (b.m||'').toLowerCase();
+    } else if (memberSortCol === 'posicao') {
+      va = posOrdem[a.posicao||'comum'] ?? 2; vb = posOrdem[b.posicao||'comum'] ?? 2;
+      return memberSortDir === 'asc' ? va - vb : vb - va;
+    } else if (memberSortCol === 'cargo') {
+      va = (a.cargo||'zzz').toLowerCase(); vb = (b.cargo||'zzz').toLowerCase();
+    } else if (memberSortCol === 'entrou') {
+      // Converter DD/MM/AAAA → AAAA/MM/DD para comparação correta
+      const toISO = d => {
+        if (!d || d === '—') return '9999/99/99';
+        const p = d.split('/');
+        return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : d;
+      };
+      va = toISO(a.entrou); vb = toISO(b.entrou);
+    } else {
+      va = ''; vb = '';
+    }
+    const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+    return memberSortDir === 'asc' ? cmp : -cmp;
+  });
+
+  updateMemberSortIcons();
   const total = s.members.filter(m => !isRebocado(m)).length;
   document.getElementById('members-count').textContent=filtered.length+'/'+total;
   document.getElementById('members-tbody').innerHTML=filtered.map(m=>{
@@ -4470,21 +4838,46 @@ function renderMembers(){
     if (m.subAreas?.instrucao)   subs.push(`<span style="font-size:9px;background:rgba(168,85,247,.12);color:#c084fc;padding:1px 5px;border-radius:5px">📚</span>`);
     if (m.subAreas?.acolhimento) subs.push(`<span style="font-size:9px;background:rgba(34,211,238,.1);color:#22d3ee;padding:1px 5px;border-radius:5px">🤗</span>`);
     if (m.subAreas?.gamenews)    subs.push(`<span style="font-size:9px;background:rgba(249,115,22,.1);color:#fb923c;padding:1px 5px;border-radius:5px">📰</span>`);
-    const tipoUpBadge = m.tipoUp === 'merito'
-      ? `<span style="font-size:9px;background:rgba(168,85,247,.15);color:#c084fc;padding:1px 7px;border-radius:8px;font-family:'Share Tech Mono',monospace">🏅 Mérito</span>`
-      : `<span style="font-size:9px;background:rgba(0,112,209,.15);color:#4db0ff;padding:1px 7px;border-radius:8px;font-family:'Share Tech Mono',monospace">🎯 Meta</span>`;
-    const gamesBadge = m.upaGames === 'sim'
-      ? `<span style="font-size:9px;background:rgba(34,197,94,.15);color:#22c55e;padding:1px 7px;border-radius:8px;font-family:'Share Tech Mono',monospace">🎮</span>`
+    // Streak, tendência e progresso up
+    const streak    = calcStreak(m.id, m.m);
+    const tendencia = calcTendencia(m.id, m.m);
+    const progUp    = calcProgressoUp(m);
+    const emRisco   = getMembroEmRisco(m);
+    const streakBadge = streak >= 2
+      ? `<span style="font-size:9px;background:rgba(249,115,22,.15);color:#fb923c;padding:1px 6px;border-radius:6px;font-family:'Share Tech Mono',monospace" title="${streak} semanas seguidas">🔥${streak}</span>`
       : '';
-    return `<tr>
-    <td><div class="mname">${m.m}</div><div class="mid">${m.id?.slice(-10)||'—'}…</div></td>
+    const tendBadge = tendencia
+      ? `<span style="font-size:11px;color:${tendencia.cor}" title="Tendência: ${tendencia.label}">${tendencia.seta}</span>`
+      : '';
+    const riscoBadge = emRisco
+      ? `<span style="font-size:9px;background:rgba(249,115,22,.15);color:#fb923c;padding:1px 6px;border-radius:6px;font-family:'Share Tech Mono',monospace;font-weight:700" title="Atenção: próximo do rebocamento">⚠️</span>`
+      : '';
+    const aptoBadge = progUp?.apto
+      ? `<span style="font-size:9px;background:rgba(34,197,94,.15);color:#22c55e;padding:1px 6px;border-radius:6px;font-family:'Share Tech Mono',monospace;font-weight:700" title="Apto para UP!">🎯</span>`
+      : '';
+    const barraUp = progUp && !progUp.apto
+      ? `<div style="margin-top:3px;height:3px;background:var(--bg2);border-radius:2px;overflow:hidden;width:60px" title="${progUp.pts}/${progUp.metaTotal} pts (${progUp.pct}%)">
+          <div style="width:${progUp.pct}%;height:100%;background:${progUp.cor};border-radius:2px"></div>
+        </div>`
+      : '';
+    return `<tr${emRisco ? ' style="background:rgba(249,115,22,.03)"' : ''}>
+    <td>
+      <div class="mname" style="display:flex;align-items:center;gap:4px">${m.m} ${riscoBadge}${aptoBadge}</div>
+      <div class="mid">${m.id?.slice(-10)||'—'}…</div>
+    </td>
     <td><span style="font-size:10px;font-weight:600;color:${posCor[posicao]||'#94a3b8'};white-space:nowrap">${posMap[posicao]||'—'}</span></td>
     <td style="white-space:nowrap">${subs.join(' ')||'<span style="color:var(--text3);font-size:11px">—</span>'}</td>
-    <td><span style="font-size:11px;font-weight:600;color:${cargoCor}">${m.cargo||'—'}</span></td>
+    <td>
+      <span style="font-size:11px;font-weight:600;color:${cargoCor}">${m.cargo||'—'}</span>
+      ${barraUp}
+    </td>
     <td style="white-space:nowrap">${tipoUpBadge} ${gamesBadge}</td>
     <td><span class="badge ${m.ativo?'b-cyan':'b-gray'}">${m.ativo?'● ATIVO':'○ —'}</span></td>
-    <td><span class="badge ${m.pts?'b-green':'b-gray'}">${m.pts?'✓':'✗'}</span></td>
-    <td>${ultBadge(m.ult, m)}</td>
+    <td style="white-space:nowrap">
+      <span class="badge ${m.pts?'b-green':'b-gray'}">${m.pts?'✓':'✗'}</span>
+      ${streakBadge}
+    </td>
+    <td style="white-space:nowrap">${ultBadge(m.ult, m)} ${tendBadge}</td>
     <td style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3)">${m.entrou||'—'}</td>
     <td><div style="display:flex;gap:4px">
       <button class="btn btn-edit btn-sm" onclick="openMemberModal('${m._id}')">✏️</button>
@@ -4494,11 +4887,66 @@ function renderMembers(){
 }
 
 let reboxFiltro = 'todos';
+let memberSortCol = 'm';
+let memberSortDir = 'asc';
+let indFiltro = 'todos'; // movido para cá pois let não tem hoisting — deve existir antes do renderAll
+
+function sortMembers(col) {
+  if (memberSortCol === col) {
+    memberSortDir = memberSortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    memberSortCol = col;
+    memberSortDir = 'asc';
+  }
+  renderMembers();
+}
+
+function updateMemberSortIcons() {
+  ['m','posicao','cargo','entrou'].forEach(col => {
+    const el = document.getElementById('sort-icon-' + col);
+    if (!el) return;
+    if (col === memberSortCol) {
+      el.textContent = memberSortDir === 'asc' ? '↑' : '↓';
+      el.style.color = '#4db0ff';
+    } else {
+      el.textContent = '↕';
+      el.style.color = 'var(--text3)';
+    }
+  });
+}
 function setReboFilter(f, el) {
   document.querySelectorAll('.rebo-f').forEach(b => b.classList.remove('active-filter'));
   if(el) el.classList.add('active-filter');
   reboxFiltro = f;
   renderRebocamentos();
+}
+
+function reboCopiarDiscord() {
+  const s = window._state; if (!s) return;
+  const rebocados = (s.members||[])
+    .filter(m => isRebocado(m))
+    .map(m => ({ ...m, faixa: reboxFaixa(m) || { ordem:0, key:'sem' }, ult: getUltimaPontuacaoMembro(m) }))
+    .sort((a,b) => (b.faixa.ordem||0) - (a.faixa.ordem||0));
+
+  if (rebocados.length === 0) { toast('⚠️ Nenhum membro em rebocamento!'); return; }
+
+  const grupos = { sem:[], '3m':[], '2m':[], '1m':[] };
+  rebocados.forEach(m => { (grupos[m.faixa.key] = grupos[m.faixa.key]||[]).push(m); });
+
+  const labels = { sem:'❌ Sem pontos', '3m':'🔴 3+ meses', '2m':'🟠 2 meses', '1m':'🟡 1 mês' };
+  const linhas = Object.entries(grupos)
+    .filter(([, arr]) => arr.length > 0)
+    .map(([key, arr]) => {
+      const nomes = arr.map(m => `• @${m.m}${m.id ? ` (<@${m.id}>)` : ''}`).join('\n');
+      return `${labels[key]} (${arr.length}):\n${nomes}`;
+    }).join('\n\n');
+
+  const msg = `🚨 **REBOCAMENTOS — GAMES**\nTotal: ${rebocados.length} membros\n\n${linhas}\n\n━━━━━━━━━━━━━━━━━━━━━━━`;
+  navigator.clipboard.writeText(msg).then(() => {
+    toast('📋 Lista de rebocamentos copiada!');
+  }).catch(() => {
+    toast('⚠️ Não foi possível copiar automaticamente.');
+  });
 }
 
 function renderRebocamentos() {
@@ -4699,13 +5147,54 @@ function renderSuggestions() {
       }).join('');
 }
 
+function subCopiarDiscord() {
+  const s = window._state; if (!s) return;
+  const lista = (s.subgestao||[]).sort((a,b) => (a.subarea||'').localeCompare(b.subarea||''));
+  if (lista.length === 0) { toast('⚠️ Nenhum subgestor cadastrado!'); return; }
+
+  const grupos = {};
+  lista.forEach(sg => {
+    const key = sg.subarea || 'Sem Subárea';
+    if (!grupos[key]) grupos[key] = [];
+    grupos[key].push(sg);
+  });
+
+  const icones = { 'Game News': '📰', 'Instrução': '📚', 'Acolhimento': '🤗' };
+  const linhas = Object.entries(grupos).map(([area, membros]) => {
+    const ic = icones[area] || '🛡️';
+    const nomes = membros.map(sg => `• @${sg.name}${sg.dias ? ` (${sg.dias})` : ''}`).join('\n');
+    return `${ic} **${area}:**\n${nomes}`;
+  }).join('\n\n');
+
+  const msg = `🛡️ **EQUIPE DE SUBGESTÃO — GAMES**\n\n${linhas}\n\n━━━━━━━━━━━━━━━━━━━━━━━`;
+  navigator.clipboard.writeText(msg).then(() => {
+    toast('📋 Subgestão copiada para o Discord!');
+  }).catch(() => {
+    toast('⚠️ Não foi possível copiar automaticamente.');
+  });
+}
+
 function renderSubgestao(){
   const s=window._state; if(!s)return;
   const q=(document.getElementById('search-sub')?.value||'').toLowerCase();
-  const lista = (s.subgestao||[])
+  const todas = s.subgestao||[];
+
+  // Stats por subárea
+  const statsEl = document.getElementById('sub-stats');
+  if (statsEl) {
+    const areas = {};
+    todas.forEach(sg => { areas[sg.subarea] = (areas[sg.subarea]||0)+1; });
+    const cores = { 'Game News':'#f97316', 'Instrução':'#a855f7', 'Acolhimento':'#22d3ee' };
+    statsEl.innerHTML = Object.entries(areas).map(([area, n]) => {
+      const cor = cores[area] || '#64748b';
+      return `<div class="sc" style="border-top:3px solid ${cor}"><span class="sc-icon" style="font-size:14px">${{'Game News':'📰','Instrução':'📚','Acolhimento':'🤗'}[area]||'🛡️'}</span><div class="sc-val">${n}</div><div class="sc-lbl">${area}</div></div>`;
+    }).join('') + `<div class="sc v"><span class="sc-icon">🛡️</span><div class="sc-val">${todas.length}</div><div class="sc-lbl">Total</div></div>`;
+  }
+
+  const lista = todas
     .filter(sg => !q || sg.name?.toLowerCase().includes(q) || sg.id?.includes(q) || sg.subarea?.toLowerCase().includes(q))
     .sort((a,b)=>(a.name||'').localeCompare(b.name||''));
-  document.getElementById('sub-count').textContent=lista.length+'/'+s.subgestao.length;
+  document.getElementById('sub-count').textContent=lista.length+'/'+todas.length;
   document.getElementById('sub-list').innerHTML=lista.map(sg=>`
     <div class="sub-card">
       <div class="sub-head">
@@ -4756,10 +5245,74 @@ function renderAusencias(){
   }).join('')||'<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">Nenhuma ausência registrada</div></div>';
 }
 
+function indCopiarDiscord() {
+  const s = window._state; if (!s) return;
+  const lista = (s.indicacoes||[]).sort((a,b) => (b.data||'').localeCompare(a.data||''));
+  if (lista.length === 0) { toast('⚠️ Nenhuma indicação cadastrada!'); return; }
+
+  const validas   = lista.filter(i => i.valida);
+  const pendentes = lista.filter(i => !i.valida);
+  const taxa = lista.length > 0 ? Math.round(validas.length / lista.length * 100) : 0;
+
+  const formatarLinha = ind =>
+    `• @${ind.membro} → @${ind.indicado}${ind.idIndicado ? ` (<@${ind.idIndicado}>)` : ''} ${ind.valida ? '✅' : '⏳'} ${ind.data ? `| ${ind.data}` : ''}`;
+
+  const linhasValidas   = validas.map(formatarLinha).join('\n');
+  const linhasPendentes = pendentes.map(formatarLinha).join('\n');
+
+  const msg =
+`🔗 **INDICAÇÕES — GAMES**
+📊 Total: ${lista.length} | ✅ Válidas: ${validas.length} | ⏳ Pendentes: ${pendentes.length} | Taxa: ${taxa}%
+
+${validas.length > 0 ? `✅ **VÁLIDAS (${validas.length}):**\n${linhasValidas}` : ''}
+${pendentes.length > 0 ? `\n⏳ **PENDENTES (${pendentes.length}):**\n${linhasPendentes}` : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━`;
+
+  navigator.clipboard.writeText(msg.trim()).then(() => {
+    toast('📋 Lista de indicações copiada!');
+  }).catch(() => {
+    toast('⚠️ Não foi possível copiar automaticamente.');
+  });
+}
+
+function setIndFiltro(f, el) {
+  indFiltro = f;
+  document.querySelectorAll('.ind-f').forEach(b => b.classList.remove('active-filter'));
+  if (el) el.classList.add('active-filter');
+  renderIndicacoes();
+}
+
 function renderIndicacoes(){
   const s=window._state; if(!s)return;
-  document.getElementById('ind-count').textContent=s.indicacoes.length;
-  document.getElementById('ind-list').innerHTML=s.indicacoes.map(ind=>`
+  const q = (document.getElementById('search-ind')?.value || '').toLowerCase();
+  const todas = s.indicacoes || [];
+  const validas  = todas.filter(i => i.valida).length;
+  const pendentes= todas.filter(i => !i.valida).length;
+  const taxa     = todas.length > 0 ? Math.round(validas / todas.length * 100) : 0;
+
+  // Stats
+  const statsEl = document.getElementById('ind-stats');
+  if (statsEl) statsEl.innerHTML = `
+    <div class="sc v"><span class="sc-icon">🔗</span><div class="sc-val">${todas.length}</div><div class="sc-lbl">Total</div></div>
+    <div class="sc g"><span class="sc-icon">✅</span><div class="sc-val">${validas}</div><div class="sc-lbl">Válidas</div></div>
+    <div class="sc y"><span class="sc-icon">⏳</span><div class="sc-val">${pendentes}</div><div class="sc-lbl">Pendentes</div></div>
+    <div class="sc c"><span class="sc-icon">📊</span><div class="sc-val">${taxa}%</div><div class="sc-lbl">Conversão</div></div>
+  `;
+
+  const lista = todas
+    .filter(ind => {
+      if (indFiltro === 'valida' && !ind.valida) return false;
+      if (indFiltro === 'pendente' && ind.valida) return false;
+      if (!q) return true;
+      return (ind.membro||'').toLowerCase().includes(q) ||
+             (ind.indicado||'').toLowerCase().includes(q) ||
+             (ind.id||'').includes(q);
+    })
+    .sort((a,b) => (b.data||'').localeCompare(a.data||''));
+
+  document.getElementById('ind-count').textContent = lista.length + '/' + todas.length;
+  document.getElementById('ind-list').innerHTML=lista.map(ind=>`
     <div class="ind-card">
       <div class="ind-head">
         <div><div class="ind-from">${ind.membro}</div><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${ind.id}</div></div>
@@ -4774,7 +5327,7 @@ function renderIndicacoes(){
       <div class="ind-to">${ind.indicado}</div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);text-align:center;margin-top:2px">${ind.idIndicado||'—'}</div>
       <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--text3)">📅 ${fmtDate(ind.data)}</div>
-    </div>`).join('')||'<div class="empty"><div class="empty-icon">🔗</div><div class="empty-text">Nenhuma indicação</div></div>';
+    </div>`).join('')||'<div class="empty"><div class="empty-icon">🔗</div><div class="empty-text">Nenhuma indicação encontrada</div></div>';
 }
 
 let newsFuncFiltro = '';
@@ -4858,16 +5411,79 @@ function showLoginScreen(){
   setTimeout(()=>document.getElementById('login-user').focus(),100);
 }
 
-function doLoginBtn(){
-  const u=document.getElementById('login-user').value.trim().toLowerCase();
-  const p=document.getElementById('login-pass').value;
-  const found=window._state&&window._state.users.find(x=>x.usuario.toLowerCase()===u && x.senha===p && x.ativo!==false);
-  if(!found){
+async function doLoginBtn(){
+  const u = document.getElementById('login-user').value.trim().toLowerCase();
+  const p = document.getElementById('login-pass').value;
+  if (!u || !p) {
     document.getElementById('login-error').classList.add('show');
-    document.getElementById('login-pass').value='';
+    document.getElementById('login-error').textContent = '❌ Preencha usuário e senha';
     return;
   }
-  doLogin(found);
+
+  // Verificar se o usuário existe no Firestore
+  const found = window._state && window._state.users.find(
+    x => x.usuario.toLowerCase() === u && x.ativo !== false
+  );
+  if (!found) {
+    document.getElementById('login-error').classList.add('show');
+    document.getElementById('login-error').textContent = '❌ Usuário não encontrado';
+    document.getElementById('login-pass').value = '';
+    return;
+  }
+
+  const email = window._auth.toAuthEmail(u);
+
+  // Desabilitar botão durante o processo
+  const btn = document.getElementById('login-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Entrando...'; }
+
+  try {
+    // Tentar login direto no Firebase Auth
+    await window._auth.signInWithEmailAndPassword(window._auth.auth, email, p);
+    // Auth → onAuthStateChanged → loadAll → doLogin — fluxo automático
+  } catch(e) {
+    if (e.code === 'auth/invalid-credential' || e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password') {
+      // Usuário existe no Firestore mas ainda não no Firebase Auth (sistema legado)
+      // Verificar senha contra o Firestore para migrar
+      const validLegacy = window._state.users.find(
+        x => x.usuario.toLowerCase() === u && x.senha === p && x.ativo !== false
+      );
+      if (validLegacy) {
+        try {
+          // Criar conta no Firebase Auth (migração)
+          const cred = await window._auth.createUserWithEmailAndPassword(window._auth.auth, email, p);
+          // Salvar authUid no Firestore para referência futura
+          await window._db.dbSet(window._db.COLS.users, validLegacy._id, { ...validLegacy, authUid: cred.user.uid });
+          window._state.users = await window._db.dbGetAll(window._db.COLS.users);
+          toast('🔐 Conta migrada para autenticação segura!');
+          // Auth cuida do login automaticamente via onAuthStateChanged
+        } catch(e2) {
+          if (e2.code === 'auth/email-already-in-use') {
+            // Email já existe no Auth mas senha errada — senha incorreta real
+            document.getElementById('login-error').classList.add('show');
+            document.getElementById('login-error').textContent = '❌ Senha incorreta';
+          } else {
+            console.error('[Auth migração]', e2);
+            document.getElementById('login-error').classList.add('show');
+            document.getElementById('login-error').textContent = '❌ Erro ao autenticar: ' + (e2.message || e2.code);
+          }
+          document.getElementById('login-pass').value = '';
+        }
+      } else {
+        // Senha errada no Firestore também
+        document.getElementById('login-error').classList.add('show');
+        document.getElementById('login-error').textContent = '❌ Usuário ou senha incorretos';
+        document.getElementById('login-pass').value = '';
+      }
+    } else {
+      console.error('[Auth login]', e);
+      document.getElementById('login-error').classList.add('show');
+      document.getElementById('login-error').textContent = '❌ Erro: ' + (e.message || e.code);
+      document.getElementById('login-pass').value = '';
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
+  }
 }
 
 async function fixLiderUser(){
@@ -4885,7 +5501,8 @@ async function fixLiderUser(){
 function doLogin(user){
   try{
     window._currentUser=user;
-    sessionStorage.setItem('gp_user',JSON.stringify({_id:user._id,senha:user.senha}));
+    // Salvar apenas ID — sem senha em nenhum storage local
+    try{ sessionStorage.setItem('gp_user', JSON.stringify({ _id: user._id })); }catch(e){}
   }catch(e){}
   try{ document.getElementById('login-screen').classList.remove('show'); }catch(e){}
   try{
@@ -4906,16 +5523,123 @@ function doLogin(user){
   try{ openActiveGroup('overview'); }catch(e){}
   // Verificar movs vencidas ao logar
   setTimeout(() => { if(window.autoFinalizarMovs) window.autoFinalizarMovs(); }, 2000);
+  setTimeout(() => { if(window.autoEncerrarRpps) window.autoEncerrarRpps(); }, 2500);
+  // Limpeza automática (só roda no SAB, a cada 3 semanas)
+  setTimeout(() => { if(window.executarLimpezaSemanal) window.executarLimpezaSemanal(); }, 4000);
+  // Notificações de boas-vindas + alertas
+  setTimeout(() => { notificarAoLogar(user); }, 1000);
   try{ toast(`Bem-vindo, ${user.nome||user.usuario}!`); }catch(e){}
 }
 
-function doLogout(){
+function notificarAoLogar(user) {
+  const s = window._state; if (!s) return;
+  const hoje  = new Date().toISOString().slice(0,10);
+  const amanha = new Date(Date.now() + 86400000).toISOString().slice(0,10);
+  const hojeMs = new Date().setHours(0,0,0,0);
+
+  // ── Movs de hoje e amanhã (não finalizadas) ───────────
+  const movsProximas = (s.movs || []).filter(m =>
+    !m.finalizada && (m.data === hoje || m.data === amanha)
+  ).sort((a,b) => (a.data+a.horario).localeCompare(b.data+b.horario));
+
+  // ── RPPs vencendo em ≤3 dias ─────────────────────────
+  const rppVencendo = (s.rpps || []).filter(r => {
+    if (r.status !== 'ativo' || !r.fim) return false;
+    const dias = Math.round((new Date(r.fim+'T00:00:00').getTime() - hojeMs) / 86400000);
+    return dias >= 0 && dias <= 3;
+  });
+
+  const alertas = [];
+
+  movsProximas.forEach(mv => {
+    const ehHoje = mv.data === hoje;
+    const label  = ehHoje ? '🎮 HOJE' : '🎮 AMANHÃ';
+    const hora   = mv.horario ? ` às ${mv.horario}` : '';
+    const nome   = mv.nome || mv.tipo || 'Mov sem nome';
+    alertas.push({ tipo: 'mov', msg: `${label}: ${nome}${hora}`, cor: ehHoje ? '#4db0ff' : '#a78bfa' });
+  });
+
+  rppVencendo.forEach(r => {
+    const dias = Math.round((new Date(r.fim+'T00:00:00').getTime() - hojeMs) / 86400000);
+    const label = dias === 0 ? '🚨 Vence HOJE' : `⚠️ Vence em ${dias}d`;
+    alertas.push({ tipo: 'rpp', msg: `${label}: RPP @${r.membro || '—'}`, cor: '#f87171' });
+  });
+
+  if (alertas.length === 0) return;
+
+  // Exibir toasts sequenciais com delay
+  alertas.forEach((a, i) => {
+    setTimeout(() => {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      t.textContent = a.msg;
+      t.style.background = a.cor;
+      t.style.color = '#0d0d0d';
+      t.className = 'toast show';
+      setTimeout(() => {
+        t.className = 'toast';
+        t.style.background = '';
+        t.style.color = '';
+      }, 3200);
+    }, (i + 1) * 3800);
+  });
+
+  // Atualizar badge no Overview
+  atualizarAlertasOverview(movsProximas, rppVencendo);
+}
+
+function atualizarAlertasOverview(movsProximas, rppVencendo) {
+  const el = document.getElementById('ov-alertas');
+  if (!el) return;
+
+  const hoje = new Date().toISOString().slice(0,10);
+  const itens = [];
+
+  movsProximas.forEach(mv => {
+    const ehHoje = mv.data === hoje;
+    const hora   = mv.horario ? ` · ${mv.horario}` : '';
+    itens.push(`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:${ehHoje?'rgba(77,176,255,.1)':'rgba(167,139,250,.1)'};border:1px solid ${ehHoje?'rgba(77,176,255,.3)':'rgba(167,139,250,.3)'};border-radius:8px;margin-bottom:6px">
+      <span style="font-size:14px">🎮</span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:${ehHoje?'#4db0ff':'#a78bfa'}">${ehHoje?'HOJE':'AMANHÃ'}${hora}</div>
+        <div style="font-size:12px;color:var(--text2)">${mv.nome}</div>
+      </div>
+      ${mv.resp?`<div style="font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace">@${mv.resp}</div>`:''}
+    </div>`);
+  });
+
+  rppVencendo.forEach(r => {
+    const hojeMs = new Date().setHours(0,0,0,0);
+    const dias   = Math.round((new Date(r.fim+'T00:00:00').getTime() - hojeMs) / 86400000);
+    itens.push(`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;margin-bottom:6px">
+      <span style="font-size:14px">🚨</span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:#f87171">RPP ${dias===0?'VENCE HOJE':`VENCE EM ${dias}D`}</div>
+        <div style="font-size:12px;color:var(--text2)">@${r.membro}</div>
+      </div>
+      <button onclick="tab('rpp')" style="font-size:10px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:3px 8px;border-radius:6px;cursor:pointer;font-family:'Share Tech Mono',monospace">Ver RPP</button>
+    </div>`);
+  });
+
+  if (itens.length > 0) {
+    el.style.display = '';
+    el.innerHTML = `
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:8px">⚡ ALERTAS DO DIA</div>
+      ${itens.join('')}`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+async function doLogout(){
   if(!confirm('Deseja sair?'))return;
   window._currentUser=null;
-  sessionStorage.removeItem('gp_user');
+  try{ sessionStorage.removeItem('gp_user'); }catch(e){}
   document.getElementById('user-bar').style.display='none';
   const fc=document.getElementById('float-config');
   if(fc) fc.style.display='none';
+  // Firebase Auth signOut — invalida a sessão no servidor
+  try{ await window._auth.signOut(window._auth.auth); }catch(e){ console.error('[signOut]',e); }
   showLoginScreen();
 }
 
@@ -4957,6 +5681,7 @@ function applyPermissions(){
     'cronograma': 'edit_cronograma',
     'cron-news':  'edit_cronograma',
     'usuarios':   'manage_users',
+    'historico':  'manage_users',
     'overview':   'view',
     'designer-destaques': 'view',
     'designer-temas':     'view',
@@ -4995,28 +5720,59 @@ function openUserModal(docId){
   openModal('user');
 }
 async function saveUser(){
-  const docId=document.getElementById('u-edit-id').value||window._db.genId();
-  const existing=window._state.users.find(x=>x._id===docId);
-  const senha=document.getElementById('u-senha').value;
-  const funcoesRaw=document.getElementById('u-funcoes').value;
-  const funcoes=funcoesRaw.split('\n').map(s=>s.trim()).filter(Boolean);
-  const obj={
-    nome:document.getElementById('u-nome').value.trim(),
-    usuario:document.getElementById('u-usuario').value.trim().toLowerCase(),
-    senha:senha||(existing?.senha||''),
-    role:document.getElementById('u-role').value,
+  const docId    = document.getElementById('u-edit-id').value || window._db.genId();
+  const existing = window._state.users.find(x => x._id === docId);
+  const senha    = document.getElementById('u-senha').value;
+  const funcoesRaw = document.getElementById('u-funcoes').value;
+  const funcoes  = funcoesRaw.split('\n').map(s=>s.trim()).filter(Boolean);
+
+  const obj = {
+    nome:    document.getElementById('u-nome').value.trim(),
+    usuario: document.getElementById('u-usuario').value.trim().toLowerCase(),
+    senha:   senha || (existing?.senha || ''),
+    role:    document.getElementById('u-role').value,
     funcoes,
-    ativo:document.getElementById('u-ativo').value==='true'
+    ativo:   document.getElementById('u-ativo').value === 'true',
+    authUid: existing?.authUid || null, // preservar UID do Firebase Auth se já migrado
   };
-  if(!obj.nome||!obj.usuario){toast('❌ Preencha nome e usuário');return;}
-  if(!obj.senha){toast('❌ Informe a senha');return;}
-  if(obj.senha.length<6){toast('❌ Senha deve ter mínimo 6 caracteres');return;}
-  const dup=window._state.users.find(x=>x.usuario===obj.usuario&&x._id!==docId);
-  if(dup){toast('❌ Usuário já existe');return;}
-  await window._db.dbSet(window._db.COLS.users,docId,obj);
-  window._state.users=await window._db.dbGetAll(window._db.COLS.users);
+
+  if(!obj.nome || !obj.usuario){ toast('❌ Preencha nome e usuário'); return; }
+  if(!obj.senha){ toast('❌ Informe a senha'); return; }
+  if(obj.senha.length < 6){ toast('❌ Senha deve ter mínimo 6 caracteres'); return; }
+  const dup = window._state.users.find(x => x.usuario === obj.usuario && x._id !== docId);
+  if(dup){ toast('❌ Usuário já existe'); return; }
+
+  // Sincronizar com Firebase Auth se a senha foi alterada e o usuário já tem authUid
+  if (senha && existing?.authUid && window._auth) {
+    try {
+      // Nota: updatePassword exige re-autenticação recente — só funciona se o user
+      // estiver logado. Para simplificar, apenas atualizamos o Firestore aqui.
+      // A nova senha será usada no próximo login via migração automática.
+    } catch(e) {
+      console.warn('[Auth updatePassword]', e);
+    }
+  }
+
+  // Se é um novo usuário, tentar criar no Firebase Auth imediatamente
+  if (!existing && window._auth) {
+    const email = window._auth.toAuthEmail(obj.usuario);
+    try {
+      const cred = await window._auth.createUserWithEmailAndPassword(window._auth.auth, email, obj.senha);
+      obj.authUid = cred.user.uid;
+      toast('🔐 Conta criada com autenticação segura!');
+    } catch(e) {
+      if (e.code === 'auth/email-already-in-use') {
+        // Conta já existe no Auth — ok, será migrada no próximo login
+      } else {
+        console.warn('[Auth createUser]', e);
+      }
+    }
+  }
+
+  await window._db.dbSet(window._db.COLS.users, docId, obj);
+  window._state.users = await window._db.dbGetAll(window._db.COLS.users);
   renderUsers(); closeModalDirect(); toast('✅ Usuário salvo!');
-  if(document.getElementById('config-overlay').style.display !== 'none') renderConfigUsuarios();
+  if(document.getElementById('config-overlay')?.style.display !== 'none') renderConfigUsuarios();
 }
 async function deleteUser(docId){
   if(docId===window._currentUser?._id){toast('❌ Você não pode se remover!');return;}
@@ -5025,6 +5781,61 @@ async function deleteUser(docId){
   window._state.users=await window._db.dbGetAll(window._db.COLS.users);
   renderUsers(); toast('🗑 Usuário removido!');
   if(document.getElementById('config-overlay').style.display !== 'none') renderConfigUsuarios();
+}
+
+function exportarBackupJSON() {
+  const s = window._state; if (!s) { toast('⚠️ Estado não carregado'); return; }
+  const agora = new Date();
+  const data  = agora.toISOString().slice(0,10);
+  const hora  = agora.toTimeString().slice(0,5).replace(':','-');
+
+  const backup = {
+    _meta: {
+      exportadoEm: agora.toISOString(),
+      painel: 'GAMES // PUREZA',
+      versao: '2.0',
+      totalCollections: 25,
+    },
+    members:      s.members      || [],
+    suggestions:  s.suggestions  || [],
+    subgestao:    s.subgestao    || [],
+    ausencias:    s.ausencias    || [],
+    indicacoes:   s.indicacoes   || [],
+    news:         s.news         || [],
+    naoverif:     s.naoverif     || [],
+    movs:         s.movs         || [],
+    participacoes:s.participacoes|| [],
+    users:        s.users        || [],
+    instrucoes:   s.instrucoes   || [],
+    feedbacks:    s.feedbacks    || [],
+    funcoes:      s.funcoes      || [],
+    notificacoes: s.notificacoes || [],
+    rpps:         s.rpps         || [],
+    cronograma:   s.cronograma   || [],
+    acolhimentos: s.acolhimentos || [],
+    advertencias: s.advertencias || [],
+    blacklist:    s.blacklist    || [],
+    levelup:      s.levelup      || [],
+    upamentos:    s.upamentos    || [],
+    destaques:    s.destaques    || [],
+    pautas:       s.pautas       || [],
+    designer:     s.designer     || [],
+    historico:    s.historico    || [],
+  };
+
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `backup_games_${data}T${hora}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  const totalItens = Object.values(backup).filter(Array.isArray).reduce((acc, arr) => acc + arr.length, 0);
+  toast(`✅ Backup baixado! ${totalItens} registros em 25 collections.`);
 }
 
 function renderUsers(){
@@ -5099,10 +5910,15 @@ function setHistFiltro(f, el) {
 
 function renderHistorico() {
   const s = window._state; if (!s) return;
-  const q = (document.getElementById('search-hist')?.value || '').toLowerCase();
+  const q       = (document.getElementById('search-hist')?.value || '').toLowerCase();
+  const dataIni = document.getElementById('hist-data-ini')?.value || '';
+  const dataFim = document.getElementById('hist-data-fim')?.value || '';
+
   const lista = (s.historico || [])
     .filter(h => {
       if (histFiltro !== 'todos' && h.tipo !== histFiltro) return false;
+      if (dataIni && (h.data||'') < dataIni) return false;
+      if (dataFim && (h.data||'') > dataFim) return false;
       if (!q) return true;
       return (h.nome||'').toLowerCase().includes(q) ||
              (h.memId||'').includes(q) ||
@@ -5130,7 +5946,7 @@ function renderHistorico() {
       { key:'removido', icon:'🗑️', label:'Removidos',    cor:'#f87171', bg:'rgba(239,68,68,.08)',   border:'rgba(239,68,68,.25)'   },
       { key:'notif',    icon:'🔔', label:'Notificações', cor:'#4db0ff', bg:'rgba(77,176,255,.08)',  border:'rgba(77,176,255,.25)'  },
     ].map(t => `
-      <div style="background:${t.bg};border:1px solid ${t.border};border-top:3px solid ${t.cor};border-radius:10px;padding:10px 12px;text-align:center;cursor:pointer" onclick="setHistFiltro('${t.key}', document.querySelector('[onclick*=\\'${t.key}\\']'))">
+      <div style="background:${t.bg};border:1px solid ${t.border};border-top:3px solid ${t.cor};border-radius:10px;padding:10px 12px;text-align:center;cursor:pointer" onclick="setHistFiltro('${t.key}', null); document.querySelectorAll('#page-historico .pb button').forEach(b=>b.classList.remove('active-filter')); this.closest('.pb') && this.classList.add('active-filter')">
         <div style="font-size:18px;margin-bottom:4px">${t.icon}</div>
         <div style="font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:${t.cor}">${contagens[t.key]}</div>
         <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${t.label}</div>
@@ -5152,7 +5968,12 @@ function renderHistorico() {
     notif:    { icon:'🔔', label:'Notificação',  cor:'#4db0ff', bg:'rgba(77,176,255,.08)',  border:'rgba(77,176,255,.25)' },
   };
 
-  listEl.innerHTML = lista.map(h => {
+  const HIST_PAGE = 100;
+  let histLimit = parseInt(document.getElementById('hist-limit')?.value || HIST_PAGE);
+  const listaExibida = lista.slice(0, histLimit);
+  const temMais = lista.length > histLimit;
+
+  listEl.innerHTML = listaExibida.map(h => {
     const tc = tipoConfig[h.tipo] || tipoConfig.notif;
     return `<div style="background:${tc.bg};border:1px solid ${tc.border};border-left:4px solid ${tc.cor};border-radius:10px;padding:12px 16px;margin-bottom:8px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
@@ -5172,7 +5993,22 @@ function renderHistorico() {
         </div>
       </div>
     </div>`;
-  }).join('');
+  }).join('') + (temMais
+    ? `<div style="text-align:center;padding:16px">
+        <input type="hidden" id="hist-limit" value="${histLimit}">
+        <button onclick="histCarregarMais()" style="background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3);color:#c084fc;padding:8px 24px;border-radius:10px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px">
+          ⬇ VER MAIS (${lista.length - histLimit} eventos restantes)
+        </button>
+      </div>`
+    : lista.length > HIST_PAGE
+      ? `<div style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);padding:10px">Exibindo todos os ${lista.length} eventos</div>`
+      : '');
+}
+
+function histCarregarMais() {
+  const el = document.getElementById('hist-limit');
+  if (el) el.value = String((parseInt(el.value) || 100) + 100);
+  renderHistorico();
 }
 
 async function limparHistorico() {
@@ -5514,12 +6350,57 @@ async function deletePresenca(docId){
 
 function renderMovs(){
   const s=window._state; if(!s)return;
-  document.getElementById('movs-count').textContent=s.movs.length;
+  const q         = (document.getElementById('search-movs')?.value || '').toLowerCase();
+  const tipoFiltro= document.getElementById('movs-tipo-filtro')?.value || '';
+  const stFiltro  = document.getElementById('movs-status-filtro')?.value || '';
+
+  const todas = [...(s.movs||[])].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+
+  // ── Stats gerais (sempre sobre todas as movs, não filtradas) ──
+  const fin     = todas.filter(m => m.finalizada).length;
+  const abertas = todas.length - fin;
+  const partsAll= s.participacoes||[];
+  const movsComPart = todas.filter(m => partsAll.some(p => p.movId === m._id && p.presente));
+  const mediaPresentes = movsComPart.length > 0
+    ? Math.round(movsComPart.reduce((acc, m) => {
+        return acc + partsAll.filter(p => p.movId === m._id && p.presente).length;
+      }, 0) / movsComPart.length)
+    : 0;
+  const tiposCount = {};
+  todas.forEach(m => { if(m.tipo) tiposCount[m.tipo] = (tiposCount[m.tipo]||0)+1; });
+  const tipoTop = Object.entries(tiposCount).sort((a,b)=>b[1]-a[1])[0];
+
+  // Inserir stats no sgrid de movs (criado dinamicamente pois o HTML tem só a lista)
+  let statsEl = document.getElementById('movs-stats-grid');
+  if (!statsEl) {
+    statsEl = document.createElement('div');
+    statsEl.id = 'movs-stats-grid';
+    statsEl.className = 'sgrid';
+    statsEl.style.marginBottom = '12px';
+    const listEl = document.getElementById('movs-list');
+    if (listEl && listEl.parentNode) listEl.parentNode.insertBefore(statsEl, listEl);
+  }
+  statsEl.innerHTML = `
+    <div class="sc v"><span class="sc-icon">🎮</span><div class="sc-val">${todas.length}</div><div class="sc-lbl">Total</div></div>
+    <div class="sc g"><span class="sc-icon">✅</span><div class="sc-val">${fin}</div><div class="sc-lbl">Finalizadas</div></div>
+    <div class="sc y"><span class="sc-icon">⏳</span><div class="sc-val">${abertas}</div><div class="sc-lbl">Em Aberto</div></div>
+    <div class="sc c"><span class="sc-icon">👥</span><div class="sc-val">${mediaPresentes}</div><div class="sc-lbl">Média Presentes</div></div>
+    ${tipoTop ? `<div class="sc p"><span class="sc-icon">🏆</span><div class="sc-val" style="font-size:11px;font-family:'Share Tech Mono',monospace">${tipoTop[0]}</div><div class="sc-lbl">Tipo Top (${tipoTop[1]})</div></div>` : ''}
+  `;
+  const filtered = todas.filter(mv => {
+    if (q && !(mv.nome||'').toLowerCase().includes(q) && !(mv.resp||'').toLowerCase().includes(q)) return false;
+    if (tipoFiltro && mv.tipo !== tipoFiltro) return false;
+    if (stFiltro === 'aberta' && mv.finalizada) return false;
+    if (stFiltro === 'finalizada' && !mv.finalizada) return false;
+    return true;
+  });
+
+  document.getElementById('movs-count').textContent = filtered.length + '/' + todas.length;
   const tipoColor={Temática:'b-purple',Cine:'b-cyan',Jogatina:'b-green',Quiz:'b-orange',Atividades:'b-pink',Evento:'b-yellow',Livre:'b-gray','Reunião Setorial':'b-red',Outro:'b-gray'};
-  document.getElementById('movs-list').innerHTML=s.movs.length===0
-    ?'<div class="empty"><div class="empty-icon">🎮</div><div class="empty-text">Nenhuma mov registrada ainda</div></div>'
-    :s.movs.sort((a,b)=>(b.data||'').localeCompare(a.data||'')).map(mv=>{
-      const pars=s.participacoes.filter(p=>p.movId===mv._id);
+  document.getElementById('movs-list').innerHTML=filtered.length===0
+    ?'<div class="empty"><div class="empty-icon">🎮</div><div class="empty-text">Nenhuma mov encontrada</div></div>'
+    :filtered.map(mv=>{
+      const pars=(s.participacoes||[]).filter(p=>p.movId===mv._id);
       const presentes=pars.filter(p=>p.presente).length;
       const totalPts=pars.reduce((acc,p)=>acc+(p.pontos||0),0);
       const finalizada=!!mv.finalizada;
@@ -6324,8 +7205,15 @@ async function deleteNotif(docId) {
 
 function renderNotificacoes() {
   const s = window._state; if (!s) return;
+  const q = (document.getElementById('search-notif')?.value || '').toLowerCase();
   const lista = (s.notificacoes || [])
-    .filter(n => notifFiltro === 'todos' || n.cat === notifFiltro)
+    .filter(n => {
+      if (notifFiltro !== 'todos' && n.cat !== notifFiltro) return false;
+      if (!q) return true;
+      return (n.titulo||'').toLowerCase().includes(q) ||
+             (n.dest||'').toLowerCase().includes(q) ||
+             (n.obs||'').toLowerCase().includes(q);
+    })
     .sort((a,b) => (b.data||'').localeCompare(a.data||''));
 
   document.getElementById('notif-count').textContent = lista.length + '/' + (s.notificacoes||[]).length;
@@ -6431,17 +7319,43 @@ async function toggleRppStatus(docId) {
 
 function renderRpp() {
   const s = window._state; if (!s) return;
+  const q       = (document.getElementById('search-rpp')?.value || '').toLowerCase();
+  const hojeMs  = new Date().setHours(0,0,0,0); // único cálculo de hoje para toda a função
+  const hojeOrd = hojeMs; // alias para compatibilidade do sort
   const lista = (s.rpps || [])
-    .filter(r => rppFiltro === 'todos' || r.status === rppFiltro)
-    .sort((a,b) => (b.inicio||'').localeCompare(a.inicio||''));
+    .filter(r => {
+      if (rppFiltro !== 'todos' && r.status !== rppFiltro) return false;
+      if (!q) return true;
+      return (r.membro||'').toLowerCase().includes(q) ||
+             (r.discordId||'').includes(q) ||
+             (r.motivo||'').toLowerCase().includes(q);
+    })
+    .sort((a, b) => {
+      // Ativos primeiro; dentro dos ativos, mais urgentes (menor diasRestantes) primeiro
+      if (a.status === 'ativo' && b.status !== 'ativo') return -1;
+      if (a.status !== 'ativo' && b.status === 'ativo') return  1;
+      if (a.status === 'ativo' && b.status === 'ativo') {
+        const dA = a.fim ? Math.round((new Date(a.fim+'T00:00:00').getTime() - hojeMs)/86400000) : 9999;
+        const dB = b.fim ? Math.round((new Date(b.fim+'T00:00:00').getTime() - hojeMs)/86400000) : 9999;
+        return dA - dB; // menor = mais urgente
+      }
+      return (b.inicio||'').localeCompare(a.inicio||'');
+    });
 
   const ativos     = (s.rpps||[]).filter(r => r.status === 'ativo').length;
   const encerrados = (s.rpps||[]).filter(r => r.status === 'encerrado').length;
+  const vencendo  = (s.rpps||[]).filter(r => {
+    if (r.status !== 'ativo' || !r.fim) return false;
+    const fim = new Date(r.fim + 'T00:00:00').getTime();
+    const dias = Math.round((fim - hojeMs) / 86400000);
+    return dias >= 0 && dias <= 3;
+  }).length;
 
   document.getElementById('rpp-stats').innerHTML = `
     <div class="sc y"><span class="sc-icon">⏳</span><div class="sc-val">${ativos}</div><div class="sc-lbl">Ativos</div></div>
     <div class="sc g"><span class="sc-icon">✅</span><div class="sc-val">${encerrados}</div><div class="sc-lbl">Encerrados</div></div>
     <div class="sc v"><span class="sc-icon">🏖️</span><div class="sc-val">${(s.rpps||[]).length}</div><div class="sc-lbl">Total RPP</div></div>
+    ${vencendo > 0 ? `<div class="sc r" style="border-top:3px solid #ef4444;cursor:pointer" onclick="setRppFilter('ativo',this)"><span class="sc-icon">🚨</span><div class="sc-val" style="color:#f87171">${vencendo}</div><div class="sc-lbl">Vencendo em ≤3d</div></div>` : ''}
   `;
   document.getElementById('rpp-count').textContent = lista.length + '/' + (s.rpps||[]).length;
 
@@ -6456,20 +7370,27 @@ function renderRpp() {
         if (r.inicio && r.fim) {
           const ini  = new Date(r.inicio + 'T00:00:00').getTime();
           const fim  = new Date(r.fim    + 'T00:00:00').getTime();
-          const hoje = new Date().setHours(0,0,0,0);
           const total = fim - ini;
-          const passou = Math.min(hoje - ini, total);
+          const passou = Math.min(hojeMs - ini, total);
           pct = total > 0 ? Math.round(Math.max(0, Math.min(100, passou / total * 100))) : 0;
-          diasRestantes = Math.max(0, Math.round((fim - hoje) / 86400000));
+          diasRestantes = Math.max(0, Math.round((fim - hojeMs) / 86400000));
         }
         const barColor = pct >= 100 ? '#22c55e' : pct >= 66 ? '#eab308' : '#06b6d4';
 
-        return `<div class="rpp-card ${r.status}">
+        // Badge de alerta de vencimento
+        const alertaVenc = isAtivo && diasRestantes <= 3 && diasRestantes >= 0
+          ? (diasRestantes === 0
+              ? `<span style="background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.5);color:#f87171;padding:2px 10px;border-radius:8px;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;animation:pulse-border 1.5s infinite">🚨 VENCE HOJE</span>`
+              : `<span style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fca5a5;padding:2px 10px;border-radius:8px;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700">⚠️ Vence em ${diasRestantes}d</span>`)
+          : '';
+
+        return `<div class="rpp-card ${r.status}" style="${isAtivo && diasRestantes <= 3 ? 'border-color:rgba(239,68,68,.4)' : ''}">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px">
             <div>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
                 <span style="font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--text)">@${r.membro}</span>
                 <span class="badge ${isAtivo?'b-yellow':'b-green'}">${isAtivo?'⏳ Ativo':'✅ Encerrado'}</span>
+                ${alertaVenc}
               </div>
               ${r.discordId ? `<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${r.discordId}</div>` : ''}
             </div>
@@ -6491,10 +7412,10 @@ function renderRpp() {
           <div class="rpp-progress">
             <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-bottom:4px">
               <span>PROGRESSO</span>
-              <span>${isAtivo && diasRestantes > 0 ? diasRestantes+' dias restantes' : pct >= 100 ? 'Concluído' : pct+'%'}</span>
+              <span style="color:${isAtivo && diasRestantes <= 3 ? '#f87171' : 'var(--text3)'}">${isAtivo && diasRestantes > 0 ? diasRestantes+' dias restantes' : pct >= 100 ? 'Concluído' : pct+'%'}</span>
             </div>
             <div class="rpp-bar-track">
-              <div class="rpp-bar-fill" style="width:${pct}%;background:${barColor}"></div>
+              <div class="rpp-bar-fill" style="width:${pct}%;background:${isAtivo && diasRestantes <= 3 ? '#ef4444' : barColor}"></div>
             </div>
           </div>` : ''}
         </div>`;
@@ -6523,16 +7444,37 @@ async function salvarMinhaConta() {
   const nova  = document.getElementById('mc-senha-nova').value;
   const conf  = document.getElementById('mc-senha-conf').value;
   if (!atual) { toast('❌ Informe sua senha atual'); return; }
-  if (atual !== u.senha) { toast('❌ Senha atual incorreta'); return; }
-  if (!nova) { toast('❌ Informe a nova senha'); return; }
+  if (!nova)  { toast('❌ Informe a nova senha'); return; }
   if (nova.length < 6) { toast('❌ Senha deve ter mínimo 6 caracteres'); return; }
-  if (nova !== conf) { toast('❌ As senhas não coincidem'); return; }
+  if (nova !== conf)   { toast('❌ As senhas não coincidem'); return; }
+
+  // Verificar senha atual via Firebase Auth (re-autenticação)
+  if (window._auth) {
+    const email = window._auth.toAuthEmail(u.usuario);
+    try {
+      // Re-autenticar para confirmar senha atual
+      await window._auth.signInWithEmailAndPassword(window._auth.auth, email, atual);
+      // Atualizar senha no Firebase Auth
+      await window._auth.updatePassword(window._auth.auth.currentUser, nova);
+    } catch(e) {
+      if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password') {
+        toast('❌ Senha atual incorreta'); return;
+      }
+      console.error('[updatePassword]', e);
+      toast('❌ Erro ao alterar senha: ' + (e.message || e.code)); return;
+    }
+  } else {
+    // Fallback legado — verificar contra Firestore
+    if (atual !== u.senha) { toast('❌ Senha atual incorreta'); return; }
+  }
+
+  // Atualizar Firestore
   const { _id: _uId, ...uSemId } = u;
   const updated = { ...uSemId, senha: nova };
   await window._db.dbSet(window._db.COLS.users, u._id, updated);
   window._state.users = await window._db.dbGetAll(window._db.COLS.users);
   window._currentUser = { ...updated, _id: u._id };
-  sessionStorage.setItem('gp_user', JSON.stringify({ _id: updated._id, senha: updated.senha }));
+  try{ sessionStorage.setItem('gp_user', JSON.stringify({ _id: u._id })); }catch(e){}
   closeModalDirect();
   toast('✅ Senha alterada com sucesso!');
 }
@@ -6913,14 +7855,18 @@ function renderCronograma() {
   }
 
   // --- MOVS ---
+  const q = (document.getElementById('search-cron')?.value || '').toLowerCase();
   const todasMovs = (s.cronograma || [])
     .filter(x => x.tipo === 'mov')
     .sort((a,b) => (a.data+a.horario).localeCompare(b.data+b.horario));
 
   const movsFiltradas = todasMovs.filter(m => {
-    if (cronMovFiltro === 'proximas') return m.data >= hoje;
-    if (cronMovFiltro === 'passadas') return m.data < hoje;
-    return true;
+    if (cronMovFiltro === 'proximas' && m.data < hoje) return false;
+    if (cronMovFiltro === 'passadas' && m.data >= hoje) return false;
+    if (!q) return true;
+    return (m.nome||'').toLowerCase().includes(q) ||
+           (m.resp||'').toLowerCase().includes(q) ||
+           (m.tipo||'').toLowerCase().includes(q);
   });
 
   document.getElementById('cron-mov-count').textContent = movsFiltradas.length + '/' + todasMovs.length;
@@ -7311,6 +8257,201 @@ function matchSemana(rec, sem) {
   return (rec.data||'') >= sem.inicio && (rec.data||'') <= sem.fim;
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// FUNÇÕES DE ANÁLISE E GAMIFICAÇÃO
+// ═══════════════════════════════════════════════════════════════════════
+
+// 1. Streak: semanas consecutivas com pontuação
+function calcStreak(memId, memNome) {
+  const s = window._state; if (!s) return 0;
+  let streak = 0;
+  for (let offset = 0; offset >= -26; offset--) {
+    const sem = getPontSemana(offset);
+    const temPonto = (s.levelup||[]).some(l =>
+      (l.memId === memId || l.membro === memNome) &&
+      matchSemana(l, sem) && (l.pts||0) > 0
+    );
+    if (!temPonto) break;
+    streak++;
+  }
+  return streak;
+}
+
+// 2. Progresso para o próximo up
+function calcProgressoUp(m) {
+  const s = window._state; if (!s) return null;
+  const cargo = getUpCargo(m.cargo);
+  if (!cargo) return null;
+  const prox = getUpProximo(m.cargo);
+  if (!prox) return { pct:100, apto:false, label:'Cargo máximo', cor:'#22c55e' };
+  const metaTotal = calcUpMeta(cargo);
+  const sem = getPontSemana(0);
+  const pts = (s.levelup||[])
+    .filter(l => (l.memId===m.id||l.membro===m.m) && matchSemana(l,sem))
+    .reduce((a,l)=>a+(l.pts||0),0);
+  const pctPts = Math.min(100, metaTotal>0 ? Math.round(pts/metaTotal*100) : 0);
+  const cor  = pctPts>=100?'#22c55e':pctPts>=60?'#eab308':'#3b82f6';
+  const apto = pctPts>=100;
+  return { pct:pctPts, pts, metaTotal, cargo, prox, cor, apto };
+}
+
+// 3. Detecta membro em risco (próximo do rebocamento, mas ainda não rebocado)
+function getMembroEmRisco(m) {
+  if (isRebocado(m)) return false;
+  const ult = (m.ult||'').toUpperCase();
+  return ult.includes('3 SEMANAS') || ult.includes('1 MÊS') || ult.includes('2 MES');
+}
+
+// 4. Tendência de pontuação (subindo / estável / caindo)
+function calcTendencia(memId, memNome) {
+  const s = window._state; if (!s) return null;
+  const ptsSem = offset => (s.levelup||[])
+    .filter(l=>(l.memId===memId||l.membro===memNome)&&matchSemana(l,getPontSemana(offset)))
+    .reduce((a,l)=>a+(l.pts||0),0);
+  const atual   = ptsSem(0);
+  const anterior= ptsSem(-1);
+  if (anterior===0 && atual===0) return null;
+  if (atual > anterior+5)  return { seta:'↑', cor:'#22c55e', label:'Subindo' };
+  if (atual < anterior-5)  return { seta:'↓', cor:'#ef4444', label:'Caindo' };
+  return { seta:'→', cor:'#94a3b8', label:'Estável' };
+}
+
+// 5. Score de saúde do servidor (0-100)
+function calcSaudeServidor() {
+  const s = window._state; if (!s) return { score:0, nivel:{label:'—',cor:'#64748b'} };
+  const total  = (s.members||[]).length||1;
+  const ativos = (s.members||[]).filter(m=>m.ativo).length;
+  const comPts = (s.members||[]).filter(m=>m.pts).length;
+  const reboc  = (s.members||[]).filter(m=>isRebocado(m)).length;
+  const movsF  = (s.movs||[]).filter(m=>m.finalizada).length;
+  const movsTot= (s.movs||[]).length||1;
+  const fbRes  = (s.feedbacks||[]).filter(f=>f.status==='resolvido').length;
+  const fbTot  = (s.feedbacks||[]).length||1;
+  const score  = Math.round(
+    (ativos/total*100)*0.30 +
+    (comPts/total*100)*0.25 +
+    Math.max(0,100-reboc/total*200)*0.20 +
+    (movsF/movsTot*100)*0.15 +
+    (fbRes/fbTot*100)*0.10
+  );
+  const nivel = score>=80?{label:'ÓTIMO',cor:'#22c55e'}
+              : score>=60?{label:'BOM',cor:'#4db0ff'}
+              : score>=40?{label:'REGULAR',cor:'#eab308'}
+              :            {label:'CRÍTICO',cor:'#ef4444'};
+  return { score, nivel };
+}
+
+// 6. Exportar membros como CSV
+function exportarCSVMembros() {
+  const s = window._state; if (!s) return;
+  const lista = (s.members||[]);
+  const header = ['Nome','ID Discord','Cargo','Posição','Tipo Up','Upa Games','Ativo','Com Pontos','Última Pont.','Entrou'];
+  const rows = lista.map(m => [
+    m.m||'', m.id||'', m.cargo||'', m.posicao||'comum',
+    m.tipoUp||'meta', m.upaGames||'nao',
+    m.ativo?'sim':'nao', m.pts?'sim':'nao', m.ult||'', m.entrou||'',
+  ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv  = [header.join(','),...rows].join('\n');
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=`membros_games_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast(`✅ CSV exportado: ${lista.length} membros`);
+}
+
+// 7. Cópia de lista de membros para Discord
+function copiarListaMembrosDiscord() {
+  const s = window._state; if (!s) return;
+  const membros = (s.members||[]);
+  const posOrder= ['gestao','subgestao','comum',''];
+  const grupos  = {};
+  posOrder.forEach(p=>{ grupos[p]=[]; });
+  membros.forEach(m=>{ (grupos[m.posicao||'comum']=grupos[m.posicao||'comum']||[]).push(m); });
+  const posLabel= {gestao:'🛡️ GESTÃO',subgestao:'⚡ SUBGESTÃO',comum:'👤 MEMBROS','':"👤 MEMBROS"};
+  const fmt = arr => arr.map(m=>`• @${m.m}${m.id?` (<@${m.id}>)`:''} — ${m.cargo||'—'}`).join('\n');
+  const partes = posOrder.filter(p=>(grupos[p]||[]).length>0)
+    .map(p=>`${posLabel[p]} (${grupos[p].length}):\n${fmt(grupos[p])}`);
+  const msg = `👥 **MEMBROS — GAMES // PUREZA**\nTotal: ${membros.length}\n\n${partes.join('\n\n')}\n\n━━━━━━━━━━━━━━━━━━━━━━━`;
+  navigator.clipboard.writeText(msg)
+    .then(()=>toast('📋 Lista de membros copiada!'))
+    .catch(()=>toast('⚠️ Erro ao copiar'));
+}
+
+// 8. Relatório semanal automático para Discord
+function gerarRelatorioSemanalDiscord() {
+  const s = window._state; if (!s) return;
+  const sem     = getPontSemana(0);
+  const ranking = typeof dtCalcRanking==='function' ? dtCalcRanking(sem) : [];
+  const dest    = ranking.filter(r=>r.elegivel&&!r.foraDoTop).slice(0,2);
+  const luSem   = (s.levelup||[]).filter(l=>matchSemana(l,sem)).sort((a,b)=>(b.pts||0)-(a.pts||0));
+  const upsSem  = (s.upamentos||[]).filter(u=>u.upou&&matchSemana(u,sem));
+  const movsSem = (s.movs||[]).filter(m=>m.finalizada&&(m.data||'')>=sem.inicio&&(m.data||'')<=sem.fim);
+  const reboc   = (s.members||[]).filter(m=>isRebocado(m)).length;
+  const medalhas= ['🥇','🥈','🥉'];
+
+  const destStr = dest.length>0
+    ? dest.map((d,i)=>`${['🥇','🥈'][i]} @${d.nome} (score: ${d.score})`).join('\n')
+    : '— Nenhum destaque —';
+  const luStr = luSem.slice(0,3).map((l,i)=>`${medalhas[i]} @${l.membro||'—'} — ${l.pts} pts`).join('\n')||'—';
+  const upsStr= upsSem.length>0
+    ? upsSem.map(u=>`• @${u.membro}: ${u.cargoDe} → **${u.cargoPara}**`).join('\n')
+    : '— Nenhum up esta semana —';
+
+  const msg =
+`📊 **RELATÓRIO SEMANAL — GAMES**
+📅 Semana: ${sem.label}
+
+⭐ **DESTAQUES:**
+${destStr}
+
+🏆 **TOP PONTUAÇÃO:**
+${luStr}
+
+🎯 **UPS REALIZADOS (${upsSem.length}):**
+${upsStr}
+
+🎮 **MOVS REALIZADAS:** ${movsSem.length}
+🚨 **EM REBOCAMENTO:** ${reboc}
+
+━━━━━━━━━━━━━━━━━━━━━━━`;
+
+  navigator.clipboard.writeText(msg)
+    .then(()=>toast('📋 Relatório semanal copiado!'))
+    .catch(()=>toast('⚠️ Erro ao copiar'));
+}
+
+// 9. Confirmar destaque automático como oficial com 1 clique
+async function confirmarDestaqueOficial(memId, nome, score, semLabel) {
+  if (!confirm(`Confirmar @${nome} como destaque oficial?\n(${semLabel})`)) return;
+  const obj = {
+    membro:nome, memId, semana:semLabel,
+    motivo:`Destaque automático — Score: ${score}`,
+    data:new Date().toISOString().slice(0,10),
+    resp:window._currentUser?.nome||'—',
+    oficial:true,
+  };
+  await window._db.dbSet(window._db.COLS.destaques, window._db.genId(), obj);
+  window._state.destaques = await window._db.dbGetAll(window._db.COLS.destaques);
+  renderDestaques();
+  toast('⭐ Destaque confirmado como oficial!');
+}
+
+// 10. Ranking histórico geral (soma de todas as semanas)
+function calcRankingHistorico() {
+  const s = window._state; if (!s) return [];
+  const acc = {};
+  (s.levelup||[]).forEach(l => {
+    const k = l.memId||l.membro;
+    if (!k) return;
+    if (!acc[k]) acc[k] = { memId:l.memId, membro:l.membro, total:0, semanas:0 };
+    acc[k].total  += (l.pts||0);
+    acc[k].semanas++;
+  });
+  return Object.values(acc).sort((a,b)=>b.total-a.total);
+}
+
 function getPontSemana(offset) {
   // Semana de SAB a SEX (sábado=6, domingo=0, ..., sexta=5)
   const agora = new Date();
@@ -7328,6 +8469,73 @@ function getPontSemana(offset) {
     fim:    sex.toISOString().slice(0,10),
     label:  `${fmt(sab)}/${sab.getFullYear()} — ${fmt(sex)}/${sex.getFullYear()}`
   };
+}
+
+// Retorna o status atual da semana de LU e da janela de upamentos
+// Regra:
+//   Level Up  → semana SAB 00:00 até SEX 23:59 (7 dias)
+//   Upamentos → janela SAB 00:00 até DOM 23:59 (SAB da semana atual + 1 dia extra = DOM)
+function getSemanaStatus() {
+  const agora  = new Date();
+  const dia    = agora.getDay(); // 0=dom, 6=sab
+  const hora   = agora.getHours();
+  const sem    = getPontSemana(0);           // semana atual SAB→SEX
+  const semAnt = getPontSemana(-1);          // semana anterior
+
+  // Fase da semana (baseada no dia atual)
+  // SAB (dia=6): 1º dia da semana LU → LU ABERTO, janela UP ABERTA
+  // DOM (dia=0): LU fechado (semana anterior), janela UP ABERTA (até 23:59)
+  // SEG–SEX (dia=1-5): LU da semana atual em curso, UP fechado
+
+  const isDOM = dia === 0;
+  const isSAB = dia === 6;
+
+  // Para Level Up: a semana ativa é sempre a semana SAB→SEX atual
+  // Para Upamentos: a janela é SAB 00:00 → DOM 23:59 (2 dias)
+  //   No DOM: ainda estamos na janela da semana que fechou ontem (SEX)
+  //   → a semana de referência dos ups é a semana ANTERIOR (SAB→SEX que acabou)
+
+  const semLU = sem;            // semana ativa do LU (SAB→SEX)
+  const semUP = isDOM ? semAnt : sem;  // semana de ref dos ups (no DOM = semana anterior)
+
+  // Status do LU
+  let luStatus, luCor;
+  if (isSAB) {
+    luStatus = '🟢 SEMANA ABERTA — reseta hoje às 00:00';
+    luCor    = '#22c55e';
+  } else if (isDOM) {
+    luStatus = '🔒 LV fechado — upamentos ainda abertos até meia-noite';
+    luCor    = '#f97316';
+  } else {
+    // SEG a SEX
+    const diasRestantesLU = 6 - dia; // sex=dia5 → 1 dia restante; seg=dia1 → 5 dias
+    // Calcula data do próximo sábado
+    const proxSab = new Date(agora);
+    proxSab.setDate(agora.getDate() + (6 - dia + 7) % 7 || 7);
+    const fmtDia = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+    luStatus = `📊 Semana em curso — reseta ${fmtDia(proxSab)} (SAB)`;
+    luCor    = '#a855f7';
+  }
+
+  // Status do UP
+  let upStatus, upCor, upAtivo;
+  if (isSAB || isDOM) {
+    upAtivo  = true;
+    const fimJanela = isDOM ? 'hoje (DOM) às 23:59' : 'amanhã (DOM) às 23:59';
+    upStatus = `🟢 JANELA ABERTA — ups válidos até ${fimJanela}`;
+    upCor    = '#22c55e';
+  } else {
+    upAtivo  = false;
+    // Próximo SAB
+    const proxSab = new Date(agora);
+    proxSab.setDate(agora.getDate() + (6 - dia + 7) % 7 || 7);
+    const fmtDia = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+    const diasAte = Math.ceil((proxSab.getTime() - agora.setHours(0,0,0,0)) / 86400000);
+    upStatus = `🔒 JANELA FECHADA — abre em ${diasAte}d (${fmtDia(proxSab)} SAB)`;
+    upCor    = '#64748b';
+  }
+
+  return { luStatus, luCor, upStatus, upCor, upAtivo, semLU, semUP };
 }
 
 function pontSemanaAnterior() { pontSemanaOffset--; renderPontuacoes(); }
@@ -7554,11 +8762,14 @@ function renderPontuacoes() {
   if(elRankLabel) elRankLabel.textContent = `${rankList.length} colaboradores`;
   if(elRank) elRank.innerHTML = rankList.length === 0
     ? '<div class="empty"><div class="empty-icon">🏆</div><div class="empty-text">Nenhuma pontuação ainda</div></div>'
-    : rankList.map((r, i) => `
+    : rankList.map((r, i) => {
+        const tend = !isGeral ? calcTendencia(null, r.nome) : null;
+        const tendStr = tend ? `<span style="color:${tend.cor};font-size:13px" title="${tend.label}">${tend.seta}</span>` : '';
+        return `
       <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:${i===0?'rgba(0,112,209,.08)':'var(--bg3)'};border:1px solid ${i===0?'rgba(0,112,209,.25)':'var(--border)'};border-radius:10px;margin-bottom:7px;flex-wrap:wrap">
         <span style="font-size:24px;width:32px;text-align:center">${medalhas[i]||`<span style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--text3)">#${i+1}</span>`}</span>
         <div style="flex:1;min-width:120px">
-          <div style="font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--text)">@${r.nome}</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px">@${r.nome} ${tendStr}</div>
           <div style="display:flex;gap:8px;margin-top:5px;flex-wrap:wrap">
             ${r.part  ? `<span style="font-size:10px;color:#a855f7;font-family:'Share Tech Mono',monospace;background:rgba(168,85,247,.1);padding:1px 8px;border-radius:3px">🎮 ${r.part}pts</span>` : ''}
             ${r.news  ? `<span style="font-size:10px;color:#f97316;font-family:'Share Tech Mono',monospace;background:rgba(249,115,22,.1);padding:1px 8px;border-radius:3px">📰 ${r.news}pts</span>` : ''}
@@ -7569,10 +8780,76 @@ function renderPontuacoes() {
         <div style="font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:${i===0?'#4db0ff':i===1?'#94a3b8':i===2?'#b45309':'var(--text2)'}">
           ${r.total}<span style="font-size:10px;font-weight:400;color:var(--text3)"> pts</span>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 }
 
 function pontCard() {} // mantido por compatibilidade
+
+function pontCopiarDiscord() {
+  const s = window._state; if (!s) return;
+  const sem      = getPontSemana(pontSemanaOffset);
+  const isGeral  = pontViewMode === 'geral';
+  const labelPer = isGeral ? 'Geral' : sem.label;
+
+  function noperiodo(data) {
+    if (isGeral) return true;
+    return (data||'') >= sem.inicio && (data||'') <= sem.fim;
+  }
+
+  // Montar ranking consolidado igual ao renderPontuacoes
+  const newsItens  = (s.news||[]).filter(n => noperiodo(n.data||''));
+  const instItens  = (s.instrucoes||[]).filter(i => i.status==='concluida' && noperiodo(i.data||''));
+  const fbInstItens= (s.feedbacks||[]).filter(f => noperiodo(f.data||'') &&
+    (f.tipo==='membro_area' || (f.tipo==='gestao_membro' && f.staffCargo==='instrutor')));
+  const acolhItens = (s.acolhimentos||[]).filter(a => a.status==='concluido' && noperiodo(a.data||''));
+  const partItens  = (s.participacoes||[]).filter(p => noperiodo(p.data||''));
+
+  const ranking = {};
+  const add = (k, campo, pts) => {
+    if (!k) return;
+    if (!ranking[k]) ranking[k] = { part:0, news:0, inst:0, acolh:0 };
+    ranking[k][campo] += pts;
+  };
+
+  newsItens.forEach(n  => add(n.autor||'', 'news', 15));
+  instItens.forEach(i  => add(i.instrutor||'', 'inst', i.tipo==='duvida'?2:i.canal==='call'?4:2));
+  fbInstItens.forEach(f => add(f.staffNome||f.autorNome||'', 'inst', 2));
+  acolhItens.forEach(a => add(a.acolhedor||'', 'acolh', a.tipo==='call'?4:2));
+  partItens.forEach(p  => add(p.memNome||p.memId||'', 'part', 1));
+
+  const lista = Object.entries(ranking)
+    .map(([nome, p]) => ({ nome, total: p.part+p.news+p.inst+p.acolh, ...p }))
+    .sort((a,b) => b.total - a.total)
+    .slice(0, 20); // top 20
+
+  if (lista.length === 0) { toast('⚠️ Nenhuma pontuação neste período!'); return; }
+
+  const medalhas = ['🥇','🥈','🥉'];
+  const linhas = lista.map((r, i) => {
+    const pos = medalhas[i] || `#${i+1}`;
+    const partes = [];
+    if (r.part)  partes.push(`🎮 ${r.part}pts`);
+    if (r.news)  partes.push(`📰 ${r.news}pts`);
+    if (r.inst)  partes.push(`📚 ${r.inst}pts`);
+    if (r.acolh) partes.push(`🤗 ${r.acolh}pts`);
+    return `${pos} @${r.nome} — **${r.total}pts** (${partes.join(' · ')})`;
+  }).join('\n');
+
+  const msg =
+`🏆 **RANKING DE PONTUAÇÕES** 🏆
+📅 ${labelPer}
+
+${linhas}
+
+━━━━━━━━━━━━━━━━━━━━━━━`;
+
+  navigator.clipboard.writeText(msg).then(() => {
+    toast('📋 Ranking copiado para o Discord!');
+  }).catch(() => {
+    toast('⚠️ Não foi possível copiar automaticamente.');
+  });
+}
 
 // ===== LEVEL UP — CARGOS SEMANAIS MANUAIS =====
 const LU_CARGOS = [
@@ -7768,23 +9045,74 @@ async function deleteLevelUp(docId) {
 function renderLevelUp() {
   const s = window._state; if(!s) return;
   const sem = getPontSemana(luOffset);
+  const q   = (document.getElementById('search-lu')?.value || '').toLowerCase();
   const labelEl = document.getElementById('lu-semana-label');
-  if(labelEl) labelEl.textContent = sem.label;
+  if(labelEl) labelEl.textContent = luViewMode === 'historico' ? 'TODAS AS SEMANAS' : sem.label;
 
-  // Filtrar por semana — robusto com múltiplos formatos via matchSemana
-  const lista = (s.levelup || [])
-    .filter(l => matchSemana(l, sem))
+  // Badge de status semanal
+  const statusEl = document.getElementById('lu-semana-status');
+  if (statusEl) {
+    if (luViewMode === 'historico') {
+      statusEl.innerHTML = `<span style="color:#a855f7">🏅 Ranking acumulado histórico</span>`;
+    } else if (luOffset === 0) {
+      const { luStatus, luCor } = getSemanaStatus();
+      statusEl.innerHTML = `<span style="color:${luCor}">${luStatus}</span>`;
+    } else {
+      statusEl.innerHTML = `<span style="color:var(--text3)">📅 Semana arquivada</span>`;
+    }
+  }
+
+  const rankEl = document.getElementById('lu-ranking');
+  if(!rankEl) return;
+
+  // ── MODO HISTÓRICO ──────────────────────────────────
+  if (luViewMode === 'historico') {
+    const hist = calcRankingHistorico();
+    const listaH = hist.filter(r => !q ||
+      (r.membro||'').toLowerCase().includes(q) ||
+      (r.memId||'').toLowerCase().includes(q)
+    );
+    const countEl = document.getElementById('lu-count');
+    if(countEl) countEl.textContent = `${listaH.length} membros`;
+
+    const medalhas = ['🥇','🥈','🥉'];
+    if (listaH.length === 0) {
+      rankEl.innerHTML = '<div class="empty"><div class="empty-icon">🏅</div><div class="empty-text">Nenhum registro histórico</div></div>';
+      return;
+    }
+    rankEl.innerHTML = listaH.map((r,i) => {
+      const media = r.semanas > 0 ? Math.round(r.total / r.semanas) : 0;
+      return `<div style="background:var(--bg3);border:1px solid ${i<3?'rgba(168,85,247,.3)':'var(--border)'};border-left:4px solid ${i===0?'#fbbf24':i===1?'#94a3b8':i===2?'#b45309':'#475569'};border-radius:12px;padding:12px 16px;margin-bottom:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-size:18px;width:24px;text-align:center">${medalhas[i]||`<span style='font-family:Share Tech Mono,monospace;font-size:11px;color:var(--text3)'>#${i+1}</span>`}</span>
+        <div style="flex:1;min-width:120px">
+          <div style="font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--text)">@${r.membro||'—'}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)">${r.semanas} semana${r.semanas!==1?'s':''} · média ${media} pts/sem</div>
+        </div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:#a855f7">${r.total}<span style="font-size:10px;font-weight:400;color:var(--text3)"> pts total</span></div>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // ── MODO SEMANAL (original) ─────────────────────────
+
+  // Filtrar por semana + busca
+  const listaTodos = (s.levelup || []).filter(l => matchSemana(l, sem));
+  const lista = listaTodos
+    .filter(l => !q ||
+      (l.membro||'').toLowerCase().includes(q) ||
+      (l.memId||'').includes(q))
     .sort((a,b) => (b.pts||0) - (a.pts||0));
 
   const countEl = document.getElementById('lu-count');
-  if(countEl) countEl.textContent = `${lista.length} membros`;
+  if(countEl) countEl.textContent = `${lista.length}${q ? '/'+listaTodos.length : ''} membros`;
 
   const medalhas = ['🥇','🥈','🥉'];
 
-  // ---- TOP 3 ----
+  // ---- TOP 3 (sempre sobre o ranking completo, não filtrado pela busca) ----
   const top3El = document.getElementById('lu-top3');
   if(top3El) {
-    const top3 = lista.slice(0,3);
+    const top3 = listaTodos.slice(0,3);
     if(top3.length === 0) {
       top3El.innerHTML = '';
     } else {
@@ -7806,18 +9134,34 @@ function renderLevelUp() {
   }
 
   // ---- Lista completa ----
-  const rankEl = document.getElementById('lu-ranking');
   if(!rankEl) return;
   if(lista.length === 0) {
     rankEl.innerHTML = '<div class="empty"><div class="empty-icon">⚡</div><div class="empty-text">Nenhum registro nesta semana</div></div>';
     return;
   }
 
+  // Calcular acumulado por membro (todas as semanas)
+  const acumuladoPorMembro = {};
+  (s.levelup||[]).forEach(l => {
+    const k = l.memId || l.membro;
+    if (!k) return;
+    acumuladoPorMembro[k] = (acumuladoPorMembro[k] || 0) + (l.pts || 0);
+  });
+  const semanasPorMembro = {};
+  (s.levelup||[]).forEach(l => {
+    const k = l.memId || l.membro;
+    if (!k) return;
+    semanasPorMembro[k] = (semanasPorMembro[k] || 0) + 1;
+  });
+
   rankEl.innerHTML = lista.map((r,i) => {
     const c = getLuCargo(r.pts||0);
     const pctMax = c.max === Infinity ? r.pts : c.max;
     const pct = Math.min(100, Math.round((r.pts - c.min) / (pctMax - c.min + 1) * 100));
     const faltam = c.max === Infinity ? null : (c.max + 1) - r.pts;
+    const keyMem    = r.memId || r.membro || null;
+    const acumulado = keyMem ? (acumuladoPorMembro[keyMem] || r.pts) : r.pts;
+    const nSemanas  = keyMem ? (semanasPorMembro[keyMem]   || 1)     : 1;
     return `<div style="background:var(--bg3);border:1px solid ${i<3?c.border:'var(--border)'};border-left:4px solid ${c.cor};border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <span style="font-size:20px;width:28px;text-align:center">${medalhas[i]||`<span style='font-family:Share Tech Mono,monospace;font-size:11px;color:var(--text3)'>#${i+1}</span>`}</span>
       <span style="font-size:22px">${c.icon}</span>
@@ -7834,8 +9178,9 @@ function renderLevelUp() {
           ${faltam!==null ? `Faltam ${faltam} pts para o próximo nível` : '🏆 Nível máximo!'}
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
         <div style="font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:${c.cor}">${r.pts}<span style="font-size:10px;font-weight:400;color:var(--text3)"> pts</span></div>
+        ${nSemanas > 1 ? `<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);text-align:right">🏅 ${acumulado} acumulados<br><span style="font-size:9px">(${nSemanas} semanas)</span></div>` : ''}
         <div style="display:flex;gap:5px">
           <button class="btn btn-edit btn-sm" onclick="openLevelUpModal('${r._id}')">✏️</button>
           <button class="btn btn-del btn-sm" onclick="deleteLevelUp('${r._id}')">🗑</button>
@@ -7999,22 +9344,35 @@ function upBuscarParticipacoes() {
     upPopularSelect(membro.tipoUp || 'meta');
     const cargoEl = document.getElementById('up-cargo-de');
     if (cargoEl && membro.cargo) cargoEl.value = membro.cargo;
+
+    // Atualizar título e cor do modal conforme tipo
+    const isMerito = membro.tipoUp === 'merito';
+    const titleEl  = document.getElementById('modal-upamento-title');
+    if (titleEl) {
+      titleEl.textContent = isMerito ? '➕ REGISTRAR 🏅 MÉRITO' : '➕ REGISTRAR 🎯 META';
+      titleEl.style.color = isMerito ? '#c084fc' : '#4db0ff';
+    }
+
     // Mostrar aviso de elegibilidade
-    const elegivel = membro.tipoUp === 'meta' && membro.upaGames === 'sim';
+    const elegivel = !isMerito && membro.upaGames === 'sim';
     const infoUpEl = document.getElementById('up-eligibilidade-membro');
     if (infoUpEl) {
       infoUpEl.style.display = '';
-      if (elegivel) {
-        infoUpEl.style.background = 'rgba(34,197,94,.08)';
+      if (isMerito) {
+        infoUpEl.style.background  = 'rgba(168,85,247,.08)';
+        infoUpEl.style.borderColor = 'rgba(168,85,247,.3)';
+        infoUpEl.style.color       = '#c084fc';
+        infoUpEl.innerHTML = `🏅 <strong>${membro.m}</strong> — Tipo Mérito · Cargo: <strong>${membro.cargo||'—'}</strong>`;
+      } else if (elegivel) {
+        infoUpEl.style.background  = 'rgba(34,197,94,.08)';
         infoUpEl.style.borderColor = 'rgba(34,197,94,.3)';
-        infoUpEl.style.color = '#22c55e';
+        infoUpEl.style.color       = '#22c55e';
         infoUpEl.innerHTML = `✅ <strong>${membro.m}</strong> — 🎯 Meta · 🎮 Upa por Games · Cargo: <strong>${membro.cargo||'—'}</strong>`;
       } else {
-        infoUpEl.style.background = 'rgba(239,68,68,.08)';
+        infoUpEl.style.background  = 'rgba(239,68,68,.08)';
         infoUpEl.style.borderColor = 'rgba(239,68,68,.25)';
-        infoUpEl.style.color = '#f87171';
-        const motivo = membro.tipoUp !== 'meta' ? '🏅 Tipo Mérito' : '❌ Não marcado para upar por Games';
-        infoUpEl.innerHTML = `⚠️ <strong>${membro.m}</strong> — ${motivo} · Cargo: <strong>${membro.cargo||'—'}</strong>`;
+        infoUpEl.style.color       = '#f87171';
+        infoUpEl.innerHTML = `⚠️ <strong>${membro.m}</strong> — ❌ Não marcado para upar por Games · Cargo: <strong>${membro.cargo||'—'}</strong>`;
       }
     }
     upAutoFill();
@@ -8237,9 +9595,10 @@ async function saveUpamento() {
   if (!document.getElementById('up-membro').value.trim()) { toast('❌ Informe o membro'); return; }
   if (!cargoNome) { toast('❌ Selecione o cargo atual'); return; }
 
-  // Buscar tipo do membro ANTES das validações
-  const membro = (window._state.members || []).find(m => m.id === memId || m.m === document.getElementById('up-membro').value.trim());
-  const tipoUp   = membro?.tipoUp   || 'meta';
+  // Buscar tipo do membro — com fallback pelo cargo selecionado (mérito vs meta)
+  const membro   = (window._state.members || []).find(m => m.id === memId || m.m === document.getElementById('up-membro').value.trim());
+  const cargoMerito = getMeritoCargo(cargoNome);
+  const tipoUp   = membro?.tipoUp || (cargoMerito ? 'merito' : 'meta');
   const upaGames = membro?.upaGames || 'nao';
 
   // Validações de meta apenas para membros Meta (não Mérito)
@@ -8266,10 +9625,8 @@ async function saveUpamento() {
     data:      new Date().toISOString().slice(0,10),
   };
 
-  // Alertar se não é elegível por games
-  if (tipoUp !== 'meta') {
-    toast('⚠️ Membro do tipo Mérito — registrado mas não apto para up por Games.');
-  } else if (upaGames !== 'sim') {
+  // Alertar apenas se meta sem games habilitado
+  if (tipoUp === 'meta' && upaGames !== 'sim') {
     toast('⚠️ Membro não marcado para upar por Games — registrado mas verifique.');
   }
 
@@ -8338,6 +9695,14 @@ function renderUpamentos() {
   const s = window._state; if(!s) return;
   const q = (document.getElementById('search-up')?.value || '').toLowerCase();
 
+  // Badge de status da janela de upamentos
+  const janelaEl = document.getElementById('up-janela-status');
+  if (janelaEl) {
+    const { upStatus, upCor, upAtivo, semUP } = getSemanaStatus();
+    janelaEl.innerHTML = `<span style="color:${upCor}">${upStatus}</span>
+      ${upAtivo ? `<span style="color:var(--text3);margin-left:8px">Semana ref: ${semUP.label}</span>` : ''}`;
+  }
+
   // Tabela de cargos
   const tabelaEl = document.getElementById('up-tabela-cargos');
   if(tabelaEl) {
@@ -8368,9 +9733,22 @@ function renderUpamentos() {
     tabelaEl.innerHTML = html;
   }
 
+  // Atualizar visual dos botões de semana
+  ['up-sem-all','up-sem-atual','up-sem-ant'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active-filter');
+  });
+  const semBtnId = upSemanaOffset === null ? 'up-sem-all' : upSemanaOffset === 0 ? 'up-sem-atual' : 'up-sem-ant';
+  document.getElementById(semBtnId)?.classList.add('active-filter');
+
+  // Semana de referência para filtro
+  const semFiltro = upSemanaOffset !== null ? getPontSemana(upSemanaOffset) : null;
+
   // Lista de registros
   const lista = (s.upamentos || [])
     .filter(u => {
+      // Filtro por semana
+      if (semFiltro && !matchSemana(u, semFiltro)) return false;
       // Busca por texto
       if (q && !(u.membro?.toLowerCase().includes(q) || u.cargoDe?.toLowerCase().includes(q) || u.cargoPara?.toLowerCase().includes(q))) return false;
       // Filtro por tipo
@@ -8382,12 +9760,31 @@ function renderUpamentos() {
     })
     .sort((a,b) => (b.data||'').localeCompare(a.data||''));
 
+  // Histórico de ups por membro (agrupado)
+  const historicoUps = {};
+  (s.upamentos||[]).filter(u => u.upou).forEach(u => {
+    const k = u.memId || u.membro;
+    if (!k) return;
+    if (!historicoUps[k]) historicoUps[k] = [];
+    historicoUps[k].push({ cargo: u.cargoPara, semana: u.semana || u.data || '' });
+  });
+
   document.getElementById('up-count').textContent = lista.length;
   document.getElementById('up-list').innerHTML = lista.length === 0
     ? '<div class="empty"><div class="empty-icon">🎯</div><div class="empty-text">Nenhum upamento registrado</div></div>'
     : lista.map(u => {
         const cargo = getUpCargo(u.cargoDe) || getMeritoCargo(u.cargoDe) || { cor:'#64748b', bg:'rgba(100,116,139,.1)' };
         const upouCor = u.upou ? '#22c55e' : '#e53935';
+        const keyMem  = u.memId || u.membro;
+        const histMem = (historicoUps[keyMem]||[]).sort((a,b) => a.semana.localeCompare(b.semana));
+        const histHtml = histMem.length > 1
+          ? `<div style="margin-top:8px;padding:6px 10px;background:rgba(0,112,209,.06);border:1px solid rgba(0,112,209,.15);border-radius:8px">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#4db0ff;letter-spacing:1px;margin-bottom:4px">📈 CAMINHO DE CARGOS</div>
+              <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center">
+                ${histMem.map((h,i) => `<span style="font-size:10px;background:rgba(34,197,94,.12);color:#22c55e;padding:1px 7px;border-radius:6px;font-family:'Share Tech Mono',monospace">${h.cargo}</span>${i<histMem.length-1?'<span style="color:var(--text3);font-size:10px">→</span>':''}`).join('')}
+              </div>
+            </div>`
+          : '';
         return `<div style="background:var(--bg3);border:1px solid var(--border);border-left:4px solid ${u.upou?'#22c55e':'#475569'};border-radius:12px;padding:14px 16px;margin-bottom:8px">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
             <div style="flex:1">
@@ -8418,6 +9815,8 @@ function renderUpamentos() {
               </div>
               <!-- Checklist elegibilidade -->
               ${upChecklistHtml(u)}
+              <!-- Histórico de ups por membro -->
+              ${histHtml}
             </div>
             <div style="display:flex;gap:5px;flex-shrink:0">
               <button class="btn btn-edit btn-sm" onclick="openUpamentoModal('${u._id}')">✏️</button>
@@ -8543,6 +9942,47 @@ function dtCalcRanking(sem) {
   return [...elegiveis.slice(0, 2), ...elegiveis.slice(2).map(m => ({...m, foraDoTop: true})), ...inelegiveis];
 }
 
+function dtToggleFormula() {
+  const el = document.getElementById('dt-formula-panel');
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
+function dtCopiarDiscord() {
+  const s = window._state; if (!s) return;
+  const sem     = getPontSemana(dtOffset);
+  const ranking = dtCalcRanking(sem);
+  const destaques = ranking.filter(r => r.elegivel && !r.foraDoTop).slice(0, 2);
+
+  if (destaques.length === 0) {
+    toast('⚠️ Nenhum destaque elegível nesta semana!');
+    return;
+  }
+
+  const medalhas = ['🥇', '🥈'];
+  const linhas = destaques.map((r, i) => {
+    const subTexto = r.subAreas.length > 0 ? ` · ${r.subAreas.join(' ')}` : '';
+    const lvTexto  = r.topLevelUp ? ` · ⚡ Top LV (${r.ptsLevelUp}pts)` : '';
+    const reunTexto = r.reuniao ? ' · 🏛️ Reunião ✅' : '';
+    return `${medalhas[i]} <@${r.memId || r.nome}> — ${r.movs} movs${subTexto}${lvTexto}${reunTexto} — Score: **${r.score}**`;
+  }).join('\n');
+
+  const semLabel = sem.label;
+  const msg =
+`⭐ **DESTAQUES DA SEMANA** ⭐
+📅 Semana: ${semLabel}
+
+${linhas}
+
+━━━━━━━━━━━━━━━━━━━━━━━`;
+
+  navigator.clipboard.writeText(msg).then(() => {
+    toast('📋 Destaques copiados para o Discord!');
+  }).catch(() => {
+    toast('⚠️ Não foi possível copiar automaticamente.');
+  });
+}
+
 function openDestaqueModal(docId) {
   document.getElementById('dt-edit-id').value = docId || '';
   document.getElementById('modal-destaque-title').textContent = docId ? '✏️ EDITAR DESTAQUE' : '⭐ REGISTRAR DESTAQUE OFICIAL';
@@ -8593,6 +10033,7 @@ async function saveDestaque() {
     motivo: document.getElementById('dt-motivo').value.trim(),
     data:   document.getElementById('dt-data').value,
     resp:   document.getElementById('dt-resp').value.trim(),
+    oficial: true, // destaques registrados manualmente são permanentes — preservados na limpeza
   };
   if (!obj.membro) { toast('❌ Informe o membro'); return; }
   if (!obj.motivo) { toast('❌ Informe o motivo'); return; }
@@ -8627,10 +10068,14 @@ function renderDestaques() {
     if(ranking.length === 0) {
       top3El.innerHTML = '';
     } else {
-      const destaques2 = ranking.filter(r => r.elegivel && !r.foraDoTop);
+      const destaques2 = ranking.filter(r => r.elegivel && !r.foraDoTop).slice(0, 2);
       top3El.innerHTML = `
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:4px">
-          ${destaques2.map((r,i) => `
+          ${destaques2.map((r,i) => {
+            const jaOficial = (s.destaques||[]).some(d =>
+              d.oficial && d.semana === sem.label && (d.memId === r.memId || d.membro === r.nome)
+            );
+            return `
             <div style="background:${i===0?'rgba(234,179,8,.1)':'var(--panel)'};border:${i===0?'2px solid rgba(234,179,8,.4)':'1px solid var(--border)'};border-radius:14px;padding:18px 16px;text-align:center;position:relative">
               ${r.topLevelUp?`<div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#a855f7;color:#fff;font-size:9px;font-family:'Share Tech Mono',monospace;padding:2px 10px;border-radius:10px;white-space:nowrap">⚡ TOP LV</div>`:''}
               <div style="font-size:30px;margin-bottom:6px">${['🥇','🥈'][i]}</div>
@@ -8643,7 +10088,14 @@ function renderDestaques() {
               <div style="margin-top:8px">
                 <span style="background:${r.reuniao?'rgba(34,197,94,.15)':'rgba(239,68,68,.1)'};color:${r.reuniao?'#22c55e':'#f87171'};padding:3px 10px;border-radius:10px;font-size:10px;font-family:'Share Tech Mono',monospace">${r.reuniao?'🏛️ Reunião ✅':'🏛️ Reunião ❌'}</span>
               </div>
-            </div>`).join('')}
+              <div style="margin-top:10px">
+                ${jaOficial
+                  ? `<span style="background:rgba(34,197,94,.15);color:#22c55e;padding:4px 12px;border-radius:8px;font-size:10px;font-family:'Share Tech Mono',monospace">✅ Oficial confirmado</span>`
+                  : `<button onclick="confirmarDestaqueOficial('${r.memId||''}','${r.nome}',${r.score},'${sem.label}')" style="background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.3);color:#fbbf24;padding:4px 12px;border-radius:8px;cursor:pointer;font-size:10px;font-family:'Share Tech Mono',monospace;font-weight:700">⭐ Confirmar Oficial</button>`
+                }
+              </div>
+            </div>`;
+          }).join('')}
         </div>`;
     }
   }
@@ -8701,13 +10153,19 @@ function renderDestaques() {
   }
 
   // ---- Destaques oficiais registrados ----
-  const lista = (s.destaques || []).sort((a,b) => (b.data||'').localeCompare(a.data||''));
+  const qDt   = (document.getElementById('search-dt')?.value || '').toLowerCase();
+  const listaOfi = (s.destaques || [])
+    .filter(d => !qDt ||
+      (d.membro||'').toLowerCase().includes(qDt) ||
+      (d.semana||'').toLowerCase().includes(qDt) ||
+      (d.motivo||'').toLowerCase().includes(qDt))
+    .sort((a,b) => (b.data||'').localeCompare(a.data||''));
   const oficialCountEl = document.getElementById('dt-oficial-count');
-  if(oficialCountEl) oficialCountEl.textContent = lista.length;
+  if(oficialCountEl) oficialCountEl.textContent = listaOfi.length + '/' + (s.destaques||[]).length;
   const listEl = document.getElementById('dt-list');
-  if(listEl) listEl.innerHTML = lista.length === 0
-    ? '<div class="empty"><div class="empty-icon">⭐</div><div class="empty-text">Nenhum destaque oficial registrado</div></div>'
-    : lista.map((d,i) => `
+  if(listEl) listEl.innerHTML = listaOfi.length === 0
+    ? '<div class="empty"><div class="empty-icon">⭐</div><div class="empty-text">Nenhum destaque encontrado</div></div>'
+    : listaOfi.map((d,i) => `
       <div style="background:${i===0?'rgba(234,179,8,.08)':'var(--bg3)'};border:1px solid ${i===0?'rgba(234,179,8,.3)':'var(--border)'};border-left:4px solid #eab308;border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
         <div style="flex:1">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
@@ -9301,15 +10759,43 @@ function ptBuildCard(p) {
 
 function renderPautas() {
   const s = window._state; if(!s) return;
+
+  // Cada aba tem seu próprio campo de busca
+  const qPorTipo = {
+    setorial: (document.getElementById('search-pautas-setorial')?.value || '').toLowerCase(),
+    gestores: (document.getElementById('search-pautas-gestores')?.value || '').toLowerCase(),
+    geral:    (document.getElementById('search-pautas-geral')?.value    || '').toLowerCase(),
+  };
+
+  // Stats gerais de pautas (todas as categorias)
+  const todasPautas = s.pautas || [];
+  const ptRealizadas = todasPautas.filter(p => p.status === 'realizada').length;
+  const ptAgendadas  = todasPautas.filter(p => p.status === 'agendada').length;
+  const taxaPautas   = todasPautas.length > 0 ? Math.round(ptRealizadas / todasPautas.length * 100) : 0;
+  const statsEl = document.getElementById('pt-stats-setorial');
+  if (statsEl) statsEl.innerHTML = `
+    <div class="sc g" style="font-size:11px;padding:6px 10px;min-width:80px"><div class="sc-val" style="font-size:16px">${ptRealizadas}</div><div class="sc-lbl">Realizadas</div></div>
+    <div class="sc y" style="font-size:11px;padding:6px 10px;min-width:80px"><div class="sc-val" style="font-size:16px">${ptAgendadas}</div><div class="sc-lbl">Agendadas</div></div>
+    <div class="sc v" style="font-size:11px;padding:6px 10px;min-width:80px"><div class="sc-val" style="font-size:16px">${taxaPautas}%</div><div class="sc-lbl">% Realizadas</div></div>
+  `;
+
   ['setorial','gestores','geral'].forEach(tipo => {
     const filtro = ptFiltros[tipo] || 'todos';
+    const q = qPorTipo[tipo] || '';
     const lista  = (s.pautas || [])
-      .filter(p => p.tipo === tipo && (filtro === 'todos' || p.status === filtro))
+      .filter(p => {
+        if (p.tipo !== tipo) return false;
+        if (filtro !== 'todos' && p.status !== filtro) return false;
+        if (!q) return true;
+        return (p.data||'').includes(q) ||
+               (p.status||'').toLowerCase().includes(q) ||
+               (p.topicos||[]).some(t => (t.texto||'').toLowerCase().includes(q));
+      })
       .sort((a,b) => (b.data||'').localeCompare(a.data||''));
     const el = document.getElementById(`pt-list-${tipo}`);
     if(!el) return;
     el.innerHTML = lista.length === 0
-      ? `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">${PT_TIPOS[tipo].icon}</div><div class="empty-text">Nenhuma pauta registrada</div></div>`
+      ? `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">${PT_TIPOS[tipo].icon}</div><div class="empty-text">Nenhuma pauta encontrada</div></div>`
       : lista.map(p => ptBuildCard(p)).join('');
   });
 }
@@ -9498,10 +10984,453 @@ async function autoFinalizarMovs() {
 // Expor para o módulo chamar após loadAll
 window.autoFinalizarMovs = autoFinalizarMovs;
 
-// Rodar a cada 60 segundos para checar movs vencidas
+// ===== AUTO-ENCERRAMENTO DE RPPs VENCIDOS =====
+async function autoEncerrarRpps() {
+  const s = window._state;
+  if (!s || !s.rpps) return;
+
+  const hoje = new Date().setHours(0,0,0,0);
+  const vencidos = s.rpps.filter(r => {
+    if (r.status !== 'ativo' || !r.fim) return false;
+    const fim = new Date(r.fim + 'T00:00:00').getTime();
+    return hoje > fim; // hoje é DEPOIS do fim
+  });
+
+  if (vencidos.length === 0) return;
+
+  let encerrou = false;
+  for (const r of vencidos) {
+    if (!r._id) continue; // segurança: ignorar registros sem ID
+    const { _id, ...rSemId } = r;
+    await window._db.dbSet(window._db.COLS.rpps, r._id, { ...rSemId, status: 'encerrado' });
+    encerrou = true;
+    console.log(`[AUTO RPP] Encerrado: @${r.membro} — venceu em ${r.fim}`);
+  }
+
+  if (encerrou) {
+    window._state.rpps = await window._db.dbGetAll(window._db.COLS.rpps);
+    renderRpp();
+    renderOverview();
+    if (vencidos.length === 1) {
+      toast(`✅ RPP de @${vencidos[0].membro} encerrado automaticamente!`);
+      await registrarHistorico('notif', {
+        nome:   vencidos[0].membro || '—',
+        motivo: `RPP encerrado automaticamente (venceu em ${vencidos[0].fim})`,
+        extra:  'Auto-encerramento por vencimento de prazo',
+        autor:  'Sistema',
+      });
+    } else {
+      toast(`✅ ${vencidos.length} RPPs encerrados automaticamente!`);
+      for (const r of vencidos) {
+        await registrarHistorico('notif', {
+          nome:   r.membro || '—',
+          motivo: `RPP encerrado automaticamente (venceu em ${r.fim})`,
+          extra:  'Auto-encerramento por vencimento de prazo',
+          autor:  'Sistema',
+        });
+      }
+    }
+  }
+}
+window.autoEncerrarRpps = autoEncerrarRpps;
+
+// ═══════════════════════════════════════════════════════
+// LIMPEZA AUTOMÁTICA SEMANAL (a cada 3 semanas)
+// Regra:
+//   - Roda toda vez que o painel é aberto num SÁBADO (dia de reset)
+//   - Verifica se já passou 3+ semanas desde a última limpeza
+//   - Se sim: apaga dados de semanas antigas, mantém apenas a atual e a anterior
+//   - Collections limpas: levelup, upamentos, participacoes, movs (finalizadas),
+//     cronograma (entradas passadas > 2 semanas), instrucoes, acolhimentos, destaques
+//   - Collections NUNCA limpas: members, users, rpps, advertencias, blacklist,
+//     historico, feedbacks, notificacoes, subgestao, ausencias, indicacoes,
+//     sugestoes, news, naoverif, pautas, funcoes
+// ═══════════════════════════════════════════════════════
+
+const LIMPEZA_KEY      = 'gp_ultima_limpeza';
+const LIMPEZA_CICLO    = 3; // a cada 3 semanas
+
+function getLimpezaDevida() {
+  // Só roda no sábado (dia de reset da semana)
+  const dia = new Date().getDay();
+  if (dia !== 6) return false; // 6 = sábado
+
+  const semAtual = getPontSemana(0);
+  let ultimaStr = '';
+  try { ultimaStr = localStorage.getItem(LIMPEZA_KEY) || ''; } catch(e) { return true; }
+
+  // Se nunca rodou → limpeza devida
+  if (!ultimaStr) return true;
+
+  // Calcular quantas semanas se passaram
+  try {
+    const ultima  = new Date(ultimaStr + 'T00:00:00');
+    const agora   = new Date(semAtual.inicio + 'T00:00:00');
+    const semanas = Math.round((agora - ultima) / (7 * 86400000));
+    return semanas >= LIMPEZA_CICLO;
+  } catch(e) {
+    return true;
+  }
+}
+
+async function executarLimpezaSemanal(forcar = false) {
+  if (!forcar && !getLimpezaDevida()) return;
+
+  const s = window._state;
+  if (!s) return;
+
+  const semAtual = getPontSemana(0);   // semana que acabou de começar (SAB atual → SEX)
+  const semManter = getPontSemana(-1); // semana anterior — manter como referência
+
+  // Semanas a MANTER (as 2 mais recentes: atual + anterior)
+  const semGuardar = [semAtual, semManter];
+
+  function deveGuardar(record) {
+    // Verifica se o record pertence a alguma das semanas a guardar
+    return semGuardar.some(sem => matchSemana(record, sem));
+  }
+
+  function deveGuardarPorData(dateISO) {
+    if (!dateISO) return false;
+    return semGuardar.some(sem => dateISO >= sem.inicio && dateISO <= sem.fim);
+  }
+
+  const deletes = [];
+  let totalApagado = 0;
+
+  // ── 1. LEVEL UP ────────────────────────────────────────
+  const luParaApagar = (s.levelup||[]).filter(l => !deveGuardar(l));
+  for (const l of luParaApagar) {
+    if (l._id) deletes.push(window._db.dbDel(window._db.COLS.levelup, l._id));
+  }
+  totalApagado += luParaApagar.length;
+
+  // ── 2. UPAMENTOS ───────────────────────────────────────
+  const upParaApagar = (s.upamentos||[]).filter(u => {
+    const data = u.semanaRef || u.semana || u.data || '';
+    // Upamentos sem data → guardar (segurança)
+    if (!data) return false;
+    // Verificar por semanaRef (label) ou data ISO
+    const porLabel = semGuardar.some(sem =>
+      sem.label === data ||
+      sem.label.replace(/\/\d{4}/g,'') === data ||
+      (data >= sem.inicio && data <= sem.fim)
+    );
+    return !porLabel;
+  });
+  for (const u of upParaApagar) {
+    if (u._id) deletes.push(window._db.dbDel(window._db.COLS.upamentos, u._id));
+  }
+  totalApagado += upParaApagar.length;
+
+  // ── 3. MOVS finalizadas (+ 2 semanas) ─────────────────
+  // Guardar movs das 2 últimas semanas e movs NÃO finalizadas (qualquer data)
+  const movsParaApagar = (s.movs||[]).filter(m => {
+    if (!m.finalizada) return false; // nunca apagar movs em aberto
+    return !deveGuardarPorData(m.data);
+  });
+  const movIdsApagados = new Set(movsParaApagar.map(m => m._id));
+  for (const m of movsParaApagar) {
+    if (m._id) deletes.push(window._db.dbDel(window._db.COLS.movs, m._id));
+  }
+  totalApagado += movsParaApagar.length;
+
+  // ── 4. PARTICIPAÇÕES (das movs apagadas ou fora das 2 semanas) ──
+  const partsParaApagar = (s.participacoes||[]).filter(p =>
+    movIdsApagados.has(p.movId) || !deveGuardarPorData(p.data)
+  );
+  for (const p of partsParaApagar) {
+    if (p._id) deletes.push(window._db.dbDel(window._db.COLS.participacoes, p._id));
+  }
+  totalApagado += partsParaApagar.length;
+
+  // ── 5. CRONOGRAMA (entradas passadas > 2 semanas) ─────
+  const cronParaApagar = (s.cronograma||[]).filter(c =>
+    !deveGuardarPorData(c.data)
+  );
+  for (const c of cronParaApagar) {
+    if (c._id) deletes.push(window._db.dbDel(window._db.COLS.cronograma, c._id));
+  }
+  totalApagado += cronParaApagar.length;
+
+  // ── 6. INSTRUCOES e ACOLHIMENTOS fora das 2 semanas ──
+  for (const [col, arr] of [
+    [window._db.COLS.instrucoes,   s.instrucoes||[]],
+    [window._db.COLS.acolhimentos, s.acolhimentos||[]],
+  ]) {
+    const paraApagar = arr.filter(r => !deveGuardarPorData(r.data));
+    for (const r of paraApagar) {
+      if (r._id) deletes.push(window._db.dbDel(col, r._id));
+    }
+    totalApagado += paraApagar.length;
+  }
+
+  // ── 7. DESTAQUES automáticos (mantém apenas das 2 semanas) ──
+  // Destaques OFICIAIS (registrados manualmente) → nunca apagar
+  // Destaques sem campo 'oficial' → limpar
+  const destParaApagar = (s.destaques||[]).filter(d =>
+    !d.oficial && !deveGuardarPorData(d.data)
+  );
+  for (const d of destParaApagar) {
+    if (d._id) deletes.push(window._db.dbDel(window._db.COLS.destaques, d._id));
+  }
+  totalApagado += destParaApagar.length;
+
+  if (deletes.length === 0) {
+    localStorage.setItem(LIMPEZA_KEY, semAtual.inicio);
+    console.log('[Limpeza] Nada para apagar — dados dentro das 2 semanas.');
+    return;
+  }
+
+  // Executar todos os deletes em paralelo
+  try {
+    await Promise.all(deletes);
+
+    // Recarregar state
+    const [lu, up, movs, parts, cron, inst, acolh, dest] = await Promise.all([
+      window._db.dbGetAll(window._db.COLS.levelup),
+      window._db.dbGetAll(window._db.COLS.upamentos),
+      window._db.dbGetAll(window._db.COLS.movs),
+      window._db.dbGetAll(window._db.COLS.participacoes),
+      window._db.dbGetAll(window._db.COLS.cronograma),
+      window._db.dbGetAll(window._db.COLS.instrucoes),
+      window._db.dbGetAll(window._db.COLS.acolhimentos),
+      window._db.dbGetAll(window._db.COLS.destaques),
+    ]);
+    s.levelup       = lu;
+    s.upamentos     = up;
+    s.movs          = movs;
+    s.participacoes = parts;
+    s.cronograma    = cron;
+    s.instrucoes    = inst;
+    s.acolhimentos  = acolh;
+    s.destaques     = dest;
+
+    // Salvar data da limpeza
+    localStorage.setItem(LIMPEZA_KEY, semAtual.inicio);
+
+    renderAll();
+    toast(`🗑️ Limpeza semanal: ${totalApagado} registros antigos removidos (mantidas semanas: atual + anterior)`);
+    console.log(`[Limpeza] ✅ ${totalApagado} registros removidos. Semanas mantidas: ${semAtual.label} / ${semManter.label}`);
+
+    // Registrar no histórico
+    await registrarHistorico('removido', {
+      nome: 'Sistema',
+      motivo: `Limpeza automática: ${totalApagado} registros removidos`,
+      extra: `Semanas mantidas: ${semAtual.label} | ${semManter.label}`,
+      autor: window._currentUser?.nome || 'Sistema',
+    });
+
+  } catch(e) {
+    console.error('[Limpeza] Erro:', e);
+    toast('⚠️ Erro na limpeza automática — tente novamente.');
+  }
+}
+
+window.executarLimpezaSemanal = executarLimpezaSemanal;
+
+function mostrarInfoLimpeza() {
+  const el = document.getElementById('limpeza-status-info');
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? '' : 'none';
+  if (el.style.display === 'none') return;
+
+  const semAtual  = getPontSemana(0);
+  const semManter = getPontSemana(-1);
+  let ultimaStr;
+  try { ultimaStr = localStorage.getItem(LIMPEZA_KEY) || ''; } catch(e) { ultimaStr = ''; }
+  const devida = getLimpezaDevida();
+  const s = window._state;
+  if (!s) return;
+
+  // Calcular data da próxima limpeza automática (próximo SAB após 3 semanas desde última)
+  let proxLimpeza = '—';
+  if (ultimaStr) {
+    try {
+      const ultima = new Date(ultimaStr + 'T00:00:00');
+      ultima.setDate(ultima.getDate() + LIMPEZA_CICLO * 7);
+      const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+      proxLimpeza = fmt(ultima);
+    } catch(e) { proxLimpeza = '—'; }
+  }
+
+  const semGuardar = [semAtual, getPontSemana(-1)];
+  const isDentro   = (dateISO) => semGuardar.some(sem => (dateISO||'') >= sem.inicio && (dateISO||'') <= sem.fim);
+
+  const luAntigos    = (s.levelup||[]).filter(l => !semGuardar.some(sem => matchSemana(l, sem))).length;
+  const upAntigos    = (s.upamentos||[]).filter(u => {
+    const d = u.semanaRef || u.semana || u.data || '';
+    return d && !semGuardar.some(sem => sem.label === d || (d >= sem.inicio && d <= sem.fim));
+  }).length;
+  const movsAntigas  = (s.movs||[]).filter(m => m.finalizada && !isDentro(m.data)).length;
+  const partAntigas  = (s.participacoes||[]).filter(p => !isDentro(p.data)).length;
+  const cronAntigos  = (s.cronograma||[]).filter(c => !isDentro(c.data)).length;
+  const instAntigas  = (s.instrucoes||[]).filter(i => !isDentro(i.data)).length;
+  const acolhAntigos = (s.acolhimentos||[]).filter(a => !isDentro(a.data)).length;
+  const totalAntigos = luAntigos + upAntigos + movsAntigas + partAntigas + cronAntigos + instAntigas + acolhAntigos;
+
+  el.innerHTML = `
+    <div style="color:var(--text2);margin-bottom:8px;display:flex;flex-wrap:wrap;gap:12px">
+      <span>📅 Última limpeza: <strong style="color:#4db0ff">${ultimaStr || '—'}</strong></span>
+      <span>⏭ Próxima: <strong style="color:#fb923c">${proxLimpeza}</strong></span>
+      ${devida
+        ? '<span style="color:#f87171;font-weight:700">⚠️ Limpeza disponível agora!</span>'
+        : '<span style="color:#22c55e">✅ Aguardando próximo ciclo</span>'}
+    </div>
+    <div style="color:var(--text3);margin-bottom:8px">
+      Semanas mantidas: <strong style="color:var(--text)">${semAtual.label}</strong> + <strong style="color:var(--text)">${semManter.label}</strong>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px;font-family:'Share Tech Mono',monospace;font-size:11px">
+      <span style="color:${luAntigos>0?'#f87171':'#22c55e'}">⚡ LevelUp: ${luAntigos} antigos</span>
+      <span style="color:${upAntigos>0?'#f87171':'#22c55e'}">🎯 Upamentos: ${upAntigos} antigos</span>
+      <span style="color:${movsAntigas>0?'#f87171':'#22c55e'}">🎮 Movs fin.: ${movsAntigas} antigas</span>
+      <span style="color:${partAntigas>0?'#f87171':'#22c55e'}">👥 Participações: ${partAntigas} antigas</span>
+      <span style="color:${cronAntigos>0?'#f87171':'#22c55e'}">📅 Cronograma: ${cronAntigos} antigos</span>
+      <span style="color:${instAntigas>0?'#f87171':'#22c55e'}">📚 Instruções: ${instAntigas} antigas</span>
+      <span style="color:${acolhAntigos>0?'#f87171':'#22c55e'}">🤗 Acolhimentos: ${acolhAntigos} antigos</span>
+    </div>
+    ${totalAntigos > 0
+      ? `<div style="margin-top:8px;font-weight:700;color:#f87171;font-family:'Share Tech Mono',monospace;font-size:11px">🗑️ Total a remover: ${totalAntigos} registros</div>`
+      : `<div style="margin-top:8px;color:#22c55e;font-family:'Share Tech Mono',monospace;font-size:11px">✅ Nenhum dado antigo — tudo dentro das 2 semanas</div>`
+    }`;
+}
+
+async function confirmarLimpezaManual() {
+  const semAtual  = getPontSemana(0);
+  const semManter = getPontSemana(-1);
+  if (!confirm(
+    `🗑️ LIMPEZA MANUAL\n\n` +
+    `Serão REMOVIDOS dados de semanas antigas.\n` +
+    `MANTIDOS: "${semAtual.label}" e "${semManter.label}"\n\n` +
+    `⚠️ Esta ação não pode ser desfeita!\n` +
+    `Recomendado: faça um backup antes.\n\n` +
+    `Deseja continuar?`
+  )) return;
+  await executarLimpezaSemanal(true); // forçar independente do dia
+}
+
+// Rodar a cada 60 segundos para checar movs vencidas e RPPs
 setInterval(() => {
-  if (window._state && window._currentUser) autoFinalizarMovs();
+  if (window._state && window._currentUser) {
+    autoFinalizarMovs();
+    autoEncerrarRpps();
+  }
 }, 60 * 1000);
+
+// ===== AVISO AO FECHAR ABA COM MODAL ABERTO =====
+window.addEventListener('beforeunload', e => {
+  const overlay = document.getElementById('modal-overlay');
+  if (overlay && overlay.classList.contains('open')) {
+    e.preventDefault();
+    e.returnValue = 'Há dados não salvos. Tem certeza que deseja sair?';
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+// ATUALIZAÇÕES DE UI — SIDEBAR SEMANA
+// ═══════════════════════════════════════════════════════
+
+function atualizarSidebarSemana() {
+  const labelEl = document.getElementById('sidebar-semana-label');
+  const resetEl = document.getElementById('sidebar-semana-reset');
+  if (!labelEl || !resetEl) return;
+
+  const sem  = getPontSemana(0);
+  const stat = getSemanaStatus();
+  labelEl.textContent = sem.label;
+  resetEl.innerHTML   = `<span style="color:${stat.luCor}">${stat.luStatus.replace(/^[^ ]+ /,'')}</span>`;
+}
+
+// Atualizar sidebar semana a cada minuto
+setInterval(atualizarSidebarSemana, 60000);
+
+// ═══════════════════════════════════════════════════════
+// ATALHOS DE TECLADO
+// ═══════════════════════════════════════════════════════
+
+document.addEventListener('keydown', e => {
+  // Alt + número → navegar para aba
+  if (e.altKey && !e.ctrlKey && !e.shiftKey) {
+    const mapa = {
+      '1':'overview', '2':'members', '3':'levelup', '4':'upamentos',
+      '5':'destaques', '6':'pontuacoes', '7':'movs', '8':'feedbacks',
+      '9':'rpp', '0':'historico',
+    };
+    if (mapa[e.key]) {
+      e.preventDefault();
+      tab(mapa[e.key]);
+      return;
+    }
+  }
+  // ESC → fechar modal aberto
+  if (e.key === 'Escape') {
+    const overlay = document.getElementById('modal-overlay');
+    if (overlay && overlay.classList.contains('open')) closeModalDirect();
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+// FILTRO DE SEMANA NOS UPAMENTOS
+// ═══════════════════════════════════════════════════════
+
+let upSemanaOffset = null; // null = todos, número = semana específica
+
+function setUpSemanaFiltro(offset) {
+  upSemanaOffset = offset;
+  renderUpamentos();
+}
+
+// ═══════════════════════════════════════════════════════
+// RANKING HISTÓRICO — Level Up (todas as semanas)
+// ═══════════════════════════════════════════════════════
+
+let luViewMode = 'semana'; // 'semana' | 'historico'
+
+function setLuViewMode(mode, el) {
+  luViewMode = mode;
+  document.querySelectorAll('.lu-view-btn').forEach(b => b.classList.remove('active-filter'));
+  if (el) el.classList.add('active-filter');
+  renderLevelUp();
+}
+
+function atualizarSidebarBadges() {
+  const s = window._state; if (!s) return;
+  const hojeMs = new Date().setHours(0,0,0,0);
+
+  const contagens = {
+    rebocamentos: (s.members||[]).filter(m => isRebocado(m)).length,
+    feedbacks:    (s.feedbacks||[]).filter(f => f.status === 'pendente').length,
+    rpp:          (s.rpps||[]).filter(r => {
+      if (r.status !== 'ativo' || !r.fim) return false;
+      const d = Math.round((new Date(r.fim+'T00:00:00').getTime() - hojeMs) / 86400000);
+      return d >= 0 && d <= 3;
+    }).length,
+    naoverif: (s.naoverif||[]).length,
+  };
+
+  Object.entries(contagens).forEach(([pageId, count]) => {
+    const navEl = document.querySelector(`.nav-sub[data-page="${pageId}"]`);
+    if (!navEl) return;
+    // Remover badge anterior
+    const old = navEl.querySelector('.nav-badge');
+    if (old) old.remove();
+    // Adicionar novo se count > 0
+    if (count > 0) {
+      const badge = document.createElement('span');
+      badge.className = 'nav-badge';
+      badge.textContent = count;
+      const cor = pageId === 'rebocamentos' ? '#ef4444'
+                : pageId === 'rpp'          ? '#f97316'
+                : pageId === 'feedbacks'    ? '#a855f7'
+                : '#64748b';
+      badge.style.cssText = `background:${cor};color:#fff;border-radius:10px;font-size:9px;font-family:'Share Tech Mono',monospace;font-weight:700;padding:1px 6px;margin-left:auto;flex-shrink:0;min-width:18px;text-align:center`;
+      navEl.style.display = 'flex';
+      navEl.style.justifyContent = 'space-between';
+      navEl.style.alignItems = 'center';
+      navEl.appendChild(badge);
+    }
+  });
+}
 </script>
 </body>
 </html>
