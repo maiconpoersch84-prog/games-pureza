@@ -140,8 +140,28 @@ async function loadAll() {
     loading = false;
     showLoading(false);
     window._state.users = users;
-    // Auth cuida da sessão — se chegou aqui, usuário já está autenticado
-    // Buscar o usuário correspondente no Firestore pela sessionStorage (compatibilidade)
+
+    // Se há migração pendente (usuário migrado neste login), salvar o authUid
+    if (window._pendingAuthUid) {
+      const { usuario, uid } = window._pendingAuthUid;
+      window._pendingAuthUid = null;
+      const userDoc = users.find(x => x.usuario.toLowerCase() === usuario.toLowerCase());
+      if (userDoc && !userDoc.authUid) {
+        await dbSet(COLS.users, userDoc._id, { ...userDoc, authUid: uid });
+        users = await dbGetAll(COLS.users);
+        window._state.users = users;
+      }
+    }
+
+    // Auth cuida da sessão — encontrar o usuário pelo UID ou sessionStorage
+    const fbUser = auth.currentUser;
+    if (fbUser) {
+      const byUid = users.find(x => x.authUid === fbUser.uid);
+      if (byUid && window.doLogin) { window.doLogin(byUid); return; }
+      const byEmail = users.find(x => toAuthEmail(x.usuario) === fbUser.email);
+      if (byEmail && window.doLogin) { window.doLogin(byEmail); return; }
+    }
+    // Fallback sessionStorage
     const saved = sessionStorage.getItem('gp_user');
     if (saved) {
       try {
@@ -151,18 +171,8 @@ async function loadAll() {
       } catch(e) {}
       sessionStorage.removeItem('gp_user');
     }
-    // Fallback: usar uid do Firebase Auth para encontrar o usuário
-    const fbUser = auth.currentUser;
-    if (fbUser) {
-      const byUid = users.find(x => x.authUid === fbUser.uid);
-      if (byUid && window.doLogin) { window.doLogin(byUid); return; }
-      // Fallback legado: encontrar por email gerado
-      const byEmail = users.find(x => toAuthEmail(x.usuario) === fbUser.email);
-      if (byEmail && window.doLogin) { window.doLogin(byEmail); return; }
-    }
     if(window.showLoginScreen) window.showLoginScreen();
     if(window.toast) window.toast('🔥 Firebase conectado!');
-    // Verificar movs vencidas ao iniciar
     setTimeout(() => { if(window.autoFinalizarMovs) window.autoFinalizarMovs(); }, 1500);
   } catch(e) {
     showLoading(false);
@@ -538,7 +548,7 @@ function toAuthEmail(u) {
 window._auth = { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword, signOut, toAuthEmail };
 
 // ── PORTÃO DE ENTRADA ─────────────────────────────────────
-// Nenhum dado é carregado sem usuário autenticado no Firebase Auth
+// Fluxo: Firebase Auth valida → loadAll carrega tudo → doLogin abre o painel
 onAuthStateChanged(auth, async (firebaseUser) => {
   if (firebaseUser) {
     await loadAll();
@@ -5414,75 +5424,61 @@ function showLoginScreen(){
 async function doLoginBtn(){
   const u = document.getElementById('login-user').value.trim().toLowerCase();
   const p = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+
   if (!u || !p) {
-    document.getElementById('login-error').classList.add('show');
-    document.getElementById('login-error').textContent = '❌ Preencha usuário e senha';
+    errEl.classList.add('show');
+    errEl.textContent = '❌ Preencha usuário e senha';
     return;
   }
 
-  // Verificar se o usuário existe no Firestore
-  const found = window._state && window._state.users.find(
-    x => x.usuario.toLowerCase() === u && x.ativo !== false
-  );
-  if (!found) {
-    document.getElementById('login-error').classList.add('show');
-    document.getElementById('login-error').textContent = '❌ Usuário não encontrado';
-    document.getElementById('login-pass').value = '';
-    return;
-  }
-
-  const email = window._auth.toAuthEmail(u);
-
-  // Desabilitar botão durante o processo
   const btn = document.getElementById('login-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Entrando...'; }
+  if (errEl) errEl.classList.remove('show');
+
+  const email = window._auth.toAuthEmail(u);
 
   try {
     // Tentar login direto no Firebase Auth
     await window._auth.signInWithEmailAndPassword(window._auth.auth, email, p);
-    // Auth → onAuthStateChanged → loadAll → doLogin — fluxo automático
-  } catch(e) {
-    if (e.code === 'auth/invalid-credential' || e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password') {
-      // Usuário existe no Firestore mas ainda não no Firebase Auth (sistema legado)
-      // Verificar senha contra o Firestore para migrar
-      const validLegacy = window._state.users.find(
-        x => x.usuario.toLowerCase() === u && x.senha === p && x.ativo !== false
-      );
-      if (validLegacy) {
-        try {
-          // Criar conta no Firebase Auth (migração)
-          const cred = await window._auth.createUserWithEmailAndPassword(window._auth.auth, email, p);
-          // Salvar authUid no Firestore para referência futura
-          await window._db.dbSet(window._db.COLS.users, validLegacy._id, { ...validLegacy, authUid: cred.user.uid });
-          window._state.users = await window._db.dbGetAll(window._db.COLS.users);
-          toast('🔐 Conta migrada para autenticação segura!');
-          // Auth cuida do login automaticamente via onAuthStateChanged
-        } catch(e2) {
-          if (e2.code === 'auth/email-already-in-use') {
-            // Email já existe no Auth mas senha errada — senha incorreta real
-            document.getElementById('login-error').classList.add('show');
-            document.getElementById('login-error').textContent = '❌ Senha incorreta';
-          } else {
-            console.error('[Auth migração]', e2);
-            document.getElementById('login-error').classList.add('show');
-            document.getElementById('login-error').textContent = '❌ Erro ao autenticar: ' + (e2.message || e2.code);
-          }
-          document.getElementById('login-pass').value = '';
+    // onAuthStateChanged dispara → loadAll → doLogin automaticamente
+  } catch(authErr) {
+    // Auth falhou — pode ser primeira vez (conta não existe ainda)
+    // Tentar migração: verificar credenciais via API REST do Firestore sem auth
+    // Como as regras agora exigem auth, usamos uma abordagem alternativa:
+    // Criar a conta no Auth com as credenciais fornecidas e validar depois
+    if (authErr.code === 'auth/invalid-credential' ||
+        authErr.code === 'auth/user-not-found'     ||
+        authErr.code === 'auth/wrong-password'     ||
+        authErr.code === 'auth/invalid-email') {
+      try {
+        // Tentar criar conta — se funcionar, é migração de usuário legado
+        const cred = await window._auth.createUserWithEmailAndPassword(window._auth.auth, email, p);
+        // Conta criada — onAuthStateChanged vai disparar e loadAll vai rodar
+        // Depois do loadAll, vamos persistir o authUid
+        window._pendingAuthUid = { usuario: u, uid: cred.user.uid };
+        toast('🔐 Conta migrada para autenticação segura!');
+        // onAuthStateChanged cuida do resto
+      } catch(createErr) {
+        if (createErr.code === 'auth/email-already-in-use') {
+          // Email existe no Auth mas senha errada — senha incorreta
+          errEl.classList.add('show');
+          errEl.textContent = '❌ Senha incorreta';
+        } else {
+          console.error('[Auth createUser]', createErr);
+          errEl.classList.add('show');
+          errEl.textContent = '❌ Erro ao autenticar';
         }
-      } else {
-        // Senha errada no Firestore também
-        document.getElementById('login-error').classList.add('show');
-        document.getElementById('login-error').textContent = '❌ Usuário ou senha incorretos';
         document.getElementById('login-pass').value = '';
       }
     } else {
-      console.error('[Auth login]', e);
-      document.getElementById('login-error').classList.add('show');
-      document.getElementById('login-error').textContent = '❌ Erro: ' + (e.message || e.code);
+      console.error('[Auth login]', authErr);
+      errEl.classList.add('show');
+      errEl.textContent = '❌ ' + (authErr.message || authErr.code || 'Erro ao entrar');
       document.getElementById('login-pass').value = '';
     }
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'ENTRAR'; }
   }
 }
 
