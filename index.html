@@ -2311,7 +2311,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
             <span class="nav-arrow">▶</span>
           </div>
           <div class="nav-group-body">
-            <div class="nav-sub" onclick="tab('members',this)" data-page="members">👥 Membros</div>
+            <div class="nav-sub" onclick="tab('members',this)" data-page="members">⚡ Em Atividade</div>
             <div class="nav-sub" onclick="tab('rebocamentos',this)" data-page="rebocamentos">🚨 Rebocamentos</div>
             <div class="nav-sub" onclick="tab('naoverif',this)" data-page="naoverif">❓ Não Verificados</div>
             <div class="nav-sub" onclick="tab('ausencias',this)" data-page="ausencias">📋 Ausências</div>
@@ -2480,7 +2480,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
   <div id="page-members" class="page">
     <div class="panel">
       <div class="ph">
-        <span class="pt">👥 Membros · GAMES</span>
+        <span class="pt">⚡ Em Atividade · GAMES</span>
         <div class="ph-right">
           <span class="pc" id="members-count">0</span>
           <button class="btn btn-sm" onclick="exportarCSVMembros()" style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#22c55e;font-family:'Share Tech Mono',monospace;font-size:10px" title="Exportar CSV">📊 CSV</button>
@@ -3591,8 +3591,10 @@ const STATUS_ULT = [
 // Normaliza chaves legadas do banco para o novo padrão
 const _LEGADO = {
   'ÚLTIMA SEMANA':'ULTIMA SEMANA','ULTIMA SEMANA':'ULTIMA SEMANA',
-  '2 SEMANAS':'2 SEMANAS','1 MÊS':'1 MES','1 MES':'1 MES',
-  'MAIS DE 3 MESES':'+3 MESES','SEM PONTOS':'SEM PONTOS','ATIVO':'ATIVO',
+  '1 SEMANA':'1 SEMANA','2 SEMANAS':'2 SEMANAS','3 SEMANAS':'3 SEMANAS',
+  '1 MÊS':'1 MES','1 MES':'1 MES','2 MESES':'2 MESES',
+  'MAIS DE 3 MESES':'+3 MESES','+3 MESES':'+3 MESES',
+  'SEM PONTOS':'SEM PONTOS','ATIVO':'ATIVO','SEMANA':'SEMANA',
 };
 function normUlt(k){ return _LEGADO[k] || k || 'ATIVO'; }
 function getStatusUlt(k){ return STATUS_ULT.find(s=>s.key===normUlt(k)) || STATUS_ULT[0]; }
@@ -4017,7 +4019,7 @@ function openMemberModal(docId){
   }
   document.getElementById('m-ativo').value   = d.ativo  !== false ? 'true' : 'false';
   document.getElementById('m-pts').value     = d.pts    ? 'true' : 'false';
-  document.getElementById('m-ult').value     = d.ult    || 'SEM PONTOS';
+  document.getElementById('m-ult').value     = normUlt(d.ult) || 'ATIVO';
   document.getElementById('m-entrou').value  = d.entrou || '';
   document.getElementById('m-obs').value     = d.obs    || '';
   mAtualizarBadgeGames();
@@ -4049,7 +4051,7 @@ function mBuscarPorId() {
   mAtualizarTipoUp();
   document.getElementById('m-cargo').value   = membro.cargo  || '';
   document.getElementById('m-ativo').value   = membro.ativo  ? 'true' : 'false';
-  document.getElementById('m-ult').value     = membro.ult    || 'SEM PONTOS';
+  document.getElementById('m-ult').value     = normUlt(membro.ult) || 'ATIVO';
   document.getElementById('m-entrou').value  = membro.entrou || '';
   document.getElementById('m-obs').value     = membro.obs    || '';
   mAtualizarBadgeGames();
@@ -4188,8 +4190,8 @@ async function saveMember(){
       gamenews:    document.getElementById('m-sub-gamenews').checked,
     },
     ativo:   document.getElementById('m-ativo').value==='true',
-    pts:     !ultReboca(document.getElementById('m-ult').value),
-    ult:     document.getElementById('m-ult').value,
+    pts:     !ultReboca(document.getElementById('m-ult').value || 'ATIVO'),
+    ult:     document.getElementById('m-ult').value || 'ATIVO',
     entrou:  document.getElementById('m-entrou').value||'—',
     obs:     document.getElementById('m-obs').value.trim(),
     // Preservar campos de rebocamento para não reaparecer na lista
@@ -4584,7 +4586,7 @@ function renderOverview(){
   const ativos=s.members.filter(m=>m.ativo).length;
   const comPts=s.members.filter(m=>m.pts).length;
   const sugsUsadas=(s.suggestions||[]).filter(x=>x.usado).length;
-  const total=s.members.length||1; const stotal=(s.suggestions||[]).length||1;
+  const total=(s.members||[]).filter(m=>!m.rebocadoConfirmado).length||1; const stotal=(s.suggestions||[]).length||1;
   const rebocados = s.members.filter(m => isRebocado(m)).length;
   const movsFinalizadas = (s.movs||[]).filter(m => m.finalizada).length;
 
@@ -4609,8 +4611,8 @@ function renderOverview(){
   const emRiscoList = (s.members||[]).filter(m => getMembroEmRisco(m));
 
   document.getElementById('ov-stats').innerHTML=`
-    <div class="sc v"><span class="sc-icon">👥</span><div class="sc-val">${s.members.filter(m=>!isRebocado(m)).length}</div><div class="sc-lbl">Membros Ativos</div></div>
-    <div class="sc c"><span class="sc-icon">✅</span><div class="sc-val">${ativos}</div><div class="sc-lbl">Em Atividade</div></div>
+    <div class="sc v" style="cursor:pointer" onclick="tab('members')"><span class="sc-icon">⚡</span><div class="sc-val">${(s.members||[]).filter(m=>!m.rebocadoConfirmado).length}</div><div class="sc-lbl">Em Atividade</div></div>
+
     <div class="sc r" style="cursor:pointer" onclick="tab('rebocamentos')"><span class="sc-icon">🚨</span><div class="sc-val" style="color:#ef4444">${rebocados}</div><div class="sc-lbl">Rebocamentos</div></div>
     <div class="sc r"><span class="sc-icon">❓</span><div class="sc-val">${(s.naoverif||[]).length}</div><div class="sc-lbl">Não Verif.</div></div>
     <div class="sc p"><span class="sc-icon">💡</span><div class="sc-val">${s.suggestions.length}</div><div class="sc-lbl">Sugestões</div></div>
@@ -4841,12 +4843,8 @@ function getUltimaPontuacaoMembro(m) {
 }
 
 function isRebocado(m) {
-  if (m.rebocadoConfirmado) return true;
-  // Status definido: vermelho (1 mês, 2 meses, +3 meses, sem pontos) → rebocado
-  if (m.ult) return ultReboca(m.ult);
-  // Sem status: fallback pelo levelup
-  const ult = getUltimaPontuacaoMembro(m);
-  return !!(ult && ult.dias >= 30);
+  // Apenas membros com rebocamento formal confirmado saem de Em Atividade
+  return !!m.rebocadoConfirmado;
 }
 
 // Faixa de inatividade para cor e label
@@ -4873,10 +4871,11 @@ function renderMembers(){
   const s=window._state; if(!s)return;
   const q=(document.getElementById('search-members')?.value||'').toLowerCase();
   // Excluir membros rebocados da aba principal
+  // Em Atividade = todos os membros exceto rebocados formalmente (rebocadoConfirmado)
   const filtered=(s.members||[]).filter(m =>
-    !isRebocado(m) &&
-    (!q || m.m?.toLowerCase().includes(q) || m.id?.includes(q) ||
-           m.cargo?.toLowerCase().includes(q) || m.posicao?.includes(q) ||
+    !m.rebocadoConfirmado &&
+    (!q || (m.m||'').toLowerCase().includes(q) || (m.id||'').includes(q) ||
+           (m.cargo||'').toLowerCase().includes(q) || (m.posicao||'').includes(q) ||
            (m.subAreas?.instrucao && 'instrução'.includes(q)) ||
            (m.subAreas?.acolhimento && 'acolhimento'.includes(q)) ||
            (m.subAreas?.gamenews && 'game news'.includes(q))
@@ -4910,8 +4909,8 @@ function renderMembers(){
   });
 
   updateMemberSortIcons();
-  const total = s.members.filter(m => !isRebocado(m)).length;
-  document.getElementById('members-count').textContent = filtered.length + '/' + total;
+  const total = (s.members||[]).filter(m => !m.rebocadoConfirmado).length;
+  document.getElementById('members-count').textContent = total;
 
   // Empty state — avisa quando nenhum membro aparece
   if (filtered.length === 0) {
@@ -4919,13 +4918,11 @@ function renderMembers(){
     const rebocados = (s.members||[]).filter(m => isRebocado(m)).length;
     document.getElementById('members-tbody').innerHTML = `
       <tr><td colspan="99" style="padding:32px;text-align:center;color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:12px">
-        ${todos === 0
-          ? '👥 Nenhum membro cadastrado ainda.'
+        ${total === 0
+          ? '⚡ Nenhum membro em atividade. Clique em ➕ Adicionar para começar.'
           : q
             ? `🔍 Nenhum resultado para "${q}".`
-            : rebocados === todos
-              ? `⚠️ Todos os ${todos} membros estão em rebocamento. Verifique a aba Rebocamentos.`
-              : '👥 Nenhum membro encontrado.'}
+            : '⚡ Nenhum membro encontrado.'}
       </td></tr>`;
     return;
   }
@@ -5086,10 +5083,7 @@ function renderRebocamentos() {
 
   // Versão de isRebocado que usa o cache
   function isRebocadoCached(m) {
-    if (m.rebocadoConfirmado) return true;
-    if (m.ult) return ultReboca(m.ult);
-    const uc = ultCache[m.id||m.m];
-    return !!(uc && uc.dias >= 30);
+    return !!m.rebocadoConfirmado;
   }
 
   // Versão de reboxFaixa que usa o cache
@@ -5103,8 +5097,11 @@ function renderRebocamentos() {
     return { key:'sem', label:'Sem pontos', cor:'#ef4444', bg:'rgba(239,68,68,.1)', border:'rgba(239,68,68,.3)', ordem:4 };
   }
 
+  // Painel de monitoramento: membros com status vermelho OU rebocamento confirmado
+  const estaEmRisco = m => ultReboca(m.ult) || !!m.rebocadoConfirmado;
+
   const rebocados = (s.members||[])
-    .filter(m => isRebocadoCached(m))
+    .filter(m => estaEmRisco(m))
     .map(m => {
       const ult = ultCache[m.id||m.m];
       const fezEstaSemana = ult && ult.data >= semAtual.inicio && ult.data <= semAtual.fim;
