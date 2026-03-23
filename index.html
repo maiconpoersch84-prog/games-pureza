@@ -153,13 +153,27 @@ async function loadAll() {
       }
     }
 
-    // Auth cuida da sessão — encontrar o usuário pelo UID ou sessionStorage
+    // Auth cuida da sessão — encontrar o usuário pelo UID ou email
     const fbUser = auth.currentUser;
     if (fbUser) {
-      const byUid = users.find(x => x.authUid === fbUser.uid);
-      if (byUid && window.doLogin) { window.doLogin(byUid); return; }
+      const byUid   = users.find(x => x.authUid === fbUser.uid);
       const byEmail = users.find(x => toAuthEmail(x.usuario) === fbUser.email);
-      if (byEmail && window.doLogin) { window.doLogin(byEmail); return; }
+      const found   = byUid || byEmail;
+      if (found) {
+        if (found.ativo === false) {
+          // Usuário desativado — forçar logout
+          await signOut(auth);
+          if(window.toast) window.toast('❌ Usuário desativado. Contate o administrador.');
+          return;
+        }
+        if (window.doLogin) { window.doLogin(found); return; }
+      } else {
+        // Conta no Auth mas sem doc no Firestore → acesso não autorizado → logout
+        console.warn('[Auth] Usuário sem doc no Firestore — fazendo logout');
+        await signOut(auth);
+        if(window.toast) window.toast('❌ Acesso não autorizado.');
+        return;
+      }
     }
     // Fallback sessionStorage
     const saved = sessionStorage.getItem('gp_user');
@@ -548,14 +562,29 @@ function toAuthEmail(u) {
 window._auth = { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword, signOut, toAuthEmail };
 
 // ── PORTÃO DE ENTRADA ─────────────────────────────────────
-// Fluxo: Firebase Auth valida → loadAll carrega tudo → doLogin abre o painel
-onAuthStateChanged(auth, async (firebaseUser) => {
-  if (firebaseUser) {
-    await loadAll();
+// Aguarda o script principal (doLogin, renderAll etc.) estar carregado
+// antes de processar o estado de autenticação — evita race condition
+// entre type="module" (defer async) e script normal (síncrono)
+function aguardarScriptPrincipal(cb, tentativas = 0) {
+  if (window.doLogin && window.renderAll && window.showLoginScreen) {
+    cb();
+  } else if (tentativas < 50) {
+    setTimeout(() => aguardarScriptPrincipal(cb, tentativas + 1), 100);
   } else {
+    console.error('[Auth] Script principal não carregou após 5s');
     showLoading(false);
-    if (window.showLoginScreen) window.showLoginScreen();
   }
+}
+
+onAuthStateChanged(auth, async (firebaseUser) => {
+  aguardarScriptPrincipal(async () => {
+    if (firebaseUser) {
+      await loadAll();
+    } else {
+      showLoading(false);
+      if (window.showLoginScreen) window.showLoginScreen();
+    }
+  });
 });
 </script>
 
@@ -1031,7 +1060,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 </div>
 
 <!-- LOADING -->
-<div id="loading-overlay">
+<div id="loading-overlay" style="display:flex">
   <div id="loading-spinner">
     <div class="loading-ring"></div>
     <div class="loading-text">CONECTANDO AO FIREBASE...</div>
@@ -1048,7 +1077,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 <div class="toast" id="toast"></div>
 
 <!-- LOGIN SCREEN -->
-<div id="login-screen" class="show">
+<div id="login-screen">
   <div class="login-box">
     <div class="login-logo">
       <div class="login-icon">
@@ -1156,8 +1185,22 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
     <div class="form-cols">
       <div class="form-row"><label>Última Pontuação</label>
         <select id="m-ult">
-          <option>SEM PONTOS</option><option>ÚLTIMA SEMANA</option><option>2 SEMANAS</option>
-          <option>1 MÊS</option><option>MAIS DE 3 MESES</option>
+          <optgroup label="🟢 Ativo">
+            <option value="ATIVO">Ativo</option>
+            <option value="SEMANA">Semana</option>
+            <option value="ULTIMA SEMANA">Última semana</option>
+          </optgroup>
+          <optgroup label="🟡 Atenção">
+            <option value="1 SEMANA">1 semana</option>
+            <option value="2 SEMANAS">2 semanas</option>
+            <option value="3 SEMANAS">3 semanas</option>
+          </optgroup>
+          <optgroup label="🔴 Rebocamento">
+            <option value="1 MES">1 mês</option>
+            <option value="2 MESES">2 meses</option>
+            <option value="+3 MESES">+3 meses</option>
+            <option value="SEM PONTOS">Sem pontos</option>
+          </optgroup>
         </select>
       </div>
       <div class="form-row"><label>Entrou no Serv.</label><input id="m-entrou" placeholder="dd/mm/aaaa"></div>
@@ -2453,7 +2496,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
             <th onclick="sortMembers('posicao')" style="cursor:pointer;user-select:none" title="Ordenar por posição"><span id="sort-icon-posicao">↕</span> Posição</th>
             <th>Sub Áreas</th>
             <th onclick="sortMembers('cargo')" style="cursor:pointer;user-select:none" title="Ordenar por cargo"><span id="sort-icon-cargo">↕</span> Cargo</th>
-            <th>Up</th><th>Ativo</th><th>Pontos</th><th>Última Pont.</th>
+            <th>Up</th><th>Ativo</th><th>Status</th>
             <th onclick="sortMembers('entrou')" style="cursor:pointer;user-select:none" title="Ordenar por data de entrada"><span id="sort-icon-entrou">↕</span> Entrou</th>
             <th>Ações</th>
           </tr></thead>
@@ -3530,23 +3573,50 @@ var PERMS = new Proxy({}, { get: (_,k) => (window.PERMS||{})[k] });
 
 function fmtDate(d){if(!d)return'—';try{const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('pt-BR');}catch{return d;}}
 function catClass(c){return({Temática:'cat-tematica',Cine:'cat-cine',Atividades:'cat-atividades',Destaques:'cat-yellow',Reforma:'cat-green',Outro:'cat-outro'}[c]||'cat-outro');}
-function ultBadge(u, membro){
-  // Se tiver dados reais do levelup, usar
-  if (membro) {
-    const ult = getUltimaPontuacaoMembro(membro);
-    if (ult) {
-      const sem = getPontSemana(0);
-      const fezSemana = ult.data >= sem.inicio && ult.data <= sem.fim;
-      if (fezSemana)  return `<span class="badge b-green">✅ Esta semana</span>`;
-      if (ult.dias <= 14) return `<span class="badge b-cyan">${ult.dias}d atrás</span>`;
-      if (ult.dias <= 30) return `<span class="badge b-yellow">${ult.dias}d atrás</span>`;
-      if (ult.dias <= 60) return `<span class="badge b-orange">${ult.dias}d atrás</span>`;
-      return `<span class="badge b-red">${ult.dias}d atrás</span>`;
-    }
-  }
-  // Fallback campo manual
-  const map={'ÚLTIMA SEMANA':'b-green','2 SEMANAS':'b-cyan','1 MÊS':'b-yellow','MAIS DE 3 MESES':'b-red','SEM PONTOS':'b-gray'};
-  return`<span class="badge ${map[u]||'b-gray'}">${u||'—'}</span>`;
+// ── STATUS DO MEMBRO ────────────────────────────────────────────────────
+// 10 status clicáveis: verde=ativo, amarelo=atenção, vermelho=rebocado
+const STATUS_ULT = [
+  { key:'ATIVO',         label:'Ativo',          cls:'b-green',  reboca:false },
+  { key:'SEMANA',        label:'Semana',          cls:'b-green',  reboca:false },
+  { key:'ULTIMA SEMANA', label:'Última semana',   cls:'b-green',  reboca:false },
+  { key:'1 SEMANA',      label:'1 semana',        cls:'b-yellow', reboca:false },
+  { key:'2 SEMANAS',     label:'2 semanas',       cls:'b-yellow', reboca:false },
+  { key:'3 SEMANAS',     label:'3 semanas',       cls:'b-yellow', reboca:false },
+  { key:'1 MES',         label:'1 mês',           cls:'b-red',    reboca:true  },
+  { key:'2 MESES',       label:'2 meses',         cls:'b-red',    reboca:true  },
+  { key:'+3 MESES',      label:'+3 meses',        cls:'b-red',    reboca:true  },
+  { key:'SEM PONTOS',    label:'Sem pontos',      cls:'b-red',    reboca:true  },
+];
+
+// Normaliza chaves legadas do banco para o novo padrão
+const _LEGADO = {
+  'ÚLTIMA SEMANA':'ULTIMA SEMANA','ULTIMA SEMANA':'ULTIMA SEMANA',
+  '2 SEMANAS':'2 SEMANAS','1 MÊS':'1 MES','1 MES':'1 MES',
+  'MAIS DE 3 MESES':'+3 MESES','SEM PONTOS':'SEM PONTOS','ATIVO':'ATIVO',
+};
+function normUlt(k){ return _LEGADO[k] || k || 'ATIVO'; }
+function getStatusUlt(k){ return STATUS_ULT.find(s=>s.key===normUlt(k)) || STATUS_ULT[0]; }
+function ultReboca(k){ return getStatusUlt(k).reboca; }
+
+// Badge clicável — usa data-* para evitar problema de aspas em onclick inline
+function ultBadge(u, _m, memId){
+  const s = getStatusUlt(u);
+  if (!memId) return `<span class="badge ${s.cls}">${s.label}</span>`;
+  return `<span class="badge ${s.cls}" data-mid="${memId}" data-ult="${normUlt(u)}" onclick="ciclarUlt(this)" style="cursor:pointer" title="Clique para mudar status">${s.label}</span>`;
+}
+
+// Cicla para o próximo status e salva no Firebase
+async function ciclarUlt(el){
+  const docId = el.dataset.mid;
+  const atual = el.dataset.ult;
+  const s = window._state; if(!s) return;
+  const m = (s.members||[]).find(x=>x._id===docId); if(!m) return;
+  const idx  = STATUS_ULT.findIndex(x=>x.key===normUlt(atual));
+  const next = STATUS_ULT[(idx+1) % STATUS_ULT.length];
+  const {_id,...sem} = m;
+  await window._db.dbSet(window._db.COLS.members, docId, {...sem, ult:next.key, pts:!next.reboca});
+  window._state.members = await window._db.dbGetAll(window._db.COLS.members);
+  renderMembers(); renderRebocamentos(); renderOverview();
 }
 function toast(msg,ok=true){
   const t=document.getElementById('toast');
@@ -3886,6 +3956,10 @@ function tab(id, el){
     }
   }
 
+  // Resetar filtros de view ao trocar aba para evitar estado residual
+  if (id !== 'levelup')   { luViewMode = 'semana'; }
+  if (id !== 'upamentos') { upSemanaOffset = null; }
+
   if(window._renderAll) window._renderAll();
 }
 
@@ -3918,7 +3992,7 @@ function closeModal(e){if(e.target===document.getElementById('modal-overlay'))cl
 function openMemberModal(docId){
   document.getElementById('m-edit-id').value=docId||'';
   document.getElementById('modal-member-title').textContent=docId?'✏️ EDITAR MEMBRO':'➕ NOVO MEMBRO';
-  const d=docId?window._state.members.find(x=>x._id===docId):{};
+  const d=docId?(window._state.members.find(x=>x._id===docId)||{}):{};
   document.getElementById('m-nome').value       = d.m       || '';
   document.getElementById('m-id').value         = d.id      || '';
   document.getElementById('m-posicao').value    = d.posicao || 'comum';
@@ -3929,9 +4003,19 @@ function openMemberModal(docId){
   document.getElementById('m-sub-gamenews').checked    = !!(d.subAreas?.gamenews);
   const infoEl2 = document.getElementById('m-id-info');
   if (infoEl2) infoEl2.style.display = 'none';
+  // mAtualizarTipoUp DEPOIS de setar m-tipo-up para popular o select corretamente
   mAtualizarTipoUp();
+  // Setar cargo DEPOIS de popular o select para que o valor seja reconhecido
   document.getElementById('m-cargo').value   = d.cargo  || '';
-  document.getElementById('m-ativo').value   = d.ativo  ? 'true' : 'false';
+  // Se o cargo setado não está no select (select ainda sem aquela option), tentar novamente
+  const cargoEl = document.getElementById('m-cargo');
+  if (d.cargo && cargoEl && cargoEl.value !== d.cargo) {
+    // Adicionar option temporária para garantir que o valor seja exibido
+    const opt = document.createElement('option');
+    opt.value = d.cargo; opt.textContent = d.cargo; opt.selected = true;
+    cargoEl.appendChild(opt);
+  }
+  document.getElementById('m-ativo').value   = d.ativo  !== false ? 'true' : 'false';
   document.getElementById('m-pts').value     = d.pts    ? 'true' : 'false';
   document.getElementById('m-ult').value     = d.ult    || 'SEM PONTOS';
   document.getElementById('m-entrou').value  = d.entrou || '';
@@ -4104,7 +4188,7 @@ async function saveMember(){
       gamenews:    document.getElementById('m-sub-gamenews').checked,
     },
     ativo:   document.getElementById('m-ativo').value==='true',
-    pts:     document.getElementById('m-pts').value==='true',
+    pts:     !ultReboca(document.getElementById('m-ult').value),
     ult:     document.getElementById('m-ult').value,
     entrou:  document.getElementById('m-entrou').value||'—',
     obs:     document.getElementById('m-obs').value.trim(),
@@ -4230,7 +4314,7 @@ async function executarExclusaoMembro() {
 function openSugModal(docId){
   document.getElementById('s-edit-id').value=docId||'';
   document.getElementById('modal-sug-title').textContent=docId?'✏️ EDITAR SUGESTÃO':'➕ NOVA SUGESTÃO';
-  const d=docId?window._state.suggestions.find(x=>x._id===docId):{};
+  const d=docId?(window._state.suggestions||[]).find(x=>x._id===docId):{};
   document.getElementById('s-id').value=d.id||'';
   document.getElementById('s-cat').value=d.cat||'Temática';
   document.getElementById('s-data').value=d.data||new Date().toISOString().slice(0,10);
@@ -4242,7 +4326,7 @@ async function saveSuggestion(){
   const docId=document.getElementById('s-edit-id').value||window._db.genId();
   const usado = document.getElementById('s-usado').value==='true';
   // Preservar dataUso existente se já tinha, ou setar hoje se marcando como usado agora
-  const existente = window._state.suggestions.find(x=>x._id===docId);
+  const existente = (window._state.suggestions||[]).find(x=>x._id===docId);
   const dataUso = usado
     ? (existente?.dataUso || new Date().toISOString().slice(0,10))
     : '';
@@ -4260,7 +4344,7 @@ async function saveSuggestion(){
   window._renderAll(); closeModalDirect(); toast('✅ Sugestão salva!');
 }
 async function toggleUsado(docId){
-  const item = window._state.suggestions.find(x => x._id === docId);
+  const item = (window._state.suggestions||[]).find(x => x._id === docId);
   if (!item) return;
   const novoUsado = !item.usado;
   const { _id, ...itemSemId } = item;
@@ -4462,39 +4546,47 @@ async function deleteNv(docId){
 function renderAll(){
   if(!window._state) return;
   // Atualizar indicador de semana na sidebar
-  atualizarSidebarSemana();
-  renderOverview(); renderMembers(); renderRebocamentos(); renderNaoVerif(); renderSuggestions();
-  renderSubgestao(); renderAusencias(); renderIndicacoes(); renderNews();
-  renderMovs(); renderRelatorio(); renderRelNews(); renderRelInst();
-  renderUsers(); renderInstrucoes(); renderAcolhimentos(); renderAdvertencias(); renderBlacklist(); renderLevelUp(); renderUpamentos(); renderDestaques(); renderPautas(); renderFeedbacks();
-  renderNotificacoes(); renderRpp(); renderCronograma(); renderCronAside(); renderPontuacoes();
-  renderAllDesigner(); renderHistorico();
+  try{ atualizarSidebarSemana(); }catch(e){ console.error('[renderAll] atualizarSidebarSemana:', e); }
+  const renders = [
+    renderOverview, renderMembers, renderRebocamentos, renderNaoVerif, renderSuggestions,
+    renderSubgestao, renderAusencias, renderIndicacoes, renderNews,
+    renderMovs, renderRelatorio, renderRelNews, renderRelInst,
+    renderUsers, renderInstrucoes, renderAcolhimentos, renderAdvertencias, renderBlacklist,
+    renderLevelUp, renderUpamentos, renderDestaques, renderPautas, renderFeedbacks,
+    renderNotificacoes, renderRpp, renderCronograma, renderCronAside, renderPontuacoes,
+    renderAllDesigner, renderHistorico,
+  ];
+  renders.forEach(fn => {
+    try{ fn(); }catch(e){ console.error(`[renderAll] ${fn.name}:`, e); }
+  });
   // Atualizar alertas do dia no Overview
   const s = window._state;
   if (s) {
-    const hoje   = new Date().toISOString().slice(0,10);
-    const amanha = new Date(Date.now()+86400000).toISOString().slice(0,10);
-    const hojeMs = new Date().setHours(0,0,0,0);
-    const movsP  = (s.movs||[]).filter(m => !m.finalizada && (m.data===hoje||m.data===amanha));
-    const rppV   = (s.rpps||[]).filter(r => {
-      if (r.status!=='ativo'||!r.fim) return false;
-      const d = Math.round((new Date(r.fim+'T00:00:00').getTime()-hojeMs)/86400000);
-      return d>=0&&d<=3;
-    });
-    atualizarAlertasOverview(movsP, rppV);
+    try {
+      const hoje   = new Date().toISOString().slice(0,10);
+      const amanha = new Date(Date.now()+86400000).toISOString().slice(0,10);
+      const hojeMs = new Date().setHours(0,0,0,0);
+      const movsP  = (s.movs||[]).filter(m => !m.finalizada && (m.data===hoje||m.data===amanha));
+      const rppV   = (s.rpps||[]).filter(r => {
+        if (r.status!=='ativo'||!r.fim) return false;
+        const d = Math.round((new Date(r.fim+'T00:00:00').getTime()-hojeMs)/86400000);
+        return d>=0&&d<=3;
+      });
+      atualizarAlertasOverview(movsP, rppV);
+    }catch(e){ console.error('[renderAll] alertas:', e); }
   }
-  atualizarSidebarBadges();
-  applyPermissions();
+  try{ atualizarSidebarBadges(); }catch(e){ console.error('[renderAll] badges:', e); }
+  try{ applyPermissions(); }catch(e){ console.error('[renderAll] permissions:', e); }
 }
 
 function renderOverview(){
   const s=window._state; if(!s||!s.members) return;
   const ativos=s.members.filter(m=>m.ativo).length;
   const comPts=s.members.filter(m=>m.pts).length;
-  const sugsUsadas=s.suggestions.filter(x=>x.usado).length;
-  const total=s.members.length||1; const stotal=s.suggestions.length||1;
+  const sugsUsadas=(s.suggestions||[]).filter(x=>x.usado).length;
+  const total=s.members.length||1; const stotal=(s.suggestions||[]).length||1;
   const rebocados = s.members.filter(m => isRebocado(m)).length;
-  const movsFinalizadas = s.movs.filter(m => m.finalizada).length;
+  const movsFinalizadas = (s.movs||[]).filter(m => m.finalizada).length;
 
   // RPP e Upamentos para o Overview
   const hojeMs      = new Date().setHours(0,0,0,0);
@@ -4520,7 +4612,7 @@ function renderOverview(){
     <div class="sc v"><span class="sc-icon">👥</span><div class="sc-val">${s.members.filter(m=>!isRebocado(m)).length}</div><div class="sc-lbl">Membros Ativos</div></div>
     <div class="sc c"><span class="sc-icon">✅</span><div class="sc-val">${ativos}</div><div class="sc-lbl">Em Atividade</div></div>
     <div class="sc r" style="cursor:pointer" onclick="tab('rebocamentos')"><span class="sc-icon">🚨</span><div class="sc-val" style="color:#ef4444">${rebocados}</div><div class="sc-lbl">Rebocamentos</div></div>
-    <div class="sc r"><span class="sc-icon">❓</span><div class="sc-val">${s.naoverif.length}</div><div class="sc-lbl">Não Verif.</div></div>
+    <div class="sc r"><span class="sc-icon">❓</span><div class="sc-val">${(s.naoverif||[]).length}</div><div class="sc-lbl">Não Verif.</div></div>
     <div class="sc p"><span class="sc-icon">💡</span><div class="sc-val">${s.suggestions.length}</div><div class="sc-lbl">Sugestões</div></div>
     <div class="sc g"><span class="sc-icon">🎮</span><div class="sc-val">${movsFinalizadas}/${s.movs.length}</div><div class="sc-lbl">Movs Fin.</div></div>
     <div class="sc y" style="cursor:pointer" onclick="tab('rpp')" title="Clique para ver RPPs">
@@ -4543,10 +4635,10 @@ function renderOverview(){
       <div class="sc-lbl">Destaques</div>
     </div>
     <div class="sc" style="background:rgba(${saude.score>=80?'34,197,94':saude.score>=60?'77,176,255':saude.score>=40?'234,179,8':'239,68,68'},.08);border:1px solid rgba(${saude.score>=80?'34,197,94':saude.score>=60?'77,176,255':saude.score>=40?'234,179,8':'239,68,68'},.2);border-radius:12px;padding:12px;text-align:center" title="Score de saúde do servidor">
-      <span class="sc-icon">💚</span>
+      <span class="sc-icon">📡</span>
       <div style="font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:${saude.nivel.cor}">${saude.score}</div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${saude.nivel.cor};letter-spacing:1px">${saude.nivel.label}</div>
-      <div class="sc-lbl">Saúde</div>
+      <div class="sc-lbl">Status</div>
     </div>
     <div class="sc c"><span class="sc-icon">📚</span><div class="sc-val">${s.instrucoes.length}</div><div class="sc-lbl">Instruções</div></div>
     <div class="sc p"><span class="sc-icon">💬</span><div class="sc-val">${s.feedbacks.length}</div><div class="sc-lbl">Feedbacks</div></div>
@@ -4578,8 +4670,8 @@ function renderOverview(){
     <div class="prog-row"><div class="prog-lbl">✅ Ativos</div>${pb(ativos/total*100).replace('></div>','style="background:linear-gradient(90deg,#22c55e,#4ade80)"></div>')}<div class="prog-val">${ativos}</div></div>
     <div class="prog-row"><div class="prog-lbl">📊 Com Pontos</div><div class="prog-track"><div class="prog-fill" style="width:${Math.max(2,comPts/total*100)}%;background:linear-gradient(90deg,#7c3aed,#a855f7)"></div></div><div class="prog-val">${comPts}</div></div>
     <div class="prog-row"><div class="prog-lbl">❌ Sem Pontos</div><div class="prog-track"><div class="prog-fill" style="width:${Math.max(2,(s.members.length-comPts)/total*100)}%;background:linear-gradient(90deg,#2a2a5a,#3a3a7a)"></div></div><div class="prog-val">${s.members.length-comPts}</div></div>
-    <div class="prog-row"><div class="prog-lbl">❓ Não Verif.</div><div class="prog-track"><div class="prog-fill" style="width:${s.naoverif.length>0?60:2}%;background:linear-gradient(90deg,#ef4444,#f87171)"></div></div><div class="prog-val">${s.naoverif.length}</div></div>
-    <div class="prog-row"><div class="prog-lbl">📋 Ausências</div><div class="prog-track"><div class="prog-fill" style="width:${s.ausencias.length>0?40:2}%;background:linear-gradient(90deg,#f97316,#fb923c)"></div></div><div class="prog-val">${s.ausencias.length}</div></div>
+    <div class="prog-row"><div class="prog-lbl">❓ Não Verif.</div><div class="prog-track"><div class="prog-fill" style="width:${(s.naoverif||[]).length>0?60:2}%;background:linear-gradient(90deg,#ef4444,#f87171)"></div></div><div class="prog-val">${(s.naoverif||[]).length}</div></div>
+    <div class="prog-row"><div class="prog-lbl">📋 Ausências</div><div class="prog-track"><div class="prog-fill" style="width:${(s.ausencias||[]).length>0?40:2}%;background:linear-gradient(90deg,#f97316,#fb923c)"></div></div><div class="prog-val">${s.ausencias.length}</div></div>
   `;
   const cats=['Temática','Cine','Atividades'];
   const cc={Temática:'#a855f7',Cine:'#22d3ee',Atividades:'#ec4899'};
@@ -4615,7 +4707,7 @@ function renderOverview(){
 
   // Game News recentes
   const newsRec = [...s.news].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,5);
-  document.getElementById('ov-news-count').textContent = s.news.length + ' total';
+  document.getElementById('ov-news-count').textContent = (s.news||[]).length + ' total';
   document.getElementById('ov-news-list').innerHTML = newsRec.length === 0
     ? '<div class="empty"><div class="empty-icon">📰</div><div class="empty-text">Nenhuma news ainda</div></div>'
     : newsRec.map(n => `<div style="padding:9px 0;border-bottom:1px solid rgba(37,37,80,.4);display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
@@ -4631,9 +4723,9 @@ function renderOverview(){
       </div>`).join('');
 
   // Resumo instruções
-  const instConc = s.instrucoes.filter(i=>i.status==='concluida').length;
-  const instPend = s.instrucoes.filter(i=>i.status==='pendente').length;
-  const instCanc = s.instrucoes.filter(i=>i.status==='cancelada').length;
+  const instConc = (s.instrucoes||[]).filter(i=>i.status==='concluida').length;
+  const instPend = (s.instrucoes||[]).filter(i=>i.status==='pendente').length;
+  const instCanc = (s.instrucoes||[]).filter(i=>i.status==='cancelada').length;
   const instTotal = s.instrucoes.length || 1;
   document.getElementById('ov-inst-count').textContent = s.instrucoes.length + ' total';
   document.getElementById('ov-inst-list').innerHTML = s.instrucoes.length === 0
@@ -4686,7 +4778,7 @@ function renderOverview(){
        </div>`;
 
   // Resumo feedbacks
-  const fbPend   = s.feedbacks.filter(f=>f.status==='pendente').length;
+  const fbPend   = (s.feedbacks||[]).filter(f=>f.status==='pendente').length;
   const fbResolv = s.feedbacks.filter(f=>f.status==='resolvido').length;
   const fbMelh   = s.feedbacks.filter(f=>f.status==='melhorou').length;
   const fbNeg    = s.feedbacks.filter(f=>f.cat==='negativo').length;
@@ -4749,30 +4841,12 @@ function getUltimaPontuacaoMembro(m) {
 }
 
 function isRebocado(m) {
-  // Membro já processado (rebocado confirmado ou excluído) → não aparece na lista
-  if (m.rebocadoConfirmado) return false;
-
-  // Verificar primeiro no levelup (fonte de verdade)
+  if (m.rebocadoConfirmado) return true;
+  // Status definido: vermelho (1 mês, 2 meses, +3 meses, sem pontos) → rebocado
+  if (m.ult) return ultReboca(m.ult);
+  // Sem status: fallback pelo levelup
   const ult = getUltimaPontuacaoMembro(m);
-
-  if (ult) {
-    // Se tem registro no levelup: rebocado se última pontuação >= 30 dias
-    return ult.dias >= 30;
-  }
-
-  // Sem registro no levelup — usar fallback do campo manual m.ult
-  // SÓ marcar como rebocado se m.ult indicar claramente inatividade longa
-  const ultMap = {
-    'SEM PONTOS': 999, 'ÚLTIMA SEMANA': 3, '2 SEMANAS': 14,
-    '1 MÊS': 35, 'MAIS DE 3 MESES': 100,
-  };
-  if (m.ult && ultMap[m.ult] !== undefined) {
-    return ultMap[m.ult] >= 30;
-  }
-
-  // Sem levelup e sem label reconhecido → NÃO rebocado (benefício da dúvida)
-  // Membros novos ou sem histórico ficam na aba principal
-  return false;
+  return !!(ult && ult.dias >= 30);
 }
 
 // Faixa de inatividade para cor e label
@@ -4799,7 +4873,7 @@ function renderMembers(){
   const s=window._state; if(!s)return;
   const q=(document.getElementById('search-members')?.value||'').toLowerCase();
   // Excluir membros rebocados da aba principal
-  const filtered=s.members.filter(m =>
+  const filtered=(s.members||[]).filter(m =>
     !isRebocado(m) &&
     (!q || m.m?.toLowerCase().includes(q) || m.id?.includes(q) ||
            m.cargo?.toLowerCase().includes(q) || m.posicao?.includes(q) ||
@@ -4837,7 +4911,27 @@ function renderMembers(){
 
   updateMemberSortIcons();
   const total = s.members.filter(m => !isRebocado(m)).length;
-  document.getElementById('members-count').textContent=filtered.length+'/'+total;
+  document.getElementById('members-count').textContent = filtered.length + '/' + total;
+
+  // Empty state — avisa quando nenhum membro aparece
+  if (filtered.length === 0) {
+    const todos = (s.members||[]).length;
+    const rebocados = (s.members||[]).filter(m => isRebocado(m)).length;
+    document.getElementById('members-tbody').innerHTML = `
+      <tr><td colspan="99" style="padding:32px;text-align:center;color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:12px">
+        ${todos === 0
+          ? '👥 Nenhum membro cadastrado ainda.'
+          : q
+            ? `🔍 Nenhum resultado para "${q}".`
+            : rebocados === todos
+              ? `⚠️ Todos os ${todos} membros estão em rebocamento. Verifique a aba Rebocamentos.`
+              : '👥 Nenhum membro encontrado.'}
+      </td></tr>`;
+    return;
+  }
+
+  // Pré-calcular análises para todos os membros de uma vez (performance)
+  const analises = precalcAnalises(filtered);
   document.getElementById('members-tbody').innerHTML=filtered.map(m=>{
     const cargoUp   = UP_CARGOS.find(c => c.nome === m.cargo) || getMeritoCargo(m.cargo);
     const cargoCor  = cargoUp ? cargoUp.cor : '#64748b';
@@ -4848,11 +4942,12 @@ function renderMembers(){
     if (m.subAreas?.instrucao)   subs.push(`<span style="font-size:9px;background:rgba(168,85,247,.12);color:#c084fc;padding:1px 5px;border-radius:5px">📚</span>`);
     if (m.subAreas?.acolhimento) subs.push(`<span style="font-size:9px;background:rgba(34,211,238,.1);color:#22d3ee;padding:1px 5px;border-radius:5px">🤗</span>`);
     if (m.subAreas?.gamenews)    subs.push(`<span style="font-size:9px;background:rgba(249,115,22,.1);color:#fb923c;padding:1px 5px;border-radius:5px">📰</span>`);
-    // Streak, tendência e progresso up
-    const streak    = calcStreak(m.id, m.m);
-    const tendencia = calcTendencia(m.id, m.m);
-    const progUp    = calcProgressoUp(m);
-    const emRisco   = getMembroEmRisco(m);
+    // Usar cache pré-calculado
+    const an       = analises[m.id||m.m] || {};
+    const streak   = an.streak   || 0;
+    const tendencia= an.tend     || null;
+    const progUp   = an.progUp   || null;
+    const emRisco  = an.emRisco  || false;
     const streakBadge = streak >= 2
       ? `<span style="font-size:9px;background:rgba(249,115,22,.15);color:#fb923c;padding:1px 6px;border-radius:6px;font-family:'Share Tech Mono',monospace" title="${streak} semanas seguidas">🔥${streak}</span>`
       : '';
@@ -4883,11 +4978,7 @@ function renderMembers(){
     </td>
     <td style="white-space:nowrap">${tipoUpBadge} ${gamesBadge}</td>
     <td><span class="badge ${m.ativo?'b-cyan':'b-gray'}">${m.ativo?'● ATIVO':'○ —'}</span></td>
-    <td style="white-space:nowrap">
-      <span class="badge ${m.pts?'b-green':'b-gray'}">${m.pts?'✓':'✗'}</span>
-      ${streakBadge}
-    </td>
-    <td style="white-space:nowrap">${ultBadge(m.ult, m)} ${tendBadge}</td>
+    <td style="white-space:nowrap">${ultBadge(m.ult, m, m._id)} ${streakBadge} ${tendBadge}</td>
     <td style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3)">${m.entrou||'—'}</td>
     <td><div style="display:flex;gap:4px">
       <button class="btn btn-edit btn-sm" onclick="openMemberModal('${m._id}')">✏️</button>
@@ -4963,18 +5054,63 @@ function renderRebocamentos() {
   const s = window._state; if(!s) return;
   const q = (document.getElementById('search-rebo')?.value || '').toLowerCase();
 
-  // Semana atual (para detectar quem fez pontos esta semana)
+  // Pré-calcular getUltimaPontuacaoMembro para TODOS os membros uma vez só
+  // Evita 3 varreduras de s.levelup por membro (isRebocado + reboxFaixa + map)
+  const ultCache = {};
   const semAtual = getPontSemana(0);
+  if (s.levelup && s.levelup.length > 0) {
+    // Indexar levelup por memId e por nome para busca O(1)
+    const luPorId   = {};
+    const luPorNome = {};
+    s.levelup.forEach(lu => {
+      if (lu.memId) { (luPorId[lu.memId]   = luPorId[lu.memId]   || []).push(lu); }
+      const n = (lu.membro||'').toLowerCase();
+      if (n)        { (luPorNome[n]         = luPorNome[n]         || []).push(lu); }
+    });
+    (s.members||[]).forEach(m => {
+      const key = m.id || m.m;
+      const regs = [
+        ...(m.id ? (luPorId[m.id]||[]) : []),
+        ...(m.m  ? (luPorNome[(m.m||'').toLowerCase()]||[]) : []),
+      ];
+      const uniq = [...new Map(regs.map(r=>[r._id||r.semana+r.pts, r])).values()];
+      const comPts = uniq.filter(lu=>(lu.pts||0)>0).sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+      if (comPts.length > 0 && comPts[0].data) {
+        const dias = Math.floor((Date.now()-new Date(comPts[0].data+'T12:00:00').getTime())/86400000);
+        ultCache[key] = { dias, data: comPts[0].data, semana: comPts[0].semana||'', pts: comPts[0].pts };
+      } else {
+        ultCache[key] = null;
+      }
+    });
+  }
 
-  const rebocados = s.members
-    .filter(m => isRebocado(m))
+  // Versão de isRebocado que usa o cache
+  function isRebocadoCached(m) {
+    if (m.rebocadoConfirmado) return true;
+    if (m.ult) return ultReboca(m.ult);
+    const uc = ultCache[m.id||m.m];
+    return !!(uc && uc.dias >= 30);
+  }
+
+  // Versão de reboxFaixa que usa o cache
+  function reboxFaixaCached(m) {
+    const ult = ultCache[m.id||m.m];
+    if (ult) {
+      if (ult.dias >= 90) return { key:'3m', label:'3+ meses', cor:'#f97316', bg:'rgba(249,115,22,.1)', border:'rgba(249,115,22,.3)', ordem:3 };
+      if (ult.dias >= 60) return { key:'2m', label:'2 meses',  cor:'#eab308', bg:'rgba(234,179,8,.1)',  border:'rgba(234,179,8,.3)',  ordem:2 };
+      if (ult.dias >= 30) return { key:'1m', label:'1 mês',    cor:'#facc15', bg:'rgba(250,204,21,.1)', border:'rgba(250,204,21,.3)', ordem:1 };
+    }
+    return { key:'sem', label:'Sem pontos', cor:'#ef4444', bg:'rgba(239,68,68,.1)', border:'rgba(239,68,68,.3)', ordem:4 };
+  }
+
+  const rebocados = (s.members||[])
+    .filter(m => isRebocadoCached(m))
     .map(m => {
-      const ult = getUltimaPontuacaoMembro(m);
-      // Verificar se fez pontos na semana atual
+      const ult = ultCache[m.id||m.m];
       const fezEstaSemana = ult && ult.data >= semAtual.inicio && ult.data <= semAtual.fim;
-      return { ...m, faixa: reboxFaixa(m), _ult: ult, _fezEstaSemana: fezEstaSemana };
+      return { ...m, faixa: reboxFaixaCached(m), _ult: ult, _fezEstaSemana: fezEstaSemana };
     })
-    .sort((a,b) => b.faixa.ordem - a.faixa.ordem);
+    .sort((a,b) => (b.faixa.ordem||0) - (a.faixa.ordem||0));
 
   // Stats por faixa (sempre sobre todos, sem filtro de texto)
   const stats = { sem:0, '3m':0, '2m':0, '1m':0 };
@@ -5060,12 +5196,18 @@ function renderRebocamentos() {
 function renderNaoVerif(){
   const s=window._state; if(!s)return;
   const q=(document.getElementById('search-nv')?.value||'').toLowerCase();
-  const filtered=s.naoverif
-    .filter(n=>n.membro?.toLowerCase().includes(q)||n.id?.includes(q))
+  const filtered=(s.naoverif||[])
+    .filter(n=>!q||n.membro?.toLowerCase().includes(q)||n.id?.includes(q))
     .sort((a,b)=>(a.membro||'').localeCompare(b.membro||''));
-  document.getElementById('nv-count').textContent=filtered.length+'/'+s.naoverif.length;
+  document.getElementById('nv-count').textContent=filtered.length+'/'+(s.naoverif||[]).length;
+  if (filtered.length === 0) {
+    document.getElementById('nv-tbody').innerHTML = `<tr><td colspan="99" style="padding:24px;text-align:center;color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:12px">
+      ${(s.naoverif||[]).length===0 ? '✅ Nenhum membro não verificado.' : `🔍 Nenhum resultado para "${q}".`}
+    </td></tr>`;
+    return;
+  }
   document.getElementById('nv-tbody').innerHTML=filtered.map(n=>`<tr>
-    <td><div class="mname">${n.membro}</div><div class="mid">${n.id?.slice(-10)||'—'}…</div></td>
+    <td><div class="mname">${n.membro||'—'}</div><div class="mid">${n.id?.slice(-10)||'—'}…</div></td>
     <td style="font-size:12px;color:var(--text3)">${n.tempo||'—'}</td>
     <td><span class="badge ${n.pureza?'b-green':'b-gray'}">${n.pureza?'✓ SIM':'✗ NÃO'}</span></td>
     <td><span class="badge ${n.staff?'b-cyan':'b-gray'}">${n.staff?'✓ SIM':'✗ NÃO'}</span></td>
@@ -5073,8 +5215,8 @@ function renderNaoVerif(){
     <td style="font-size:12px;color:var(--text3)">${n.contato||'—'}</td>
     <td style="font-size:12px;color:var(--text3)">${n.obs||'—'}</td>
     <td><div style="display:flex;gap:4px">
-      <button class="btn btn-edit btn-sm" onclick="openNvModal('${n._id}')">✏️</button>
-      <button class="btn btn-del btn-sm" onclick="deleteNv('${n._id}')">🗑</button>
+      <button class="btn btn-edit btn-sm" data-perm="edit_naoverif" onclick="openNvModal('${n._id}')">✏️</button>
+      <button class="btn btn-del btn-sm" data-perm="edit_naoverif" onclick="deleteNv('${n._id}')">🗑</button>
     </div></td>
   </tr>`).join('');
 }
@@ -5092,24 +5234,14 @@ function renderSuggestions() {
   const q = (document.getElementById('search-sugs')?.value || '').toLowerCase();
   const isUsados = sugFiltro === 'usados';
 
-  // Filtrar por usado/pendente + categoria + busca
-  let lista = s.suggestions.filter(sg => {
+  // Filtro unificado — sem duplicação
+  const lista = (s.suggestions||[]).filter(sg => {
     if (isUsados) return !!sg.usado;
-    if (sg.usado) return false; // se filtro não é usados, só pendentes
+    if (sg.usado) return false;
     if (sugFiltro !== 'todos' && sg.cat !== sugFiltro) return false;
     if (q && !(sg.text?.toLowerCase().includes(q) || sg.cat?.toLowerCase().includes(q))) return false;
     return true;
   });
-
-  // Se não é usados, excluir os usados
-  if (!isUsados) {
-    lista = s.suggestions.filter(sg => {
-      if (sg.usado) return false;
-      if (sugFiltro !== 'todos' && sg.cat !== sugFiltro) return false;
-      if (q && !(sg.text?.toLowerCase().includes(q) || sg.cat?.toLowerCase().includes(q))) return false;
-      return true;
-    });
-  }
 
   // Ordenar usados por dataUso desc, pendentes por data desc
   lista.sort((a,b) => {
@@ -5119,8 +5251,8 @@ function renderSuggestions() {
   });
 
   const total = isUsados
-    ? s.suggestions.filter(x => x.usado).length
-    : s.suggestions.filter(x => !x.usado).length;
+    ? (s.suggestions||[]).filter(x => x.usado).length
+    : (s.suggestions||[]).filter(x => !x.usado).length;
 
   document.getElementById('sug-count').textContent = lista.length + '/' + total;
 
@@ -5232,7 +5364,7 @@ function renderAusencias(){
   const lista = s.ausencias
     .filter(a => !q || (a.membro+a.id+a.ocasiao+a.motivo).toLowerCase().includes(q))
     .sort((a,b)=>(b.data||'').localeCompare(a.data||''));
-  document.getElementById('aus-count').textContent=lista.length+'/'+s.ausencias.length;
+  document.getElementById('aus-count').textContent=lista.length+'/'+(s.ausencias||[]).length;
   document.getElementById('aus-list').innerHTML=lista.map(a=>{
     const diasAtras = a.data ? Math.floor((Date.now()-new Date(a.data+'T12:00:00').getTime())/86400000) : null;
     return `<div class="aus-card">
@@ -5352,12 +5484,12 @@ function setNewsFuncFilter(f, el) {
 function renderNews(){
   const s=window._state; if(!s)return;
   const q=(document.getElementById('search-news')?.value||'').toLowerCase();
-  let filtered = s.news.filter(n =>
+  let filtered = (s.news||[]).filter(n =>
     (n.titulo?.toLowerCase().includes(q) || (n.jogo||'').toLowerCase().includes(q) || (n.autor||'').toLowerCase().includes(q)) &&
     (!newsFuncFiltro || n.funcao === newsFuncFiltro)
   ).sort((a,b) => (b.data||'').localeCompare(a.data||''));
 
-  document.getElementById('news-count').textContent = filtered.length + '/' + s.news.length;
+  document.getElementById('news-count').textContent = filtered.length + '/' + (s.news||[]).length;
 
   const funcaoMap = {
     passtimer: { label:'⏱️ Passtimer', cls:'b-green' },
@@ -5422,16 +5554,14 @@ function showLoginScreen(){
 }
 
 async function doLoginBtn(){
-  const u = document.getElementById('login-user').value.trim().toLowerCase();
-  const p = document.getElementById('login-pass').value;
+  const u    = document.getElementById('login-user').value.trim().toLowerCase();
+  const p    = document.getElementById('login-pass').value;
   const errEl = document.getElementById('login-error');
-
   if (!u || !p) {
     errEl.classList.add('show');
     errEl.textContent = '❌ Preencha usuário e senha';
     return;
   }
-
   const btn = document.getElementById('login-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Entrando...'; }
   if (errEl) errEl.classList.remove('show');
@@ -5439,43 +5569,36 @@ async function doLoginBtn(){
   const email = window._auth.toAuthEmail(u);
 
   try {
-    // Tentar login direto no Firebase Auth
+    // 1ª tentativa: login direto (usuário já migrado para o Auth)
     await window._auth.signInWithEmailAndPassword(window._auth.auth, email, p);
-    // onAuthStateChanged dispara → loadAll → doLogin automaticamente
+    // onAuthStateChanged → loadAll → doLogin automaticamente
   } catch(authErr) {
-    // Auth falhou — pode ser primeira vez (conta não existe ainda)
-    // Tentar migração: verificar credenciais via API REST do Firestore sem auth
-    // Como as regras agora exigem auth, usamos uma abordagem alternativa:
-    // Criar a conta no Auth com as credenciais fornecidas e validar depois
-    if (authErr.code === 'auth/invalid-credential' ||
-        authErr.code === 'auth/user-not-found'     ||
-        authErr.code === 'auth/wrong-password'     ||
-        authErr.code === 'auth/invalid-email') {
+    const isNotFound = ['auth/invalid-credential','auth/user-not-found','auth/wrong-password'].includes(authErr.code);
+    if (isNotFound) {
+      // Pode ser primeira vez (conta não existe no Auth ainda)
+      // Tentar criar — se funcionar, o usuário será validado pelo Firestore após loadAll
+      // (mesmo que alguém externo crie conta, não encontrará doc no Firestore → não entra)
       try {
-        // Tentar criar conta — se funcionar, é migração de usuário legado
         const cred = await window._auth.createUserWithEmailAndPassword(window._auth.auth, email, p);
-        // Conta criada — onAuthStateChanged vai disparar e loadAll vai rodar
-        // Depois do loadAll, vamos persistir o authUid
         window._pendingAuthUid = { usuario: u, uid: cred.user.uid };
-        toast('🔐 Conta migrada para autenticação segura!');
-        // onAuthStateChanged cuida do resto
+        // onAuthStateChanged → loadAll → doLogin → valida pelo Firestore
       } catch(createErr) {
         if (createErr.code === 'auth/email-already-in-use') {
-          // Email existe no Auth mas senha errada — senha incorreta
+          // Conta existe no Auth mas senha errada
           errEl.classList.add('show');
           errEl.textContent = '❌ Senha incorreta';
         } else {
-          console.error('[Auth createUser]', createErr);
           errEl.classList.add('show');
           errEl.textContent = '❌ Erro ao autenticar';
+          console.error('[Auth createUser]', createErr);
         }
         document.getElementById('login-pass').value = '';
       }
     } else {
-      console.error('[Auth login]', authErr);
       errEl.classList.add('show');
       errEl.textContent = '❌ ' + (authErr.message || authErr.code || 'Erro ao entrar');
       document.getElementById('login-pass').value = '';
+      console.error('[Auth login]', authErr);
     }
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'ENTRAR'; }
@@ -5495,6 +5618,14 @@ async function fixLiderUser(){
 }
 
 function doLogin(user){
+  // Verificar se usuário está ativo antes de permitir entrada
+  if (user.ativo === false) {
+    if (window._auth) window._auth.signOut(window._auth.auth).catch(()=>{});
+    try{ sessionStorage.removeItem('gp_user'); }catch(e){}
+    setTimeout(()=>{ if(window.showLoginScreen) window.showLoginScreen(); }, 100);
+    if(window.toast) window.toast('❌ Usuário desativado. Contate o administrador.');
+    return;
+  }
   try{
     window._currentUser=user;
     // Salvar apenas ID — sem senha em nenhum storage local
@@ -5526,6 +5657,12 @@ function doLogin(user){
   setTimeout(() => { notificarAoLogar(user); }, 1000);
   try{ toast(`Bem-vindo, ${user.nome||user.usuario}!`); }catch(e){}
 }
+
+// Expor funções críticas imediatamente após definição
+// (evita race condition com onAuthStateChanged do módulo Firebase)
+window.doLogin      = doLogin;
+window.renderAll    = renderAll;
+window.showLoginScreen = showLoginScreen;
 
 function notificarAoLogar(user) {
   const s = window._state; if (!s) return;
@@ -5634,9 +5771,13 @@ async function doLogout(){
   document.getElementById('user-bar').style.display='none';
   const fc=document.getElementById('float-config');
   if(fc) fc.style.display='none';
-  // Firebase Auth signOut — invalida a sessão no servidor
-  try{ await window._auth.signOut(window._auth.auth); }catch(e){ console.error('[signOut]',e); }
-  showLoginScreen();
+  // Cancelar setInterval da sidebar
+  if(window._sidebarSemanaInterval) clearInterval(window._sidebarSemanaInterval);
+  // Firebase Auth signOut — onAuthStateChanged vai disparar e chamar showLoginScreen automaticamente
+  try{ await window._auth.signOut(window._auth.auth); }catch(e){
+    console.error('[signOut]',e);
+    showLoginScreen(); // fallback se signOut falhar
+  }
 }
 
 function applyPermissions(){
@@ -5749,21 +5890,8 @@ async function saveUser(){
     }
   }
 
-  // Se é um novo usuário, tentar criar no Firebase Auth imediatamente
-  if (!existing && window._auth) {
-    const email = window._auth.toAuthEmail(obj.usuario);
-    try {
-      const cred = await window._auth.createUserWithEmailAndPassword(window._auth.auth, email, obj.senha);
-      obj.authUid = cred.user.uid;
-      toast('🔐 Conta criada com autenticação segura!');
-    } catch(e) {
-      if (e.code === 'auth/email-already-in-use') {
-        // Conta já existe no Auth — ok, será migrada no próximo login
-      } else {
-        console.warn('[Auth createUser]', e);
-      }
-    }
-  }
+  // NOTA: Não criar conta Auth aqui para não trocar o auth.currentUser (deslogaria o lider)
+  // A conta Auth será criada automaticamente na primeira vez que o usuário fizer login (migração)
 
   await window._db.dbSet(window._db.COLS.users, docId, obj);
   window._state.users = await window._db.dbGetAll(window._db.COLS.users);
@@ -5837,7 +5965,7 @@ function exportarBackupJSON() {
 function renderUsers(){
   const s=window._state; if(!s)return;
   document.getElementById('users-count').textContent=s.users.length;
-  document.getElementById('users-list').innerHTML=s.users.map(u=>{
+  document.getElementById('users-list').innerHTML=(s.users||[]).map(u=>{
     const role=ROLES[u.role]||{label:u.role,icon:'👤',color:'b-gray'};
     const isMe=u._id===window._currentUser?._id;
     return`<div class="user-card">
@@ -6103,7 +6231,7 @@ async function deleteInstrucao(docId) {
 function renderInstrucoes() {
   const s = window._state; if (!s) return;
   const q = (document.getElementById('search-inst')?.value || '').toLowerCase();
-  const filtered = s.instrucoes.filter(i =>
+  const filtered = (s.instrucoes||[]).filter(i =>
     i.membro?.toLowerCase().includes(q) ||
     i.instrutor?.toLowerCase().includes(q) ||
     i.tema?.toLowerCase().includes(q) ||
@@ -7444,23 +7572,27 @@ async function salvarMinhaConta() {
   if (nova.length < 6) { toast('❌ Senha deve ter mínimo 6 caracteres'); return; }
   if (nova !== conf)   { toast('❌ As senhas não coincidem'); return; }
 
-  // Verificar senha atual via Firebase Auth (re-autenticação)
+  // Verificar senha atual e atualizar no Firebase Auth
   if (window._auth) {
-    const email = window._auth.toAuthEmail(u.usuario);
+    const fbUser = window._auth.auth.currentUser;
+    if (!fbUser) { toast('❌ Sessão expirada. Faça login novamente.'); return; }
     try {
-      // Re-autenticar para confirmar senha atual
-      await window._auth.signInWithEmailAndPassword(window._auth.auth, email, atual);
-      // Atualizar senha no Firebase Auth
-      await window._auth.updatePassword(window._auth.auth.currentUser, nova);
+      // Usar updatePassword diretamente — o usuário já está autenticado
+      // Se a sessão for recente (< 5 min), funciona sem re-auth
+      await window._auth.updatePassword(fbUser, nova);
     } catch(e) {
-      if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password') {
-        toast('❌ Senha atual incorreta'); return;
+      if (e.code === 'auth/requires-recent-login') {
+        // Sessão antiga — precisa verificar senha atual primeiro
+        // Verificar contra Firestore como fallback seguro
+        if (atual !== u.senha) { toast('❌ Senha atual incorreta'); return; }
+        toast('⚠️ Sessão expirada. Faça logout e login novamente para alterar a senha.');
+        return;
       }
       console.error('[updatePassword]', e);
       toast('❌ Erro ao alterar senha: ' + (e.message || e.code)); return;
     }
   } else {
-    // Fallback legado — verificar contra Firestore
+    // Fallback sem Auth — verificar contra Firestore
     if (atual !== u.senha) { toast('❌ Senha atual incorreta'); return; }
   }
 
@@ -7580,7 +7712,7 @@ function renderConfigUsuarios() {
   const el = document.getElementById('cfg-users-list'); if (!el) return;
   el.innerHTML = s.users.length === 0
     ? '<div style="text-align:center;padding:40px;color:#5a5a5a;font-family:Share Tech Mono,monospace;font-size:12px">Nenhum usuário cadastrado</div>'
-    : s.users.map(u => {
+    : (s.users||[]).map(u => {
         const role = ROLES[u.role] || { icon:'👤', label: u.role||'—', color:'b-gray' };
         const isMe = u._id === window._currentUser?._id;
         const funcoes = u.funcoes || [];
@@ -8258,6 +8390,64 @@ function matchSemana(rec, sem) {
 // ═══════════════════════════════════════════════════════════════════════
 
 // 1. Streak: semanas consecutivas com pontuação
+// Pré-calcula streak, tendência, progresso e risco para todos os membros de uma vez
+// Muito mais eficiente que calcular por membro dentro do loop de render
+function precalcAnalises(membros) {
+  const s = window._state; if (!s) return {};
+  // Pré-calcular 27 semanas UMA VEZ fora do loop
+  const semanas = [];
+  for (let off = 0; off >= -26; off--) semanas.push(getPontSemana(off));
+  const semAtual = semanas[0];
+  const semAnt   = semanas[1];
+  // Filtrar levelup por semana fora do forEach
+  const luAtual = (s.levelup||[]).filter(l => matchSemana(l, semAtual));
+  const luAnt   = (s.levelup||[]).filter(l => matchSemana(l, semAnt));
+  // Indexar por membro×semana para streak O(1) por verificação
+  const luSets = semanas.map(sem =>
+    new Set((s.levelup||[])
+      .filter(l => matchSemana(l, sem) && (l.pts||0) > 0)
+      .map(l => l.memId || l.membro)
+    )
+  );
+  const cache = {};
+  membros.forEach(m => {
+    const k = m.id || m.m;
+    // Streak — O(1) por semana com Set
+    let streak = 0;
+    for (let i = 0; i < luSets.length; i++) {
+      if (!luSets[i].has(k)) break;
+      streak++;
+    }
+    // Tendência
+    const ptsA = luAtual.filter(l=>l.memId===m.id||l.membro===m.m).reduce((a,l)=>a+(l.pts||0),0);
+    const ptsB = luAnt.filter(l=>l.memId===m.id||l.membro===m.m).reduce((a,l)=>a+(l.pts||0),0);
+    let tend = null;
+    if (ptsA>0||ptsB>0) {
+      if (ptsA>ptsB+5)       tend={seta:'↑',cor:'#22c55e',label:'Subindo'};
+      else if (ptsA<ptsB-5)  tend={seta:'↓',cor:'#ef4444',label:'Caindo'};
+      else                    tend={seta:'→',cor:'#94a3b8',label:'Estável'};
+    }
+    // Progresso up
+    const cargo = getUpCargo(m.cargo);
+    let progUp = null;
+    if (cargo) {
+      const prox = getUpProximo(m.cargo);
+      if (!prox) { progUp={pct:100,apto:false,cor:'#22c55e'}; }
+      else {
+        const meta = calcUpMeta(cargo)||1;
+        const pct  = Math.min(100, Math.round(ptsA/meta*100));
+        const cor  = pct>=100?'#22c55e':pct>=60?'#eab308':'#3b82f6';
+        progUp={pct,pts:ptsA,metaTotal:meta,cargo,prox,cor,apto:pct>=100};
+      }
+    }
+    // Risco de rebocamento
+    const ult = (m.ult||'').toUpperCase();
+    const emRisco = !isRebocado(m) && (ult.includes('3 SEMANAS')||ult.includes('1 MÊS')||ult.includes('2 MES'));
+    cache[k] = {streak,tend,progUp,emRisco};
+  });
+  return cache;
+}
+
 function calcStreak(memId, memNome) {
   const s = window._state; if (!s) return 0;
   let streak = 0;
@@ -8330,9 +8520,9 @@ function calcSaudeServidor() {
     (movsF/movsTot*100)*0.15 +
     (fbRes/fbTot*100)*0.10
   );
-  const nivel = score>=80?{label:'ÓTIMO',cor:'#22c55e'}
-              : score>=60?{label:'BOM',cor:'#4db0ff'}
-              : score>=40?{label:'REGULAR',cor:'#eab308'}
+  const nivel = score>=80?{label:'ONLINE',cor:'#22c55e'}
+              : score>=60?{label:'ATIVO',cor:'#4db0ff'}
+              : score>=40?{label:'BAIXO',cor:'#eab308'}
               :            {label:'CRÍTICO',cor:'#ef4444'};
   return { score, nivel };
 }
@@ -8360,14 +8550,17 @@ function exportarCSVMembros() {
 // 7. Cópia de lista de membros para Discord
 function copiarListaMembrosDiscord() {
   const s = window._state; if (!s) return;
-  const membros = (s.members||[]);
-  const posOrder= ['gestao','subgestao','comum',''];
-  const grupos  = {};
-  posOrder.forEach(p=>{ grupos[p]=[]; });
-  membros.forEach(m=>{ (grupos[m.posicao||'comum']=grupos[m.posicao||'comum']||[]).push(m); });
-  const posLabel= {gestao:'🛡️ GESTÃO',subgestao:'⚡ SUBGESTÃO',comum:'👤 MEMBROS','':"👤 MEMBROS"};
+  const membros  = (s.members||[]);
+  const posOrder = ['gestao','subgestao','comum'];
+  const grupos   = {gestao:[],subgestao:[],comum:[]};
+  // Normaliza posição vazia/null para 'comum' — evita duplicação
+  membros.forEach(m => {
+    const pos = (m.posicao && posOrder.includes(m.posicao)) ? m.posicao : 'comum';
+    grupos[pos].push(m);
+  });
+  const posLabel = {gestao:'🛡️ GESTÃO',subgestao:'⚡ SUBGESTÃO',comum:'👤 MEMBROS'};
   const fmt = arr => arr.map(m=>`• @${m.m}${m.id?` (<@${m.id}>)`:''} — ${m.cargo||'—'}`).join('\n');
-  const partes = posOrder.filter(p=>(grupos[p]||[]).length>0)
+  const partes = posOrder.filter(p=>grupos[p].length>0)
     .map(p=>`${posLabel[p]} (${grupos[p].length}):\n${fmt(grupos[p])}`);
   const msg = `👥 **MEMBROS — GAMES // PUREZA**\nTotal: ${membros.length}\n\n${partes.join('\n\n')}\n\n━━━━━━━━━━━━━━━━━━━━━━━`;
   navigator.clipboard.writeText(msg)
@@ -8759,7 +8952,7 @@ function renderPontuacoes() {
   if(elRank) elRank.innerHTML = rankList.length === 0
     ? '<div class="empty"><div class="empty-icon">🏆</div><div class="empty-text">Nenhuma pontuação ainda</div></div>'
     : rankList.map((r, i) => {
-        const tend = !isGeral ? calcTendencia(null, r.nome) : null;
+        const tend = !isGeral ? calcTendencia(r.memId || null, r.nome) : null;
         const tendStr = tend ? `<span style="color:${tend.cor};font-size:13px" title="${tend.label}">${tend.seta}</span>` : '';
         return `
       <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:${i===0?'rgba(0,112,209,.08)':'var(--bg3)'};border:1px solid ${i===0?'rgba(0,112,209,.25)':'var(--border)'};border-radius:10px;margin-bottom:7px;flex-wrap:wrap">
@@ -10929,51 +11122,40 @@ function addOneHour(horario) {
 async function autoFinalizarMovs() {
   const s = window._state;
   if (!s || !s.movs) return;
+  try {
+    const agora = new Date();
+    const movsPendentes = (s.movs||[]).filter(mv => {
+      if (mv.finalizada) return false;
+      if (!mv.data || !mv.horario) return false;
+      const inicio = new Date(mv.data + 'T' + mv.horario + ':00');
+      const fim    = new Date(inicio.getTime() + 60 * 60 * 1000);
+      return agora >= fim;
+    });
 
-  const agora = new Date();
-  const movsPendentes = s.movs.filter(mv => {
-    if (mv.finalizada) return false;       // já finalizada
-    if (!mv.data || !mv.horario) return false; // sem data/horário
-    // Montar datetime de início
-    const [h, m] = mv.horario.split(':').map(Number);
-    const inicio = new Date(mv.data + 'T' + mv.horario + ':00');
-    const fim    = new Date(inicio.getTime() + 60 * 60 * 1000); // +1h
-    return agora >= fim; // já passou 1 hora do início
-  });
+    if (movsPendentes.length === 0) return;
 
-  if (movsPendentes.length === 0) return;
-
-  let atualizou = false;
-  for (const mv of movsPendentes) {
-    const pts = mv.pontosPadrao || 1;
-    const pars = (s.participacoes || []).filter(p => p.movId === mv._id);
-    const presentes = pars.filter(p => p.presente);
-
-    // Distribuir pontos para presentes
-    await Promise.all(pars.map(p =>
-      window._db.dbSet(window._db.COLS.participacoes, p._id, (({_id,...ps})=>({...ps,pontos:p.presente?pts:0}))(p))
-    ));
-
-    // Marcar como finalizada
-    await window._db.dbSet(window._db.COLS.movs, mv._id, (({_id,...mvF})=>({...mvF,finalizada:true}))(mv));
-    atualizou = true;
-
-    console.log(`[AUTO] Mov finalizada: "${mv.nome}" — ${presentes.length} presentes, ${pts}pt cada`);
-  }
-
-  if (atualizou) {
-    window._state.participacoes = await window._db.dbGetAll(window._db.COLS.participacoes);
-    window._state.movs = await window._db.dbGetAll(window._db.COLS.movs);
-    renderMovs();
-    renderCronograma();
-    renderPontuacoes();
-    renderRebocamentos();
-    renderMembers();
-    if (movsPendentes.length === 1) {
-      toast(`✅ "${movsPendentes[0].nome}" finalizada automaticamente!`);
-    } else {
-      toast(`✅ ${movsPendentes.length} movs finalizadas automaticamente!`);
+    let atualizou = false;
+    for (const mv of movsPendentes) {
+      const pts  = mv.pontosPadrao || 1;
+      const pars = (s.participacoes || []).filter(p => p.movId === mv._id);
+      const presentes = pars.filter(p => p.presente);
+      await Promise.all(pars.map(p =>
+        window._db.dbSet(window._db.COLS.participacoes, p._id, (({_id,...ps})=>({...ps,pontos:p.presente?pts:0}))(p))
+      ));
+      await window._db.dbSet(window._db.COLS.movs, mv._id, (({_id,...mvF})=>({...mvF,finalizada:true}))(mv));
+      atualizou = true;
     }
+
+    if (atualizou) {
+      window._state.participacoes = await window._db.dbGetAll(window._db.COLS.participacoes);
+      window._state.movs = await window._db.dbGetAll(window._db.COLS.movs);
+      renderMovs(); renderCronograma(); renderPontuacoes(); renderRebocamentos(); renderMembers();
+      toast(movsPendentes.length === 1
+        ? `✅ "${movsPendentes[0].nome}" finalizada automaticamente!`
+        : `✅ ${movsPendentes.length} movs finalizadas automaticamente!`);
+    }
+  } catch(e) {
+    console.error('[autoFinalizarMovs]', e);
   }
 }
 
@@ -10984,48 +11166,50 @@ window.autoFinalizarMovs = autoFinalizarMovs;
 async function autoEncerrarRpps() {
   const s = window._state;
   if (!s || !s.rpps) return;
+  try {
+    const hoje = new Date().setHours(0,0,0,0);
+    const vencidos = (s.rpps||[]).filter(r => {
+      if (r.status !== 'ativo' || !r.fim) return false;
+      const fim = new Date(r.fim + 'T00:00:00').getTime();
+      return hoje > fim;
+    });
 
-  const hoje = new Date().setHours(0,0,0,0);
-  const vencidos = s.rpps.filter(r => {
-    if (r.status !== 'ativo' || !r.fim) return false;
-    const fim = new Date(r.fim + 'T00:00:00').getTime();
-    return hoje > fim; // hoje é DEPOIS do fim
-  });
+    if (vencidos.length === 0) return;
 
-  if (vencidos.length === 0) return;
+    let encerrou = false;
+    for (const r of vencidos) {
+      if (!r._id) continue;
+      const { _id, ...rSemId } = r;
+      await window._db.dbSet(window._db.COLS.rpps, r._id, { ...rSemId, status: 'encerrado' });
+      encerrou = true;
+    }
 
-  let encerrou = false;
-  for (const r of vencidos) {
-    if (!r._id) continue; // segurança: ignorar registros sem ID
-    const { _id, ...rSemId } = r;
-    await window._db.dbSet(window._db.COLS.rpps, r._id, { ...rSemId, status: 'encerrado' });
-    encerrou = true;
-    console.log(`[AUTO RPP] Encerrado: @${r.membro} — venceu em ${r.fim}`);
-  }
-
-  if (encerrou) {
-    window._state.rpps = await window._db.dbGetAll(window._db.COLS.rpps);
-    renderRpp();
-    renderOverview();
-    if (vencidos.length === 1) {
-      toast(`✅ RPP de @${vencidos[0].membro} encerrado automaticamente!`);
-      await registrarHistorico('notif', {
-        nome:   vencidos[0].membro || '—',
-        motivo: `RPP encerrado automaticamente (venceu em ${vencidos[0].fim})`,
-        extra:  'Auto-encerramento por vencimento de prazo',
-        autor:  'Sistema',
-      });
-    } else {
-      toast(`✅ ${vencidos.length} RPPs encerrados automaticamente!`);
-      for (const r of vencidos) {
+    if (encerrou) {
+      window._state.rpps = await window._db.dbGetAll(window._db.COLS.rpps);
+      renderRpp();
+      renderOverview();
+      if (vencidos.length === 1) {
+        toast(`✅ RPP de @${vencidos[0].membro} encerrado automaticamente!`);
         await registrarHistorico('notif', {
-          nome:   r.membro || '—',
-          motivo: `RPP encerrado automaticamente (venceu em ${r.fim})`,
+          nome:   vencidos[0].membro || '—',
+          motivo: `RPP encerrado automaticamente (venceu em ${vencidos[0].fim})`,
           extra:  'Auto-encerramento por vencimento de prazo',
           autor:  'Sistema',
         });
+      } else {
+        toast(`✅ ${vencidos.length} RPPs encerrados automaticamente!`);
+        for (const r of vencidos) {
+          await registrarHistorico('notif', {
+            nome:   r.membro || '—',
+            motivo: `RPP encerrado automaticamente (venceu em ${r.fim})`,
+            extra:  'Auto-encerramento por vencimento de prazo',
+            autor:  'Sistema',
+          });
+        }
       }
     }
+  } catch(e) {
+    console.error('[autoEncerrarRpps]', e);
   }
 }
 window.autoEncerrarRpps = autoEncerrarRpps;
@@ -11338,7 +11522,8 @@ function atualizarSidebarSemana() {
 }
 
 // Atualizar sidebar semana a cada minuto
-setInterval(atualizarSidebarSemana, 60000);
+// Guardar referência para poder cancelar no logout
+window._sidebarSemanaInterval = setInterval(atualizarSidebarSemana, 60000);
 
 // ═══════════════════════════════════════════════════════
 // ATALHOS DE TECLADO
