@@ -9,11 +9,13 @@
 
 <style>
     :root { 
+        /* Base — fundo preto original + paleta Games PRZ */
         --bg: #060609; --panel: rgba(255,255,255,0.025); --panel-solid: #0d0d12; --panel-hover: rgba(255,255,255,0.04); 
         --accent: #00dcff; --accent-glow: rgba(0,220,255,0.45); --text: rgba(255,255,255,0.35); --white: #ececf4; 
         --border: rgba(255,255,255,0.07); --success: #34d399; --success-glow: rgba(52,211,153,0.4);
         --danger: #f87171; --danger-glow: rgba(248,113,113,0.4); --warning: #fbbf24; --warning-glow: rgba(251,191,36,0.4);
-        --purple: #a78bfa; --purple-glow: rgba(167,139,250,0.4); --gn-color: #fbbf24; --inst-color: #60a5fa; --acol-color: #f472b6; 
+        --purple: #a78bfa; --purple-glow: rgba(167,139,250,0.4); --gn-color: #fbbf24; --inst-color: #60a5fa; --acol-color: #f472b6;
+        
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
@@ -29,10 +31,15 @@
 
     #login-screen { background: radial-gradient(circle at center, rgba(24,24,27,0.9) 0%, var(--bg) 100%); z-index: 9000; display: none; }
     .login-box { background: rgba(6,6,9,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(0,220,255,0.12); padding: 40px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 40px rgba(0,220,255,0.05); border-radius: 16px; border-top: 2px solid var(--accent); }
-    .login-box h1 { font-family: 'Orbitron'; color: var(--accent); margin-bottom: 30px; font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 20px var(--accent-glow); display: flex; flex-direction: column; align-items: center; gap: 10px; }
-    .login-box input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: var(--white); padding: 15px 20px; margin-bottom: 20px; font-family: 'Share Tech Mono'; outline: none; transition: 0.3s; border-radius: 10px; font-size: 14px; text-align: center; letter-spacing: 2px;}
-    .login-box input:focus { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); background: rgba(0,0,0,0.8);}
+    .login-box h1 { font-family: 'Orbitron'; color: var(--accent); margin-bottom: 6px; font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 20px var(--accent-glow); display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 20px; }
+    .login-badge { display: inline-block; background: rgba(0,220,255,0.1); color: var(--accent); border: 1px solid rgba(0,220,255,0.25); font-size: 10px; font-weight: 700; letter-spacing: 2px; padding: 3px 14px; border-radius: 20px; margin-bottom: 6px; font-family: 'Share Tech Mono'; }
+    .login-sub { font-size: 11px; color: rgba(0,220,255,0.35); letter-spacing: 2px; font-family: 'Share Tech Mono'; margin-bottom: 22px; }
+    .login-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(0,220,255,0.3), transparent); margin-bottom: 20px; }
+    .login-box input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: var(--white); padding: 15px 20px; margin-bottom: 20px; font-family: 'Share Tech Mono'; outline: none; transition: 0.3s; border-radius: 10px; font-size: 14px; text-align: center; letter-spacing: 2px; box-sizing: border-box; }
+    .login-box input:focus { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); background: rgba(0,0,0,0.8); }
     .login-box button { width: 100%; background: linear-gradient(135deg, var(--accent) 0%, #0284c7 100%); color: #fff; border: none; padding: 16px; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; transition: 0.3s; border-radius: 10px; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; display: flex; justify-content: center; align-items: center; gap: 10px; }
+    .login-box button:hover { opacity: 0.9; transform: translateY(-1px); }
+    .login-footer-text { font-size: 10px; color: rgba(255,255,255,0.15); font-family: 'Share Tech Mono'; letter-spacing: 2px; margin-top: 16px; }
 
     /* MENU LATERAL E COMPONENTES */
     #app-screen { display: none; width: 100%; height: 100%; }
@@ -41,7 +48,7 @@
     .brand { padding: 20px 18px; font-family: 'Orbitron'; font-weight: 900; font-size: 16px; color: var(--white); letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; } .brand i { font-size: 20px; color: var(--accent); filter: drop-shadow(0 0 6px var(--accent-glow)); }
     
     .sidebar-widgets { display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 10px 12px; gap: 5px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-    .side-square { position: relative; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid var(--c); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 7px 3px; transition: 0.3s; border-radius: 7px; cursor: default; }
+    .side-square { position: relative; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-bottom: 2px solid var(--c); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 7px 3px; transition: 0.3s; border-radius: 7px; cursor: default; }
     .side-square .icon { font-size: 14px; color: var(--c); margin-bottom: 4px; filter: drop-shadow(0 0 6px var(--c-glow)); }
     .side-square h1 { font-size: 15px; color: var(--white); font-family: 'Orbitron'; font-weight: 900; margin: 0; text-shadow: 0 0 6px var(--c-glow); }
     .side-square .tooltip { position: absolute; top: -30px; background: var(--panel-solid); border: 1px solid var(--border); padding: 5px 10px; border-radius: 4px; font-size: 10px; color: var(--white); font-family: 'Orbitron'; font-weight: bold; opacity: 0; transition: 0.2s; pointer-events: none; white-space: nowrap; }
@@ -70,14 +77,24 @@
     .nav-category.closed .caret { transform: rotate(-90deg); }
     .nav-group { overflow: hidden; transition: max-height 0.4s ease; max-height: 1000px; opacity: 1; display: block; }
     .nav-group.closed { max-height: 0; opacity: 0; pointer-events: none; margin: 0; }
+    .dash-panel { background:var(--panel-solid); border:1px solid var(--border); border-radius:10px; padding:14px; }
+    .dash-panel-hdr { display:flex; align-items:center; gap:6px; margin-bottom:10px; font-family:'Orbitron'; font-size:11px; font-weight:900; letter-spacing:1px; }
+    .dash-panel-hdr i { font-size:13px; }
+    .dash-row { display:flex; align-items:center; gap:7px; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .dash-row:last-child { border-bottom:none; }
+    .dash-label { color:var(--white); font-family:'Rajdhani'; font-weight:700; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; }
+    .dash-tag { font-size:10px; font-family:'Share Tech Mono'; color:var(--text); white-space:nowrap; }
+    .dash-empty { font-size:12px; color:var(--text); opacity:0.5; font-family:'Rajdhani'; }
     .nav-btn { background: transparent; color: rgba(255,255,255,0.28); border: none; padding: 8px 18px; text-align: left; font-size: 11px; font-weight: 700; cursor: pointer; border-left: 2px solid transparent; transition: 0.15s; display: flex; align-items: center; gap: 9px; width: 100%; font-family: 'Rajdhani'; letter-spacing: 0.5px; text-transform: uppercase; }
     .nav-btn i { font-size: 14px; color: rgba(255,255,255,0.2); transition: 0.15s; }
     .nav-btn:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.03); }
     .nav-btn.active { background: rgba(167,139,250,0.08); border-left-color: var(--purple); color: var(--purple); }
     .nav-btn.active i { color: var(--purple); }
-    .nav-btn-dash { font-size:20px !important; transition:transform 0.2s, filter 0.2s !important; }
-    .nav-btn-dash:hover { transform:scale(1.3) rotate(-10deg) !important; filter:drop-shadow(0 0 8px rgba(167,139,250,0.8)) !important; background:transparent !important; }
+    .nav-btn-dash { transition:transform 0.2s, filter 0.2s !important; }
+    .nav-btn-dash:hover { transform:scale(1.15) !important; filter:drop-shadow(0 0 8px rgba(167,139,250,0.9)) !important; background:transparent !important; }
     .nav-btn-dash.active { background:transparent !important; border-left-color:transparent !important; }
+    .dash-ctrl-icon { color:rgba(255,255,255,0.3); transition:color 0.2s; }
+    .nav-btn-dash:hover .dash-ctrl-icon, .nav-btn-dash.active .dash-ctrl-icon { color:var(--purple); filter:drop-shadow(0 0 4px rgba(167,139,250,0.6)); }
     .nav-sub-btn { padding-left: 32px; }
 
     .btn-logout { background: transparent; color: var(--danger); border: none; padding: 20px; font-size: 13px; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; border-top: 1px solid var(--border); display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; width: 100%; letter-spacing: 1px;}
@@ -321,9 +338,13 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 <div id="login-screen">
     <div class="login-box">
         <h1><i class="ph-fill ph-game-controller"></i> GAMES | PRZ</h1>
-        <input type="text" id="ipt-user" placeholder="UTILIZADOR" autocomplete="off">
-        <input type="password" id="ipt-pass" placeholder="PALAVRA-PASSE">
-        <button onclick="window.doLoginBtn()"><i class="ph-bold ph-sign-in"></i> ACEDER AO TERMINAL</button>
+        <div class="login-badge">PORTAL DE GESTÃO</div>
+        <div class="login-sub">ACESSO RESTRITO</div>
+        <div class="login-divider"></div>
+        <input type="text" id="ipt-user" placeholder="USUÁRIO" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('ipt-pass').focus()">
+        <input type="password" id="ipt-pass" placeholder="SENHA" onkeydown="if(event.key==='Enter')window.doLoginBtn()">
+        <button onclick="window.doLoginBtn()"><i class="ph-bold ph-sign-in"></i> ENTRAR</button>
+        <div class="login-footer-text">games | pureza // v2.0</div>
     </div>
 </div>
 
@@ -350,7 +371,17 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
             </div>
 
             <div style="display: flex; flex-direction: column;">
-                <button class="nav-btn nav-btn-dash active" onclick="window.switchTab('page-dash', this)" style="margin-bottom:5px; font-size:18px; justify-content:center; letter-spacing:2px;" title="Dashboard">🎮</button>
+                <button class="nav-btn nav-btn-dash active" onclick="window.switchTab('page-dash', this)" style="margin-bottom:5px; justify-content:center; padding:10px;" title="Dashboard">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" class="dash-ctrl-icon">
+        <rect x="2" y="2" width="10" height="10" rx="2.5" fill="currentColor" opacity="0.9"/>
+        <rect x="14" y="2" width="10" height="10" rx="2.5" fill="currentColor" opacity="0.5"/>
+        <rect x="2" y="14" width="10" height="10" rx="2.5" fill="currentColor" opacity="0.5"/>
+        <rect x="14" y="14" width="4.5" height="4.5" rx="1.2" fill="currentColor" opacity="0.9"/>
+        <rect x="19.5" y="14" width="4.5" height="4.5" rx="1.2" fill="currentColor" opacity="0.6"/>
+        <rect x="14" y="19.5" width="4.5" height="4.5" rx="1.2" fill="currentColor" opacity="0.6"/>
+        <rect x="19.5" y="19.5" width="4.5" height="4.5" rx="1.2" fill="currentColor" opacity="0.3"/>
+    </svg>
+</button>
 
                 <div id="nav-cat-membros" class="nav-category" onclick="window.toggleCategory(this)"><span>MEMBROS</span><i class="ph-bold ph-caret-down caret"></i></div>
                 <div id="nav-group-membros" class="nav-group">
@@ -358,6 +389,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                     <button class="nav-btn nav-sub-btn" onclick="window.switchTab('page-rebocamento', this)"><i class="ph-fill ph-user-minus"></i> Inativos</button>
                     <button class="nav-btn nav-sub-btn" onclick="window.switchTab('page-ausencias', this)"><i class="ph-fill ph-calendar-x"></i> Ausências</button>
                     <button id="btn-nav-ind" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-indicacoes', this)"><i class="ph-fill ph-user-plus"></i> Indicações</button>
+                    <button id="btn-nav-destaques" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-destaques', this)"><i class="ph-fill ph-star"></i> Destaques</button>
                     <button id="btn-nav-levelup" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-levelup', this)"><i class="ph-fill ph-trophy"></i> Level UP</button>
                     <button id="btn-nav-upamentos" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-upamentos', this)"><i class="ph-fill ph-arrow-fat-up"></i> Upamentos</button>
                 </div>
@@ -406,7 +438,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                 <div id="nav-admin-separator" style="height: 1px; background: rgba(255,255,255,0.05); margin: 12px 20px;"></div>
                 <div id="nav-cat-admin" class="nav-category" onclick="window.toggleCategory(this)"><span>ADMINISTRAÇÃO</span><i class="ph-bold ph-caret-right caret"></i></div>
                 <div id="nav-group-admin" class="nav-group closed">
-                    <button id="btn-nav-acessos" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-admin', this)"><i class="ph-fill ph-lock-key"></i> Acessos (RBAC)</button>
+                    <button id="btn-nav-acessos" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-admin', this)"><i class="ph-fill ph-lock-key"></i> Acessos</button>
                     <button id="btn-nav-historico" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-historico', this)"><i class="ph-fill ph-clock-clockwise"></i> Histórico</button>
                 </div>
             </div>
@@ -432,24 +464,69 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         </div>
 
         <div id="page-dash" class="page active">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-                <h2><i class="ph-fill ph-squares-four" style="color:var(--accent);"></i> DASHBOARD DA ÁREA</h2>
+
+            <!-- Linha 1: MOVs hoje + Game News + Sugestões + RPP + Entradas/Saídas -->
+            <div style="display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
+                <div class="dash-panel" style="border-color:rgba(0,220,255,0.2);">
+                    <div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-calendar-check"></i> MOVs DE HOJE</div>
+                    <div id="dash-movs-hoje"></div>
+                </div>
+                <div class="dash-panel" style="border-color:rgba(251,191,36,0.2);">
+                    <div class="dash-panel-hdr" style="color:var(--gn-color);"><i class="ph-fill ph-article"></i> GAME NEWS</div>
+                    <div id="dash-gamenews"></div>
+                </div>
+                <div class="dash-panel" style="border-color:rgba(245,158,11,0.2);">
+                    <div class="dash-panel-hdr" style="color:#f59e0b;"><i class="ph-fill ph-lightbulb"></i> SUGESTÕES</div>
+                    <div id="dash-sug-movs"></div>
+                </div>
+                <div class="dash-panel" style="border-color:rgba(251,191,36,0.2);">
+                    <div class="dash-panel-hdr" style="color:var(--warning);"><i class="ph-fill ph-shield-warning"></i> RPP</div>
+                    <div id="dash-rpp"></div>
+                </div>
+                <div class="dash-panel" style="border-color:rgba(52,211,153,0.2);">
+                    <div class="dash-panel-hdr" style="color:var(--success);"><i class="ph-fill ph-door"></i> ENTRADAS / SAÍDAS</div>
+                    <div id="dash-mov-membros"></div>
+                </div>
             </div>
 
-            <!-- Painel: MOVs com Sugestões -->
-            <div style="margin-bottom:30px;">
-                <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
-                    <i class="ph-fill ph-lightbulb" style="font-size:18px; color:#f59e0b; filter:drop-shadow(0 0 6px rgba(245,158,11,0.5));"></i>
-                    <h3 style="font-family:'Orbitron'; font-size:13px; font-weight:900; color:#f59e0b; letter-spacing:1px; text-shadow:0 0 10px rgba(245,158,11,0.3);">SUGESTÕES PARA AS MOVS</h3>
+            <!-- Linha 2: Troca de UP + Info da Semana -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                <div class="dash-panel" style="border-color:rgba(167,139,250,0.2);">
+                    <div class="dash-panel-hdr" style="color:var(--purple);"><i class="ph-fill ph-swap"></i> TROCA DE UP</div>
+                    <div id="dash-troca-up"></div>
                 </div>
-                <div id="dash-sug-movs"></div>
+                <div class="dash-panel" style="border-color:rgba(0,220,255,0.15);">
+                    <div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-calendar-star"></i> ÚLTIMAS INFORMAÇÕES</div>
+                    <div id="dash-info-semana"></div>
+                </div>
             </div>
+
+            <!-- Linha 3: Top membros + Sub áreas + Feedbacks + Troca de Conta -->
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
+                <div class="dash-panel" style="border-color:rgba(251,191,36,0.2);">
+                    <div class="dash-panel-hdr" style="color:#fbbf24;"><i class="ph-fill ph-trophy"></i> MEMBROS EM DESTAQUE</div>
+                    <div id="dash-top-membros"></div>
+                </div>
+                <div class="dash-panel" style="border-color:rgba(244,114,182,0.2);">
+                    <div class="dash-panel-hdr" style="color:#f472b6;"><i class="ph-fill ph-chart-bar"></i> RENDIMENTO SUB ÁREAS</div>
+                    <div id="dash-subareas"></div>
+                </div>
+                <div class="dash-panel" style="border-color:rgba(167,139,250,0.2);">
+                    <div class="dash-panel-hdr" style="color:var(--purple);"><i class="ph-fill ph-chat-centered-text"></i> FEEDBACKS</div>
+                    <div id="dash-feedbacks"></div>
+                </div>
+                <div class="dash-panel" style="border-color:rgba(0,220,255,0.2);">
+                    <div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-arrows-clockwise"></i> TROCA DE CONTA</div>
+                    <div id="dash-troca-conta"></div>
+                </div>
+            </div>
+
         </div>
 
         <div id="page-admin" class="page">
             <div class="card" style="padding: 0; background: transparent; border: none; box-shadow: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2><i class="ph-fill ph-shield-check" style="color: var(--white);"></i> GESTÃO DE ACESSOS (RBAC)</h2>
+                    <h2><i class="ph-fill ph-shield-check" style="color: var(--white);"></i> GESTÃO DE ACESSOS</h2>
                     <div style="display: flex; gap: 15px;">
                         <button id="btn-add-admin-user" onclick="window.openAdminModal()" class="btn-add" style="background: var(--white); color: #000;"><i class="ph-bold ph-user-plus"></i> NOVO UTILIZADOR</button>
                     </div>
@@ -762,22 +839,102 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
 <!-- PAUTAS -->
 <div id="page-pautas" class="page" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h2 style="color:#818cf8;"><i class="ph-fill ph-note-pencil"></i> PAUTAS DE REUNIÃO</h2>
-        <button class="btn-add" style="background:#818cf8; color:#fff;" onclick="window.openPautaModal()"><i class="ph-bold ph-plus"></i> NOVA PAUTA</button>
     </div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
-        <div class="card" style="padding:20px; border-left:4px solid #818cf8; margin:0;">
-            <div style="font-size:11px; color:var(--text); font-family:'Orbitron'; font-weight:bold; letter-spacing:1px;">TOTAL DE PAUTAS</div>
-            <div id="pautas-count" style="font-size:32px; color:var(--white); font-family:'Rajdhani'; font-weight:900; margin-top:5px;">0</div>
+    <div style="display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid var(--border);">
+        <button id="pauta-tab-setorial" onclick="window.switchPautaTab('setorial')" style="display:flex;align-items:center;gap:7px;padding:10px 20px;background:transparent;border:none;border-bottom:2px solid #818cf8;color:#818cf8;font-family:'Orbitron';font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;margin-bottom:-1px;"><i class="ph-fill ph-users-three"></i> SETORIAL</button>
+        <button id="pauta-tab-gestores" onclick="window.switchPautaTab('gestores')" style="display:flex;align-items:center;gap:7px;padding:10px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text);font-family:'Orbitron';font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;margin-bottom:-1px;"><i class="ph-fill ph-crown-simple"></i> GESTORES</button>
+        <button id="pauta-tab-geral" onclick="window.switchPautaTab('geral')" style="display:flex;align-items:center;gap:7px;padding:10px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text);font-family:'Orbitron';font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;margin-bottom:-1px;"><i class="ph-fill ph-globe"></i> GERAL</button>
+    </div>
+    <div id="pauta-panel-setorial">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <span id="pautas-count-setorial" style="font-size:12px;color:var(--text);font-family:'Share Tech Mono';">0 pautas</span>
+            <button class="btn-add" style="background:#818cf8;color:#fff;" onclick="window.openNovaPauta('setorial')"><i class="ph-bold ph-plus"></i> NOVA PAUTA</button>
         </div>
-        <div class="card" style="padding:18px; margin:0; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-            <span class="pauta-tipo-tag pauta-tipo-setorial"><i class="ph-fill ph-users-three"></i> Setorial</span>
-            <span class="pauta-tipo-tag pauta-tipo-gestores"><i class="ph-fill ph-crown-simple"></i> Gestores</span>
-            <span class="pauta-tipo-tag pauta-tipo-geral"><i class="ph-fill ph-globe"></i> Geral</span>
+        <div id="pautas-list-setorial"></div>
+    </div>
+    <div id="pauta-panel-gestores" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <span id="pautas-count-gestores" style="font-size:12px;color:var(--text);font-family:'Share Tech Mono';">0 pautas</span>
+            <button class="btn-add" style="background:#818cf8;color:#fff;" onclick="window.openNovaPauta('gestores')"><i class="ph-bold ph-plus"></i> NOVA PAUTA</button>
+        </div>
+        <div id="pautas-list-gestores"></div>
+    </div>
+    <div id="pauta-panel-geral" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <span id="pautas-count-geral" style="font-size:12px;color:var(--text);font-family:'Share Tech Mono';">0 pautas</span>
+            <button class="btn-add" style="background:#818cf8;color:#fff;" onclick="window.openNovaPauta('geral')"><i class="ph-bold ph-plus"></i> NOVA PAUTA</button>
+        </div>
+        <div id="pautas-list-geral"></div>
+    </div>
+</div>
+
+<!-- MODAL PAUTA SETORIAL -->
+<div id="modal-pauta-setorial" class="modal-overlay">
+    <div class="modal-content" style="max-width:560px;">
+        <h2 style="color:#818cf8;margin-bottom:20px;"><i class="ph-fill ph-users-three"></i> PAUTA — REUNIÃO SETORIAL</h2>
+        <input type="hidden" id="ps-docid">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div class="form-group"><label>DATA</label><input type="date" id="ps-data"></div>
+            <div class="form-group"><label>HORA</label><input type="time" id="ps-hora"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;"><label>RESPONSÁVEL</label><select id="ps-resp"></select></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>PRESENÇA OBRIGATÓRIA</label>
+            <select id="ps-presenca"><option value="todos">Todos os membros ativos</option><option value="gestao">Apenas gestão</option><option value="subgestao">Sub-gestão e acima</option></select>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;"><label>PAUTA <span style="font-size:10px;color:var(--text);font-weight:400;">(um tópico por linha)</span></label>
+            <textarea id="ps-itens" placeholder="Ex: Resultados da semana&#10;Metas para próxima semana" style="min-height:100px;"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:20px;"><label>OBSERVAÇÕES</label><textarea id="ps-obs" placeholder="Informações adicionais..." style="min-height:60px;"></textarea></div>
+        <div class="modal-actions">
+            <button onclick="window.closeModal('modal-pauta-setorial')" class="btn-cancel">CANCELAR</button>
+            <button onclick="window.salvarPautaTipo('setorial')" class="btn-save" style="background:#818cf8;color:#fff;">GUARDAR</button>
         </div>
     </div>
-    <div id="pautas-list"></div>
+</div>
+
+<!-- MODAL PAUTA GESTORES -->
+<div id="modal-pauta-gestores" class="modal-overlay">
+    <div class="modal-content" style="max-width:520px;">
+        <h2 style="color:#818cf8;margin-bottom:20px;"><i class="ph-fill ph-crown-simple"></i> PAUTA — REUNIÃO DE GESTORES</h2>
+        <input type="hidden" id="pg-docid">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div class="form-group"><label>DATA</label><input type="date" id="pg-data"></div>
+            <div class="form-group"><label>HORA</label><input type="time" id="pg-hora"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;"><label>RESPONSÁVEL</label><select id="pg-resp"></select></div>
+        <div class="form-group" style="margin-bottom:20px;"><label>PAUTA <span style="font-size:10px;color:var(--text);font-weight:400;">(um tópico por linha)</span></label>
+            <textarea id="pg-itens" placeholder="Ex: Análise de desempenho&#10;Decisões pendentes" style="min-height:100px;"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button onclick="window.closeModal('modal-pauta-gestores')" class="btn-cancel">CANCELAR</button>
+            <button onclick="window.salvarPautaTipo('gestores')" class="btn-save" style="background:#818cf8;color:#fff;">GUARDAR</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PAUTA GERAL -->
+<div id="modal-pauta-geral" class="modal-overlay">
+    <div class="modal-content" style="max-width:520px;">
+        <h2 style="color:#818cf8;margin-bottom:20px;"><i class="ph-fill ph-globe"></i> PAUTA — REUNIÃO GERAL</h2>
+        <input type="hidden" id="pge-docid">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div class="form-group"><label>DATA</label><input type="date" id="pge-data"></div>
+            <div class="form-group"><label>HORA</label><input type="time" id="pge-hora"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;"><label>RESPONSÁVEL</label><select id="pge-resp"></select></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>AVISO PARA TODOS</label>
+            <textarea id="pge-aviso" placeholder="Mensagem de destaque..." style="min-height:60px;"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:20px;"><label>PAUTA <span style="font-size:10px;color:var(--text);font-weight:400;">(um tópico por linha)</span></label>
+            <textarea id="pge-itens" placeholder="Ex: Apresentação de novos membros&#10;Avisos importantes" style="min-height:100px;"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button onclick="window.closeModal('modal-pauta-geral')" class="btn-cancel">CANCELAR</button>
+            <button onclick="window.salvarPautaTipo('geral')" class="btn-save" style="background:#818cf8;color:#fff;">GUARDAR</button>
+        </div>
+    </div>
 </div>
 
 <!-- ADVERTÊNCIAS -->
@@ -848,6 +1005,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         <div style="display:flex; gap:10px;">
             <button class="btn-acao btn-outline primary" style="padding:10px 18px;" onclick="window.copiarRelatorioAtividade()"><i class="ph-bold ph-copy"></i> Copiar</button>
             <button class="btn-acao btn-outline warning" style="padding:10px 18px;" id="btn-gerar-atividade-auto" onclick="window.gerarAtividadeAuto()"><i class="ph-bold ph-robot"></i> Gerar Automático</button>
+            <button class="btn-acao btn-outline primary" style="padding:10px 18px;" onclick="window.atualizarStatusPorSemanas()" title="Recalcula status baseado em semanas consecutivas sem pontuar"><i class="ph-bold ph-clock-countdown"></i> Status por Semanas</button>
             <button class="btn-add" style="background:#22d3ee; color:#000;" onclick="window.openAtividadeModal()"><i class="ph-bold ph-plus"></i> REGISTAR</button>
         </div>
     </div>
@@ -928,6 +1086,52 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
 
 <!-- ========== LEVEL UP ========== -->
+<!-- ========== DESTAQUES ========== -->
+<div id="page-destaques" class="page" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="color:#fbbf24; text-shadow:0 0 15px rgba(251,191,36,0.4);"><i class="ph-fill ph-star"></i> DESTAQUES DA SEMANA</h2>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-acao btn-outline primary" style="padding:10px 18px;" onclick="window.openAddDestaqueModal()"><i class="ph-bold ph-user-plus"></i> Adicionar</button>
+            <button class="btn-acao btn-outline warning" style="padding:10px 18px;" onclick="window.calcularDestaques()"><i class="ph-bold ph-calculator"></i> Calcular Sugestões</button>
+        </div>
+    </div>
+
+    <!-- Destaques definidos — grid de 5 -->
+    <div style="margin-bottom:24px;">
+        <div style="font-family:'Orbitron'; font-size:11px; color:#fbbf24; font-weight:900; letter-spacing:1px; margin-bottom:12px;">⭐ DESTAQUES DEFINIDOS</div>
+        <div id="destaques-escolhidos" style="display:grid; grid-template-columns:repeat(5,1fr); gap:12px;"></div>
+    </div>
+
+    <!-- Top 5 sugeridos -->
+    <div id="destaques-sugestoes-wrap" style="display:none;">
+        <div style="font-family:'Orbitron'; font-size:11px; color:var(--text); font-weight:900; letter-spacing:1px; margin-bottom:12px;">🔍 TOP 5 SUGERIDOS PELO SISTEMA</div>
+        <div style="background:rgba(251,191,36,0.05); border:1px solid rgba(251,191,36,0.15); border-radius:10px; padding:12px 16px; margin-bottom:14px; font-size:12px; color:var(--text); font-family:'Rajdhani'; font-weight:600; line-height:1.5;">
+            <i class="ph-fill ph-info" style="color:#fbbf24;"></i>
+            Score baseado em: <b style="color:var(--white);">MOVs</b>, <b style="color:var(--white);">Reunião Setorial</b> e <b style="color:var(--white);">Sub Áreas</b>. Comportamento é avaliado <b style="color:#fbbf24;">por você</b>.
+        </div>
+        <div id="destaques-sugestoes"></div>
+    </div>
+</div>
+
+<!-- MODAL ADD DESTAQUE MANUAL -->
+<div id="modal-add-destaque" class="modal-overlay">
+    <div class="modal-content small">
+        <h2 style="color:#fbbf24; margin-bottom:25px;"><i class="ph-fill ph-star"></i> ADICIONAR DESTAQUE</h2>
+        <div class="form-group" style="margin-bottom:15px;">
+            <label>MEMBRO</label>
+            <select id="add-destaque-membro"></select>
+        </div>
+        <div class="form-group" style="margin-bottom:15px;">
+            <label>MOTIVO / OBSERVAÇÃO (opcional)</label>
+            <textarea id="add-destaque-motivo" placeholder="Ex: Excelente comportamento e dedicação..." style="min-height:70px;"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button onclick="window.closeModal('modal-add-destaque')" class="btn-cancel">CANCELAR</button>
+            <button onclick="window.confirmarAddDestaque()" class="btn-save" style="background:#fbbf24; color:#000;"><i class="ph-bold ph-star"></i> DESTACAR</button>
+        </div>
+    </div>
+</div>
+
 <div id="page-levelup" class="page" style="display:none;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
         <h2 style="color:var(--success); text-shadow:0 0 15px var(--success-glow);"><i class="ph-fill ph-trophy"></i> LEVEL UP</h2>
@@ -1662,7 +1866,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                 <option value="acolhedor">Acolhedor (Apenas Acolhimento)</option>
                 <option value="gamenews">Game News (Apenas GN)</option>
                 <option value="subgestao">Sub-Gestão (Movimentações e Relatórios)</option>
-                <option value="supervisor">Supervisor (Gestão, sem criar utilizadores)</option>
+                <option value="supervisor">Supervisor (Gestão, sem criar usuários)</option>
                 <option value="gerente">Gerente (Gestão Total)</option>
                 <option value="sublider">Sub-Líder (Gestão Total)</option>
                 <option value="lider">Líder (Gestão Total)</option>
@@ -1954,7 +2158,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
     window._moduleLoaded=true; if(window._moduleTimeout)clearTimeout(window._moduleTimeout);
 
-    // ⚠️ SEGURANÇA: Esta chave é pública e exposta no código.
+    // ⚠\uFE0F SEGURANÇA: Esta chave é pública e exposta no código.
     // Proteja o seu projeto definindo regras de segurança no Firebase Console:
     // https://console.firebase.google.com → Firestore → Regras
     // Restrinja também os domínios autorizados em: Authentication → Settings → Authorized domains
@@ -2003,7 +2207,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
     window.toggleCategory = function(el) { el.classList.toggle('closed'); const g = el.nextElementSibling; if (g && g.classList.contains('nav-group')) g.classList.toggle('closed'); };
     window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; if(id==='modal-inst-post') window.removePrintFile(null, 'inst'); if(id==='modal-acol-post') window.removePrintFile(null, 'acol'); if(id==='modal-relatorio') { relPrints = []; window.renderRelPrints(); } };
 window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's": "#a855f7", "Herdeiro": "#a855f7", "Overside": "#c084fc", "Vida de Artista": "#c084fc", "Imperial": "#c084fc", "Pills": "#c084fc", "Obsessive": "#2dd4bf", "Diamonds": "#2dd4bf", "RoyalSalute": "#2dd4bf", "Alpha": "#2dd4bf", "Revoada": "#2dd4bf", "DropMaster": "#2dd4bf", "Ecstasy": "#2dd4bf", "Rackson": "#2dd4bf", "Lovely": "#ec4899", "Delusions": "#ec4899", "Blessed": "#ec4899", "Alta Mídia": "#ec4899", "Relíquia": "#ec4899", "Neurotic": "#ec4899", "Prodigy": "#ec4899", "Heavenly": "#ec4899", "Divinity": "#93c5fd", "Archangel": "#9ca3af", "Eternal": "#9ca3af", "Destinado": "#f59e0b", "Loyal": "#ec4899", "Visionário": "#ef4444", "Original": "#14b8a6", "Luxury": "#991b1b", "Mainstreet": "#a855f7", "New Era": "#ec4899", "Highest": "#2dd4bf", "Bad Blood": "#ef4444", "Celebridade": "#fef08a", "Intocável": "#f3f4f6", "Seleção": "#2dd4bf", "Contratação do Ano": "#991b1b" };
-    window.opcoesDeCargo = { meta: [{ grupo: "☘︎ Moderadores²", roles: [{ v: "Mysterious", t: "Mysterious" }, { v: "Hall da Fama", t: "Hall da Fama" }, { v: "80's", t: "80's" }, { v: "Herdeiro", t: "Herdeiro" }]}, { grupo: "☘︎ Moderadores¹", roles: [{ v: "Overside", t: "Overside" }, { v: "Vida de Artista", t: "Vida de Artista" }, { v: "Imperial", t: "Imperial" }, { v: "Pills", t: "Pills" }]}, { grupo: "☘︎ Operadores", roles: [{ v: "Obsessive", t: "Obsessive" }, { v: "Diamonds", t: "Diamonds" }, { v: "RoyalSalute", t: "RoyalSalute" }, { v: "Alpha", t: "Alpha" }, { v: "Revoada", t: "Revoada" }, { v: "DropMaster", t: "DropMaster" }, { v: "Ecstasy", t: "Ecstasy" }, { v: "Rackson", t: "Rackson" }]}, { grupo: "☘︎ Iniciantes", roles: [{ v: "Lovely", t: "Lovely" }, { v: "Delusions", t: "Delusions" }, { v: "Blessed", t: "Blessed" }, { v: "Alta Mídia", t: "Alta Mídia" }, { v: "Relíquia", t: "Relíquia" }, { v: "Neurotic", t: "Neurotic" }, { v: "Prodigy", t: "Prodigy" }, { v: "Heavenly", t: "Heavenly" }]}], merito: [{ grupo: "Gestão", roles: [{ v: "Divinity", t: "Divinity" }, { v: "Archangel", t: "Archangel" }, { v: "Eternal", t: "Eternal" }]}, { grupo: "Mérito", roles: [{ v: "Destinado", t: "Destinado" }, { v: "Loyal", t: "Loyal" }, { v: "Visionário", t: "Visionário" }, { v: "Original", t: "Original" }, { v: "Luxury", t: "Luxury" }, { v: "Mainstreet", t: "Mainstreet" }, { v: "New Era", t: "New Era" }, { v: "Highest", t: "Highest" }, { v: "Bad Blood", t: "Bad Blood" }, { v: "Celebridade", t: "Celebridade" }, { v: "Intocável", t: "Intocável" }, { v: "Seleção", t: "Seleção" }, { v: "Contratação", t: "Contratação" }]}] };
+    window.opcoesDeCargo = { meta: [{ grupo: "☘\uFE0E Moderadores²", roles: [{ v: "Mysterious", t: "Mysterious" }, { v: "Hall da Fama", t: "Hall da Fama" }, { v: "80's", t: "80's" }, { v: "Herdeiro", t: "Herdeiro" }]}, { grupo: "☘\uFE0E Moderadores¹", roles: [{ v: "Overside", t: "Overside" }, { v: "Vida de Artista", t: "Vida de Artista" }, { v: "Imperial", t: "Imperial" }, { v: "Pills", t: "Pills" }]}, { grupo: "☘\uFE0E Operadores", roles: [{ v: "Obsessive", t: "Obsessive" }, { v: "Diamonds", t: "Diamonds" }, { v: "RoyalSalute", t: "RoyalSalute" }, { v: "Alpha", t: "Alpha" }, { v: "Revoada", t: "Revoada" }, { v: "DropMaster", t: "DropMaster" }, { v: "Ecstasy", t: "Ecstasy" }, { v: "Rackson", t: "Rackson" }]}, { grupo: "☘\uFE0E Iniciantes", roles: [{ v: "Lovely", t: "Lovely" }, { v: "Delusions", t: "Delusions" }, { v: "Blessed", t: "Blessed" }, { v: "Alta Mídia", t: "Alta Mídia" }, { v: "Relíquia", t: "Relíquia" }, { v: "Neurotic", t: "Neurotic" }, { v: "Prodigy", t: "Prodigy" }, { v: "Heavenly", t: "Heavenly" }]}], merito: [{ grupo: "Gestão", roles: [{ v: "Divinity", t: "Divinity" }, { v: "Archangel", t: "Archangel" }, { v: "Eternal", t: "Eternal" }]}, { grupo: "Mérito", roles: [{ v: "Destinado", t: "Destinado" }, { v: "Loyal", t: "Loyal" }, { v: "Visionário", t: "Visionário" }, { v: "Original", t: "Original" }, { v: "Luxury", t: "Luxury" }, { v: "Mainstreet", t: "Mainstreet" }, { v: "New Era", t: "New Era" }, { v: "Highest", t: "Highest" }, { v: "Bad Blood", t: "Bad Blood" }, { v: "Celebridade", t: "Celebridade" }, { v: "Intocável", t: "Intocável" }, { v: "Seleção", t: "Seleção" }, { v: "Contratação", t: "Contratação" }]}] };
     window.gerarOpcoesCargoTabela = function(t, c) { if (!t) return '<option value="">S/ Cargo</option>'; let h = '<option value="">S/ Cargo</option>'; if(window.opcoesDeCargo[t]){ window.opcoesDeCargo[t].forEach(cat => { h += `<optgroup label="${cat.grupo}">`; cat.roles.forEach(r => { h += `<option value="${r.v}" ${r.v === c ? 'selected' : ''}>${r.v}</option>`; }); h += `</optgroup>`; }); } return h; };
     window.atualizarCargos = function() { const t = document.getElementById('f-tipoup').value, c = document.getElementById('f-cargo'); c.innerHTML = ''; if (!t) { c.innerHTML = '<option value="">S/ UP...</option>'; return; } window.opcoesDeCargo[t].forEach(cat => { const og = document.createElement('optgroup'); og.label = cat.grupo; cat.roles.forEach(r => { const o = document.createElement('option'); o.value = r.v; o.textContent = r.t; og.appendChild(o); }); c.appendChild(og); }); };
 
@@ -2061,7 +2265,12 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             await b.commit();
             window.closeModal('modal-limpeza');
             window.showToast("Limpeza semanal concluída!", "success");
-            if(tipo === 'movs') { document.getElementById('aviso-reset-semanal').style.display = 'none'; window._avisoResetDado = false; }
+            if(tipo === 'movs') { document.getElementById('aviso-reset-semanal').style.display = 'none'; window._avisoResetDado = false;
+                // Apagar destaques da semana
+                (window._state.destaques||[]).forEach(d => deleteDoc(doc(db,'gestao_destaques',d._id)).catch(()=>{}));
+                // Atualizar status por semanas sem pontuar (roda ANTES de apagar atividade)
+                setTimeout(() => window.atualizarStatusPorSemanas && window.atualizarStatusPorSemanas(), 1000);
+            }
         } catch(e) { window.showToast("Erro ao limpar dados.", "error"); }
     };
 
@@ -2077,7 +2286,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             'nav-sep-notif', 'nav-cat-notif', 'nav-group-notif', 'btn-nav-notif-mov', 'btn-nav-notif-up', 'btn-nav-notif-rpp', 'btn-nav-notif-conta',
             'nav-sep-gestao', 'nav-cat-gestao', 'nav-group-gestao', 'btn-nav-funcoes', 'btn-nav-pautas', 'btn-nav-adv', 'btn-nav-autorizacoes', 'btn-nav-atividade', 'btn-nav-blacklist',
             'nav-admin-separator', 'nav-cat-admin', 'nav-group-admin', 'btn-nav-acessos', 'btn-nav-historico',
-            'btn-nav-relatorios', 'btn-nav-movs', 'btn-nav-ind', 'btn-nav-levelup', 'btn-nav-upamentos', 'nav-sep-area', 'nav-cat-area', 'nav-group-area', 'btn-nav-info-semana', 'btn-nav-sugestoes', 'btn-nav-feedbacks'
+            'btn-nav-relatorios', 'btn-nav-movs', 'btn-nav-ind', 'btn-nav-destaques', 'btn-nav-levelup', 'btn-nav-upamentos', 'nav-sep-area', 'nav-cat-area', 'nav-group-area', 'btn-nav-info-semana', 'btn-nav-sugestoes', 'btn-nav-feedbacks'
         ];
         idsToHide.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
 
@@ -2129,6 +2338,468 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         setTimeout(() => { ['renderMovs','renderMembers','renderAusencias','renderNaoVerificados','renderIndicacoes'].forEach(fn => window[fn] && window[fn]()); }, 0);
     };
 
+
+    // ==========================================
+    // DASHBOARD — funções de render
+    // ==========================================
+
+    window.renderDashMovsHoje = () => {
+        const el = document.getElementById('dash-movs-hoje'); if(!el) return;
+        const hoje = todayStr();
+        const movs = [...(window._state.movs||[])].filter(m => m.data === hoje).sort((a,b) => (a.horario||'').localeCompare(b.horario||''));
+        if(!movs.length) { el.innerHTML = '<span class="dash-empty">Nenhuma MOV hoje.</span>'; return; }
+        const agoraMin = getBrTime().getHours()*60 + getBrTime().getMinutes();
+        const proxIdx = movs.findIndex(m => { if(m.finalizada) return false; const [hh,mm]=(m.horario||'00:00').split(':').map(Number); return (hh*60+mm)>=agoraMin; });
+        el.innerHTML = movs.map((m,i) => {
+            const [hh,mm]=(m.horario||'00:00').split(':').map(Number);
+            const isProxima = i===proxIdx;
+            let badge = '';
+            if(m.finalizada) badge = `<span style="font-size:9px;font-family:'Share Tech Mono';color:var(--success);background:rgba(52,211,153,0.12);padding:1px 6px;border-radius:4px;">finalizada</span>`;
+            else if(isProxima) badge = `<span style="font-size:9px;font-family:'Share Tech Mono';color:var(--accent);background:rgba(0,220,255,0.12);padding:1px 6px;border-radius:4px;">próxima</span>`;
+            const resp = m.resp ? `<div style="font-size:11px;color:var(--text);font-family:'Rajdhani';font-weight:600;padding-left:44px;margin-top:1px;">\uD83D\uDC64 ${escapeHTML(m.resp)}${m.aux?` · <span style="opacity:0.7">${escapeHTML(m.aux)}</span>`:''}</div>` : '';
+            return `<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                <div style="display:flex;align-items:center;gap:7px;">
+                    <span style="font-family:'Share Tech Mono';font-size:12px;color:${m.finalizada?'rgba(255,255,255,0.3)':'var(--accent)'};min-width:44px;">${escapeHTML(m.horario||'--:--')}</span>
+                    <span style="font-size:13px;color:${m.finalizada?'rgba(255,255,255,0.4)':'var(--white)'};font-family:'Rajdhani';font-weight:700;flex:1;">${escapeHTML(m.tipo)}</span>
+                    ${badge}
+                </div>${resp}</div>`;
+        }).join('');
+    };
+
+    window.renderDashGameNews = () => {
+        const el = document.getElementById('dash-gamenews'); if(!el) return;
+        const hoje = todayStr();
+        const posts = [...(window._state.gamenews||[])].filter(p => p.data === hoje).sort((a,b) => (a.hora||'').localeCompare(b.hora||''));
+        if(!posts.length) { el.innerHTML = '<span class="dash-empty">Nenhuma GN hoje.</span>'; return; }
+        const statusCor = {'Publicado':'var(--success)','Corrigido':'var(--accent)','Pendente':'var(--warning)'};
+        el.innerHTML = posts.map(p => {
+            const cor = statusCor[p.status]||'var(--warning)';
+            return `<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                <div style="display:flex;align-items:center;gap:7px;">
+                    <span style="font-family:'Share Tech Mono';font-size:12px;color:var(--gn-color);min-width:44px;">${escapeHTML(p.hora||'--:--')}</span>
+                    <span style="font-size:12px;color:var(--white);font-family:'Rajdhani';font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHTML(p.titulo||'—')}</span>
+                    <span style="font-size:9px;font-family:'Share Tech Mono';color:${cor};background:${cor}18;padding:1px 6px;border-radius:4px;white-space:nowrap;">${p.status==='Publicado'?'✓ postada':'pendente'}</span>
+                </div>
+                ${p.passtimer?`<div style="font-size:11px;color:var(--text);font-family:'Rajdhani';font-weight:600;padding-left:44px;margin-top:1px;">\uD83D\uDCF0 ${escapeHTML(p.passtimer)}${p.monitor?` · <span style="opacity:0.7">${escapeHTML(p.monitor)}</span>`:''}</div>`:''}
+            </div>`;
+        }).join('');
+    };
+
+    window.renderDashRpp = () => {
+        const el = document.getElementById('dash-rpp'); if(!el) return;
+        const all = [...(window._state.notifRpp||[])];
+        if(!all.length) { el.innerHTML = '<span class="dash-empty">Nenhum staff em RPP.</span>'; return; }
+        const ord = {ativo:0,retornou:1,expirado:2};
+        all.sort((a,b) => (ord[a.status]??3)-(ord[b.status]??3) || (b.dataInicio||b.criadoEm||'').localeCompare(a.dataInicio||a.criadoEm||''));
+        const statusCor = {ativo:'var(--warning)',expirado:'var(--danger)',retornou:'var(--success)'};
+        const statusLabel = {ativo:'⏳ RPP',expirado:'❌ Expirou',retornou:'✅ Voltou'};
+        const statusDesc = {ativo:'entrou de RPP',expirado:'RPP expirou',retornou:'retornou'};
+        el.innerHTML = all.slice(0,6).map(r => {
+            const cor = statusCor[r.status]||'var(--text)';
+            const dt = (r.status==='retornou'?r.dataRetorno:r.status==='expirado'?r.dataFim:r.dataInicio)||'';
+            const dtFmt = dt ? dt.split('-').reverse().join('/') : '';
+            return `<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <span style="font-size:12px;color:${cor};">●</span>
+                    <span class="dash-label">${escapeHTML(r.membroNome||'—')}</span>
+                    <span style="font-size:9px;font-family:'Orbitron';font-weight:900;color:${cor};background:${cor}18;padding:1px 6px;border-radius:4px;white-space:nowrap;">${statusLabel[r.status]||r.status}</span>
+                </div>
+                <div style="font-size:11px;color:var(--text);font-family:'Rajdhani';font-weight:600;padding-left:20px;margin-top:1px;">${statusDesc[r.status]||''}${dtFmt?' · '+dtFmt:''}</div>
+            </div>`;
+        }).join('');
+    };
+
+    window.renderDashMovMembros = () => {
+        const el = document.getElementById('dash-mov-membros'); if(!el) return;
+        const all = [...(window._state.notifMov||[])].sort((a,b) => (b.data||'').localeCompare(a.data||''));
+        if(!all.length) { el.innerHTML = '<span class="dash-empty">Nenhuma movimentação.</span>'; return; }
+        el.innerHTML = all.slice(0,6).map(r => {
+            const isEntrada = r.tipo==='entrada';
+            const cor = isEntrada?'var(--success)':'var(--danger)';
+            return `<div class="dash-row">
+                <span style="font-size:13px;color:${cor};font-weight:900;">${isEntrada?'↑':'↓'}</span>
+                <span class="dash-label">${escapeHTML(r.membroNome||'—')}</span>
+                <span class="dash-tag">${r.data?r.data.split('-').reverse().join('/'):'—'}</span>
+            </div>`;
+        }).join('');
+    };
+
+    window.renderDashTrocaUp = () => {
+        const el = document.getElementById('dash-troca-up'); if(!el) return;
+        const all = [...(window._state.notifUp||[])].sort((a,b) => (b.data||'').localeCompare(a.data||''));
+        if(!all.length) { el.innerHTML = '<span class="dash-empty">Nenhuma troca registada.</span>'; return; }
+        el.innerHTML = all.slice(0,5).map(r => `
+            <div class="dash-row">
+                <span class="dash-label">${escapeHTML(r.membroNome||'—')}</span>
+                <span style="font-size:11px;color:var(--text);font-family:'Share Tech Mono';">${escapeHTML(r.areaAnterior||'—')}</span>
+                <span style="font-size:12px;color:var(--purple);">→</span>
+                <span style="font-size:11px;color:var(--purple);font-family:'Share Tech Mono';">${escapeHTML(r.areaNova||'—')}</span>
+            </div>`).join('');
+    };
+
+    window.renderDashInfoSemana = () => {
+        const el = document.getElementById('dash-info-semana'); if(!el) return;
+        let html = '';
+        const lastInfo = [...(window._state.infoSemana||[])].sort((a,b) => (b.data||'').localeCompare(a.data||''))[0];
+        if(lastInfo) {
+            const dt = lastInfo.data ? lastInfo.data.split('-').reverse().join('/') : '—';
+            html += `<div style="font-size:10px;color:var(--text);font-family:'Share Tech Mono';margin-bottom:6px;">${dt}</div>`;
+            if(lastInfo.positivos) html += `<div style="margin-bottom:5px;"><div style="font-size:9px;font-family:'Orbitron';color:var(--success);font-weight:900;margin-bottom:2px;">✅ POSITIVOS</div><div style="font-size:12px;color:var(--white);font-family:'Rajdhani';font-weight:600;line-height:1.4;white-space:pre-line;">${escapeHTML(lastInfo.positivos.substring(0,100))}${lastInfo.positivos.length>100?'…':''}</div></div>`;
+            if(lastInfo.negativos) html += `<div style="margin-bottom:8px;"><div style="font-size:9px;font-family:'Orbitron';color:var(--danger);font-weight:900;margin-bottom:2px;">❌ NEGATIVOS</div><div style="font-size:12px;color:var(--white);font-family:'Rajdhani';font-weight:600;line-height:1.4;white-space:pre-line;">${escapeHTML(lastInfo.negativos.substring(0,100))}${lastInfo.negativos.length>100?'…':''}</div></div>`;
+        }
+        const ocors = [...(window._state.ocorrencias||[])].sort((a,b) => (b.data||'').localeCompare(a.data||'')).slice(0,2);
+        if(ocors.length) {
+            html += `<div style="font-size:9px;font-family:'Orbitron';color:var(--purple);font-weight:900;margin:6px 0 3px;">\uD83D\uDEE1\uFE0F OCORRÊNCIAS</div>`;
+            ocors.forEach(o => { html += `<div class="dash-row"><span class="dash-label">${escapeHTML(o.membroNome||'—')}</span><span class="dash-tag">${o.data?o.data.split('-').reverse().join('/'):'—'}</span></div>`; });
+        }
+        const probs = [...(window._state.problemas||[])].sort((a,b) => ({aberto:0,em_andamento:1,resolvido:2}[a.status]??1)-({aberto:0,em_andamento:1,resolvido:2}[b.status]??1)).slice(0,2);
+        if(probs.length) {
+            html += `<div style="font-size:9px;font-family:'Orbitron';color:var(--danger);font-weight:900;margin:6px 0 3px;">⚠\uFE0F PROBLEMAS</div>`;
+            probs.forEach(p => {
+                const cor = {aberto:'var(--danger)',em_andamento:'var(--warning)',resolvido:'var(--success)'}[p.status]||'var(--text)';
+                html += `<div class="dash-row"><span class="dash-label" style="font-size:11px;">${escapeHTML((p.descricao||'').substring(0,40))}${(p.descricao||'').length>40?'…':''}</span><span style="font-size:9px;color:${cor};font-family:'Share Tech Mono';">${{aberto:'Aberto',em_andamento:'Em andamento',resolvido:'✓'}[p.status]||p.status}</span></div>`;
+            });
+        }
+        const auts = [...(window._state.autorizacoes||[])].sort((a,b) => (b.data||'').localeCompare(a.data||'')).slice(0,3);
+        if(auts.length) {
+            const tipoCor = {'Coroa':'var(--purple)','3 Estrelas':'var(--accent)','2 Estrelas':'var(--warning)'};
+            html += `<div style="font-size:9px;font-family:'Orbitron';color:var(--success);font-weight:900;margin:6px 0 3px;">\uD83C\uDFC5 AUTORIZAÇÕES</div>`;
+            auts.forEach(a => { html += `<div class="dash-row"><span class="dash-label">${escapeHTML(a.membroNome||'—')}</span><span style="font-size:10px;color:${tipoCor[a.tipo]||'var(--text)'};font-family:'Orbitron';font-weight:900;">${escapeHTML(a.tipo||'—')}</span></div>`; });
+        }
+        if(!html) { el.innerHTML = '<span class="dash-empty">Sem registos recentes.</span>'; return; }
+        el.innerHTML = html;
+    };
+
+    window.renderDashTopMembros = () => {
+        const el = document.getElementById('dash-top-membros'); if(!el) return;
+        const atv = [...(window._state.atividade||[])].filter(a => a.status==='ativo').sort((a,b) => (b.pontos||0)-(a.pontos||0)).slice(0,5);
+        if(!atv.length) { el.innerHTML = '<span class="dash-empty">Sem dados de atividade.</span>'; return; }
+        const medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49','4º','5º'];
+        el.innerHTML = atv.map((a,i) => `
+            <div class="dash-row">
+                <span style="font-size:13px;min-width:20px;">${medals[i]}</span>
+                <span class="dash-label">${escapeHTML(a.membroNome||'—')}</span>
+                <span style="font-size:11px;font-family:'Share Tech Mono';color:#fbbf24;">${a.pontos||0} pts</span>
+                <span style="font-size:10px;color:var(--success);font-family:'Share Tech Mono';">${a.movs||0} movs</span>
+            </div>`).join('');
+    };
+
+    window.renderDashSubareas = () => {
+        const el = document.getElementById('dash-subareas'); if(!el) return;
+        const gn = (window._state.gamenews||[]).filter(r => r.status==='Publicado').length;
+        const inst = (window._state.instrucoes||[]).length;
+        const acol = (window._state.acolhimentos||[]).length;
+        const total = gn+inst+acol||1;
+        el.innerHTML = '';
+        [{label:'Game News',val:gn,cor:'#fbbf24'},{label:'Instrução',val:inst,cor:'var(--inst-color)'},{label:'Acolhimento',val:acol,cor:'var(--acol-color)'}].forEach(b => {
+            const pct = Math.round((b.val/total)*100);
+            el.innerHTML += `<div style="margin-bottom:8px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                    <span style="font-size:12px;color:var(--white);font-family:'Rajdhani';font-weight:700;">${b.label}</span>
+                    <span style="font-size:11px;font-family:'Share Tech Mono';color:${b.cor};">${b.val}</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.06);border-radius:4px;height:5px;overflow:hidden;">
+                    <div style="width:${pct}%;height:100%;background:${b.cor};border-radius:4px;"></div>
+                </div></div>`;
+        });
+    };
+
+    // ==========================================
+
+
+    // ==========================================
+    // DESTAQUES DA SEMANA
+    // ==========================================
+    window._state.destaques = [];
+
+    window.calcularDestaques = () => {
+        const wrap = document.getElementById('destaques-sugestoes-wrap');
+        const el   = document.getElementById('destaques-sugestoes');
+        if(!wrap || !el) return;
+
+        const atv = [...(window._state.atividade||[])];
+        if(!atv.length) { window.showToast('Gere a atividade automática primeiro!', 'error'); return; }
+
+        const idsReuniao = new Set();
+        (window._state.movs||[]).forEach(m => {
+            if(m.tipo !== 'Reunião Setorial') return;
+            (m.participantes||[]).forEach(p => {
+                if(!p.status?.includes('FALTOU') && p.idDiscord) idsReuniao.add(String(p.idDiscord));
+            });
+        });
+
+        const scored = atv
+            .filter(a => a.status === 'ativo')
+            .map(a => {
+                const mem = (window._state.members||[]).find(m => m._id === a.membroId);
+                const discordId = mem?.id || '';
+                const scoreMovs    = Math.min(40, (a.movs||0) * 5);
+                const scoreReuniao = idsReuniao.has(discordId) ? 20 : 0;
+                const scoreSub     = Math.min(30, ((a.instCount||0)*5) + ((a.acolCount||0)*4) + ((a.gnCount||0)*6));
+                const scorePontos  = Math.min(10, Math.round(((a.pontos||0)/200)*10));
+                const scoreTotal   = scoreMovs + scoreReuniao + scoreSub + scorePontos;
+                return { ...a, discordId, scoreTotal, scoreMovs, scoreReuniao, scoreSub };
+            })
+            .sort((a,b) => b.scoreTotal - a.scoreTotal)
+            .slice(0,5);
+
+        if(!scored.length) { window.showToast('Nenhum membro ativo encontrado.', 'error'); return; }
+
+        const jaEscolhidos = new Set((window._state.destaques||[]).map(d => d.membroId));
+        const totalDestaques = (window._state.destaques||[]).length;
+
+        el.innerHTML = scored.map((a, i) => {
+            const medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49','4º','5º'];
+            const jaEsta = jaEscolhidos.has(a.membroId);
+            const cheio  = totalDestaques >= 5;
+            return `
+            <div style="background:var(--panel-solid); border:1px solid ${jaEsta?'rgba(251,191,36,0.4)':'var(--border)'}; border-radius:10px; padding:14px 18px; margin-bottom:10px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                <span style="font-size:20px; min-width:28px;">${medals[i]}</span>
+                <div style="flex:1; min-width:140px;">
+                    <div style="font-family:'Orbitron'; font-size:13px; font-weight:900; color:var(--white); margin-bottom:4px;">${escapeHTML(a.membroNome||'—')}</div>
+                    <div style="font-size:11px; font-family:'Share Tech Mono'; color:var(--text); display:flex; gap:10px; flex-wrap:wrap;">
+                        <span style="color:var(--accent);">\uD83D\uDCCB ${a.movs||0} MOVs</span>
+                        <span style="color:${a.scoreReuniao?'var(--success)':'var(--danger)'};">${a.scoreReuniao?'✓ Reun.':'✗ Reun.'}</span>
+                        <span style="color:#f472b6;">Sub: ${(a.instCount||0)+(a.acolCount||0)+(a.gnCount||0)}</span>
+                        <span style="color:#fbbf24; font-weight:900;">${a.scoreTotal}/100</span>
+                    </div>
+                </div>
+                <div style="display:flex; gap:6px;">
+                    ${jaEsta
+                        ? `<button class="btn-acao outline-danger" style="padding:7px 10px; font-size:11px;" onclick="window.removerDestaque('${a.membroId}')"><i class="ph-bold ph-x"></i> Remover</button>`
+                        : `<button class="btn-acao btn-outline warning" style="padding:7px 12px; font-size:11px;" onclick="window.selecionarDestaque('${a.membroId}','${escapeHTML(a.membroNome||'')}',${a.scoreTotal})" ${cheio?'disabled style="opacity:0.4;padding:7px 12px;font-size:11px;"':''}><i class="ph-bold ph-star"></i> Destacar</button>`
+                    }
+                </div>
+            </div>`;
+        }).join('');
+
+        wrap.style.display = 'block';
+    };
+
+    window.openAddDestaqueModal = () => {
+        const mbs = (window._state.members||[]).filter(m => m.ativo && !['1_mes','2_meses','3_meses','sem_pontos'].includes(m.pts))
+            .sort((a,b) => (a.m||'').localeCompare(b.m||''));
+        let h = '<option value="">Selecione o membro...</option>';
+        mbs.forEach(m => h += `<option value="${m._id}">${escapeHTML(m.m)}</option>`);
+        document.getElementById('add-destaque-membro').innerHTML = h;
+        document.getElementById('add-destaque-motivo').value = '';
+        document.getElementById('modal-add-destaque').style.display = 'flex';
+    };
+
+    window.confirmarAddDestaque = async () => {
+        if((window._state.destaques||[]).length >= 5) { window.showToast('Máximo de 5 destaques atingido!', 'error'); return; }
+        const sel = document.getElementById('add-destaque-membro');
+        const membroId = sel.value;
+        const membroNome = sel.options[sel.selectedIndex]?.text || '';
+        const motivo = document.getElementById('add-destaque-motivo').value.trim();
+        if(!membroId) { window.showToast('Selecione um membro!', 'error'); return; }
+        if((window._state.destaques||[]).find(d => d.membroId === membroId)) { window.showToast('Este membro já está em destaque!', 'error'); return; }
+        try {
+            await setDoc(doc(collection(db,'gestao_destaques')), {
+                membroId, membroNome, score: 0, motivo: motivo||'', manual: true, semana: todayStr(), criadoEm: new Date().toISOString()
+            });
+            window.closeModal('modal-add-destaque');
+            window.showToast(`${membroNome} adicionado como destaque! ⭐`, 'success');
+        } catch(e){ console.error('[PRZ]',e); window.showToast('Erro ao guardar.','error'); }
+    };
+
+    window.selecionarDestaque = async (membroId, membroNome, score) => {
+        if((window._state.destaques||[]).length >= 5) { window.showToast('Máximo de 5 destaques atingido!', 'error'); return; }
+        if((window._state.destaques||[]).find(d => d.membroId === membroId)) { window.showToast('Já está em destaque!', 'error'); return; }
+        try {
+            await setDoc(doc(collection(db,'gestao_destaques')), {
+                membroId, membroNome, score, semana: todayStr(), criadoEm: new Date().toISOString()
+            });
+            window.showToast(`${membroNome} destacado! ⭐`, 'success');
+        } catch(e){ console.error('[PRZ]',e); window.showToast('Erro ao guardar.','error'); }
+    };
+
+    window.removerDestaque = async (membroId) => {
+        const d = (window._state.destaques||[]).find(x => x.membroId === membroId);
+        if(!d) return;
+        try {
+            await deleteDoc(doc(db,'gestao_destaques',d._id));
+            window.showToast('Destaque removido.', 'success');
+        } catch(e){ console.error('[PRZ]',e); }
+    };
+
+    window.renderDestaques = () => {
+        const el = document.getElementById('destaques-escolhidos'); if(!el) return;
+        const list = [...(window._state.destaques||[])].sort((a,b) => (b.score||0)-(a.score||0));
+        if(!list.length) {
+            el.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; border:2px dashed rgba(251,191,36,0.12); border-radius:12px; color:var(--text); font-family:'Rajdhani'; font-size:13px; font-weight:600; opacity:0.5;">
+                Nenhum destaque definido — use "Calcular Sugestões" ou "Adicionar"</div>`;
+            return;
+        }
+        const trophies = ['\uD83C\uDFC6','⭐','\uD83C\uDF1F','✨','\uD83D\uDCAB'];
+        const labels   = ['1º DESTAQUE','2º DESTAQUE','3º DESTAQUE','4º DESTAQUE','5º DESTAQUE'];
+        el.innerHTML = list.map((d,i) => `
+            <div style="background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.25); border-radius:12px; padding:18px; text-align:center; position:relative;">
+                <div style="font-size:28px; margin-bottom:6px;">${trophies[i]||'⭐'}</div>
+                <div style="font-family:'Orbitron'; font-size:9px; color:#fbbf24; font-weight:900; letter-spacing:1px; margin-bottom:5px;">${labels[i]||'DESTAQUE'}</div>
+                <div style="font-family:'Orbitron'; font-size:13px; font-weight:900; color:var(--white); text-shadow:0 0 8px rgba(251,191,36,0.3); line-height:1.3;">${escapeHTML(d.membroNome||'—')}</div>
+                ${d.score ? `<div style="font-size:10px; font-family:'Share Tech Mono'; color:#fbbf24; margin-top:4px;">Score ${d.score}/100</div>` : ''}
+                ${d.motivo ? `<div style="font-size:11px; color:var(--text); font-family:'Rajdhani'; margin-top:4px; font-style:italic;">${escapeHTML(d.motivo)}</div>` : ''}
+                <button class="btn-acao outline-danger" style="position:absolute;top:8px;right:8px;padding:4px 7px;font-size:10px;" onclick="window.removerDestaque('${d.membroId}')"><i class="ph-bold ph-x"></i></button>
+            </div>`).join('');
+        if(document.getElementById('destaques-sugestoes-wrap')?.style.display !== 'none') window.calcularDestaques();
+    };
+
+    window.renderDashTopMembros = () => {
+        const el = document.getElementById('dash-top-membros'); if(!el) return;
+        const destaques = [...(window._state.destaques||[])].sort((a,b) => (b.score||0)-(a.score||0));
+        if(destaques.length) {
+            const trophies = ['\uD83C\uDFC6','⭐','\uD83C\uDF1F','✨','\uD83D\uDCAB'];
+            el.innerHTML = destaques.map((d,i) => `
+                <div style="padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:15px; min-width:20px;">${trophies[i]||'⭐'}</span>
+                    <span class="dash-label">${escapeHTML(d.membroNome||'—')}</span>
+                    ${d.score ? `<span style="font-size:10px;font-family:'Share Tech Mono';color:#fbbf24;">${d.score}/100</span>` : ''}
+                </div>`).join('');
+        } else {
+            const atv = [...(window._state.atividade||[])].filter(a => a.status==='ativo').sort((a,b) => (b.pontos||0)-(a.pontos||0)).slice(0,3);
+            if(!atv.length) { el.innerHTML = '<span class="dash-empty">Sem dados.</span>'; return; }
+            const medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
+            el.innerHTML = `<div class="dash-empty" style="margin-bottom:6px;font-size:10px;">⚠\uFE0F Destaques não definidos — top por pontos:</div>` +
+                atv.map((a,i) => `<div class="dash-row"><span style="font-size:13px;">${medals[i]}</span><span class="dash-label">${escapeHTML(a.membroNome||'—')}</span><span style="font-size:11px;font-family:'Share Tech Mono';color:#fbbf24;">${a.pontos||0}pts</span></div>`).join('');
+        }
+    };
+
+
+
+
+    window.renderDashFeedbacks = () => {
+        const el = document.getElementById('dash-feedbacks'); if(!el) return;
+        const all = [...(window._state.feedbacks||[])].sort((a,b) => (b.data||'').localeCompare(a.data||''));
+        if(!all.length) { el.innerHTML = '<span class="dash-empty">Nenhum feedback.</span>'; return; }
+        const tipoCor = { elogio:'var(--success)', critica:'var(--danger)', sugestao:'var(--warning)', neutro:'var(--text)' };
+        const tipoLabel = { elogio:'Elogio', critica:'Crítica', sugestao:'Sugestão', neutro:'Neutro' };
+        el.innerHTML = all.slice(0,5).map(r => {
+            const cor = tipoCor[r.tipo] || 'var(--accent)';
+            const dt = r.data ? r.data.split('-').reverse().join('/') : '—';
+            return `<div style="padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                <div style="display:flex; align-items:center; gap:7px;">
+                    <span style="width:6px;height:6px;border-radius:50%;background:${cor};flex-shrink:0;"></span>
+                    <span class="dash-label" style="font-size:12px;">${escapeHTML(r.membroNome||'—')}</span>
+                    <span style="font-size:9px;font-family:'Share Tech Mono';color:${cor};background:${cor}18;padding:1px 6px;border-radius:4px;white-space:nowrap;">${tipoLabel[r.tipo]||r.tipo||'—'}</span>
+                </div>
+                <div style="font-size:11px;color:var(--text);font-family:'Rajdhani';font-weight:600;padding-left:13px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHTML(r.texto||'')}">
+                    ${escapeHTML((r.texto||'').substring(0,50))}${(r.texto||'').length>50?'…':''}
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+    window.renderDashTrocaConta = () => {
+        const el = document.getElementById('dash-troca-conta'); if(!el) return;
+        const all = [...(window._state.notifConta||[])].sort((a,b) => (b.data||'').localeCompare(a.data||''));
+        if(!all.length) { el.innerHTML = '<span class="dash-empty">Nenhuma troca registada.</span>'; return; }
+        el.innerHTML = all.slice(0,5).map(r => {
+            const dt = r.data ? r.data.split('-').reverse().join('/') : '—';
+            return `<div style="padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span style="font-size:11px;font-family:'Share Tech Mono';color:var(--danger);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHTML(r.contaAntigaNome||'')}">${escapeHTML((r.contaAntigaNome||'—').substring(0,12))}${(r.contaAntigaNome||'').length>12?'…':''}</span>
+                    <span style="font-size:11px;color:var(--purple);">&#8594;</span>
+                    <span style="font-size:11px;font-family:'Share Tech Mono';color:var(--success);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHTML(r.contaNovaNome||'')}">${escapeHTML((r.contaNovaNome||'—').substring(0,12))}${(r.contaNovaNome||'').length>12?'…':''}</span>
+                    <span class="dash-tag" style="margin-left:auto;">${dt}</span>
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+
+    // ==========================================
+    // STATUS AUTOMÁTICO POR SEMANAS SEM PONTUAR
+    // ==========================================
+    // Regras: 2 sem → Alerta | 4 sem → Inativo | pontuar qualquer coisa → Ativo
+    const _SEMANAS_ALERTA  = 2;
+    const _SEMANAS_INATIVO = 4;
+
+    window.atualizarStatusPorSemanas = async () => {
+        const membros = (window._state.members||[]).filter(m => m.ativo);
+        if(!membros.length) return;
+
+        // Buscar histórico de semanas
+        let historico = {};
+        try {
+            const snap = await getDocs(collection(db, 'gestao_semanas_atividade'));
+            snap.docs.forEach(d => { historico[d.data().membroId] = { _id: d.id, ...d.data() }; });
+        } catch(e) { console.error('[PRZ] Erro ao buscar histórico semanas:', e); return; }
+
+        const ativAtual = window._state.atividade || [];
+        const semanaAtual = todayStr();
+        const b = writeBatch(db);
+        let mudancas = 0;
+
+        for(const mem of membros) {
+            const regAtiv = ativAtual.find(a => a.membroId === mem._id);
+            const pontuouEssaSemana = regAtiv && (regAtiv.pontos > 0 || regAtiv.movs > 0);
+
+            const hist = historico[mem._id];
+            let semanasSemPontuar = hist ? (hist.semanasSemPontuar || 0) : 0;
+
+            if(pontuouEssaSemana) {
+                // Resetar contador
+                semanasSemPontuar = 0;
+            } else {
+                // Incrementar contador
+                semanasSemPontuar += 1;
+            }
+
+            // Calcular novo status
+            let novoStatus;
+            if(semanasSemPontuar >= _SEMANAS_INATIVO)     novoStatus = 'inativo';
+            else if(semanasSemPontuar >= _SEMANAS_ALERTA) novoStatus = 'alerta';
+            else                                            novoStatus = 'ativo';
+
+            // Salvar histórico
+            const dadosHist = {
+                membroId: mem._id,
+                membroNome: mem.m,
+                semanasSemPontuar,
+                ultimaSemana: semanaAtual,
+                statusCalculado: novoStatus,
+                atualizadoEm: new Date().toISOString()
+            };
+
+            if(hist) {
+                b.set(doc(db, 'gestao_semanas_atividade', hist._id), dadosHist, { merge: true });
+            } else {
+                b.set(doc(collection(db, 'gestao_semanas_atividade')), dadosHist);
+            }
+
+            // Se tem registo de atividade desta semana, atualizar o status lá também
+            if(regAtiv && regAtiv.status !== novoStatus) {
+                b.set(doc(db, 'gestao_atividade', regAtiv._id), { status: novoStatus }, { merge: true });
+                mudancas++;
+            }
+        }
+
+        try {
+            await b.commit();
+            if(mudancas > 0) {
+                window.showToast(`Status atualizado para ${mudancas} membro${mudancas>1?'s':''}!`, 'success');
+            }
+        } catch(e) {
+            console.error('[PRZ] Erro ao atualizar status:', e);
+            window.showToast('Erro ao atualizar status.', 'error');
+        }
+    };
+
+    // Exibir semanas sem pontuar na aba de atividade
+    window._state.semanasAtividade = {};
+    window.carregarSemanasAtividade = async () => {
+        try {
+            const snap = await getDocs(collection(db, 'gestao_semanas_atividade'));
+            window._state.semanasAtividade = {};
+            snap.docs.forEach(d => {
+                const data = d.data();
+                window._state.semanasAtividade[data.membroId] = data;
+            });
+            window.renderAtividade();
+        } catch(e) { console.error('[PRZ] Erro semanas:', e); }
+    };
+
     onAuthStateChanged(auth, async (user) => { 
         if(autoResetInterval) { clearInterval(autoResetInterval); autoResetInterval = null; }
         if (user) { 
@@ -2145,7 +2816,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             
             autoResetInterval = setInterval(() => { 
                 const br = getBrTime(); 
-                if (br.getDay() === 0 && br.getHours() === 20 && br.getMinutes() === 55 && br.getSeconds() < 10 && !window._avisoResetDado) { window.showToast("⚠️ Limpeza às 21:00!", "error"); window._avisoResetDado = true; } 
+                if (br.getDay() === 0 && br.getHours() === 20 && br.getMinutes() === 55 && br.getSeconds() < 10 && !window._avisoResetDado) { window.showToast("⚠\uFE0F Limpeza às 21:00!", "error"); window._avisoResetDado = true; } 
                 if (br.getDay() === 0 && br.getHours() === 21 && br.getMinutes() === 0 && br.getSeconds() < 10) { window.forcarLimpezaSemanal(false); } 
             }, 5000); 
         } else { 
@@ -2179,15 +2850,23 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         unsubMembers = onSnapshot(collection(db, "members"), (s) => { window._state.members = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderMembers(); window.renderIndicacoes(); });
         unsubHistorico = onSnapshot(collection(db, "historico"), (s) => { window._state.historico = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderHistorico(); });
         unsubMovs = onSnapshot(collection(db, "movs"), (s) => { 
-            window._state.movs = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderMovs(); window.renderRelatorios(); window.renderCalendar(); window.renderAcolhimentos(); window.renderDashSugMovs();
+            window._state.movs = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderMovs(); window.renderRelatorios(); window.renderCalendar(); window.renderAcolhimentos(); window.renderDashSugMovs(); window.renderDashMovsHoje(); window.renderDashSugMovs();
             if (document.getElementById('modal-relatorio').style.display === 'flex') window.renderParticipantes();
             const br = getBrTime(); if (window._state.movs.length > 0 && ((br.getDay() === 0 && br.getHours() >= 21) || (br.getDay() === 1 && br.getHours() < 12))) { document.getElementById('aviso-reset-semanal').style.display = 'flex'; } else { document.getElementById('aviso-reset-semanal').style.display = 'none'; }
         });
-        unsubGameNews = onSnapshot(collection(db, "gamenews"), (s) => { window._state.gamenews = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderGameNews(); });
-        unsubInstrucoes = onSnapshot(collection(db, "instrucoes"), (s) => { window._state.instrucoes = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderInstrucoes(); });
-        unsubAcolhimentos = onSnapshot(collection(db, "acolhimentos"), (s) => { window._state.acolhimentos = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderAcolhimentos(); });
+        unsubGameNews = onSnapshot(collection(db, "gamenews"), (s) => { window._state.gamenews = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderGameNews(); window.renderDashGameNews(); window.renderDashSubareas(); });
+        unsubInstrucoes = onSnapshot(collection(db, "instrucoes"), (s) => { window._state.instrucoes = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderInstrucoes(); window.renderDashSubareas(); });
+        unsubAcolhimentos = onSnapshot(collection(db, "acolhimentos"), (s) => { window._state.acolhimentos = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderAcolhimentos(); window.renderDashSubareas(); });
         window.startListenNotif();
         window.startListenGestao();
+
+        // Destaques
+        if(window._unsubDestaques) window._unsubDestaques();
+        window._unsubDestaques = onSnapshot(collection(db,'gestao_destaques'), s => {
+            window._state.destaques = s.docs.map(d=>({_id:d.id,...d.data()}));
+            window.renderDestaques && window.renderDestaques();
+            window.renderDashTopMembros && window.renderDashTopMembros();
+        });
         window.startListenLevelUp();
         window.startListenArea();
     }
@@ -2244,14 +2923,14 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             window.closeModal('modal-admin-user'); window.showToast("Permissões Salvas!", "success");
         } catch(e) { console.error("[PRZ Error]", e); window.showToast("Erro ao guardar.", "error"); }
     };
-    window.deleteAdminUser = async (id) => { if(await window.showConfirm("Apagar a permissão deste utilizador?", "Apagar Acesso", true)) { try { await deleteDoc(doc(db, "portal_users", id)); window.showToast("Removido.", "success"); } catch(e){ console.error("Erro ao apagar utilizador:", e); window.showToast("Erro ao apagar.", "error"); } } };
+    window.deleteAdminUser = async (id) => { if(await window.showConfirm("Apagar a permissão deste usuário?", "Apagar Acesso", true)) { try { await deleteDoc(doc(db, "portal_users", id)); window.showToast("Removido.", "success"); } catch(e){ console.error("Erro ao apagar usuário:", e); window.showToast("Erro ao apagar.", "error"); } } };
 
     window.logHistorico = async (acao, nome, id, motivo) => { try { await setDoc(doc(collection(db, "historico")), { data: new Date().toISOString(), acao, nome, idDiscord: id, motivo: motivo||'N/A' }); } catch(e){ console.error("[PRZ Error]", e); } };
     window.renderHistorico = () => { const tb = document.getElementById('tbody-historico'); const o = [...window._state.historico].sort((a,b) => new Date(b.data) - new Date(a.data)); tb.innerHTML = o.length ? o.map(h => `<tr><td><span style="font-size:12px; color:var(--text); font-family:'Share Tech Mono';">${new Date(h.data).toLocaleString('pt-PT')}</span></td><td><b style="font-family:'Orbitron'; color:var(--white);">${escapeHTML(h.nome)}</b></td><td><span class="badge b-gray">${h.acao}</span></td><td style="color:var(--white);">${escapeHTML(h.motivo)}</td></tr>`).join('') : '<tr><td colspan="4" class="empty-state">Sem histórico recente.</td></tr>'; };
     window.gerarRelatorioHistorico = async () => {
         if(window._state.historico.length === 0) return window.showToast("Sem histórico.", "error");
         const o = [...window._state.historico].sort((a,b) => new Date(b.data) - new Date(a.data));
-        let txt = `**📜 RELATÓRIO DE HISTÓRICO - GAMES PRZ**\nGerado em: ${new Date().toLocaleString('pt-PT')}\n\n`;
+        let txt = `**\uD83D\uDCDC RELATÓRIO DE HISTÓRICO - GAMES PRZ**\nGerado em: ${new Date().toLocaleString('pt-PT')}\n\n`;
         o.forEach(h => { const dataF = new Date(h.data).toLocaleString('pt-PT'); txt += `[${dataF}] ${h.nome} (${h.acao}) - ${h.motivo}\n`; });
         try { await navigator.clipboard.writeText(txt); window.showToast("Relatório copiado!", "success"); } catch(e) { window.showToast("Erro ao copiar.", "error"); }
     };
@@ -2587,7 +3266,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         if(rA.length === 0) { rEl.innerHTML = '<div class="empty-state">Nenhuma pontuação registada.</div>'; } 
         else { 
             rEl.innerHTML = rA.map((r, i) => { 
-                let med = i === 0 ? '🥇' : (i===1 ? '🥈' : (i===2 ? '🥉' : `<span style="display:inline-block; width:16px; text-align:center;">${i+1}</span>`)); 
+                let med = i === 0 ? '\uD83E\uDD47' : (i===1 ? '\uD83E\uDD48' : (i===2 ? '\uD83E\uDD49' : `<span style="display:inline-block; width:16px; text-align:center;">${i+1}</span>`)); 
                 return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><div><b style="color:var(--white);">${med} ${escapeHTML(r.nome)}</b></div><div style="text-align:right;"><div style="color:var(--success); font-weight:900; font-size:16px;">${r.pts} pts</div><div style="font-size:10px; color:var(--text);">${r.count} validadas</div></div></div>`; 
             }).join(''); 
         }
@@ -2632,7 +3311,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                 st[r.nomeIndicador].count++;
             }
         });
-        let txt = `**📊 Relatório de Indicações - GAMES PRZ**\n\n`; 
+        let txt = `**\uD83D\uDCCA Relatório de Indicações - GAMES PRZ**\n\n`; 
         Object.values(st).sort((a,b) => b.count - a.count).forEach(r => { txt += `• ${r.nome} - Fez ${r.count} indicações válidas (${r.count * 15} pts)\n`; });
         try { await navigator.clipboard.writeText(txt); window.showToast("Copiado!", "success"); } catch(e){ console.error("[PRZ Error]", e); }
     };
@@ -2671,7 +3350,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             byDate[k].push(m);
         });
 
-        let txt = `📅 **Cronograma de Movs**\n`;
+        let txt = `\uD83D\uDCC5 **Cronograma de Movs**\n`;
         txt += `Referente aos dias **${fmtShort(mon)}** a **${fmtShort(fri)}**\n`;
         txt += `${'─'.repeat(32)}\n`;
 
@@ -2829,10 +3508,10 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     window.abrirRelatorio = (id) => { const m = window._state.movs.find(x => x._id === id); if(!m) return; document.getElementById('r-docid').value = m._id; document.getElementById('rel-info').innerHTML = `<b>${escapeHTML(m.tipo)}</b> | Resp: ${escapeHTML(m.resp)}`; relPrints = []; window.renderRelPrints(); const qa = document.getElementById('r-quiz-area'); if(m.tipo === 'Quiz') { qa.style.display = 'block'; document.getElementById('r-top1').value = m.topQuiz?.primeiro || ''; document.getElementById('r-top2').value = m.topQuiz?.segundo || ''; document.getElementById('r-top3').value = m.topQuiz?.terceiro || ''; } else qa.style.display = 'none'; window.filtrarMembrosRelatorio(); window.renderParticipantes(); document.getElementById('modal-relatorio').style.display = 'flex'; };
     window.addParticipante = async () => { const idM = document.getElementById('r-select-member').value, movId = document.getElementById('r-docid').value; if(!idM) return; const m = window._state.members.find(x => x._id === idM); const mov = window._state.movs.find(x => x._id === movId); if(!m || !mov) return; if(mov.participantes && mov.participantes.find(p => p.id === idM)) return; let st = mov.tipo === 'Cine' ? '✅ ASSISTINDO' : '✅ PRESENTE'; const nL = [...(mov.participantes || []), { id: m._id, nome: m.m, idDiscord: m.id, posicao: m.posicao, status: st }]; mov.participantes = nL; window.renderParticipantes(); try { await setDoc(doc(db, "movs", movId), { participantes: nL }, { merge: true }); } catch(e){ console.error("[PRZ Error]", e); } };
     window.removerParticipante = async (mId, pId) => { const mov = window._state.movs.find(x => x._id === mId); if(!mov) return; const nL = (mov.participantes || []).filter(p => p.id !== pId); mov.participantes = nL; window.renderParticipantes(); try { await setDoc(doc(db, "movs", mId), { participantes: nL }, { merge: true }); } catch(e){ console.error("[PRZ Error]", e); } };
-    window.toggleStatus = async (mId, pId) => { const mov = window._state.movs.find(x => x._id === mId); if(!mov) return; const pts = mov.participantes || []; const i = pts.findIndex(x => x.id === pId); if(i === -1) return; const s = pts[i].status; if(mov.tipo === 'Cine') { pts[i].status = s === '✅ ASSISTINDO' ? '❌ FALTOU' : '✅ ASSISTINDO'; } else if(mov.tipo === 'Jogatina') { if(s === '✅ PRESENTE') pts[i].status = '👀 ASSISTIU'; else if(s === '👀 ASSISTIU') pts[i].status = '❌ FALTOU'; else pts[i].status = '✅ PRESENTE'; } else { pts[i].status = s === '✅ PRESENTE' ? '❌ FALTOU' : '✅ PRESENTE'; } window.renderParticipantes(); try { await setDoc(doc(db, "movs", mId), { participantes: pts }, { merge: true }); } catch(e){ console.error("[PRZ Error]", e); } };
+    window.toggleStatus = async (mId, pId) => { const mov = window._state.movs.find(x => x._id === mId); if(!mov) return; const pts = mov.participantes || []; const i = pts.findIndex(x => x.id === pId); if(i === -1) return; const s = pts[i].status; if(mov.tipo === 'Cine') { pts[i].status = s === '✅ ASSISTINDO' ? '❌ FALTOU' : '✅ ASSISTINDO'; } else if(mov.tipo === 'Jogatina') { if(s === '✅ PRESENTE') pts[i].status = '\uD83D\uDC40 ASSISTIU'; else if(s === '\uD83D\uDC40 ASSISTIU') pts[i].status = '❌ FALTOU'; else pts[i].status = '✅ PRESENTE'; } else { pts[i].status = s === '✅ PRESENTE' ? '❌ FALTOU' : '✅ PRESENTE'; } window.renderParticipantes(); try { await setDoc(doc(db, "movs", mId), { participantes: pts }, { merge: true }); } catch(e){ console.error("[PRZ Error]", e); } };
     window.renderParticipantes = () => { const mov = window._state.movs.find(x => x._id === document.getElementById('r-docid').value), tb = document.getElementById('tbody-participantes'); if(!mov || !mov.participantes || mov.participantes.length === 0) { tb.innerHTML = '<tr><td colspan="4" class="empty-state">Vazio.</td></tr>'; return; } tb.innerHTML = mov.participantes.map(p => `<tr><td><b style="font-family:'Orbitron';">${escapeHTML(p.nome)}</b></td><td><span class="badge b-gray">${escapeHTML(p.posicao)}</span></td><td style="text-align:center;"><button class="btn-acao outline-primary" onclick="window.toggleStatus('${mov._id}', '${p.id}')">${escapeHTML(p.status)}</button></td><td style="text-align:right;"><button class="btn-acao outline-danger" onclick="window.removerParticipante('${mov._id}', '${p.id}')"><i class="ph-bold ph-trash"></i></button></td></tr>`).join(''); };
     window.salvarPodioLocal = async () => { const movId = document.getElementById('r-docid').value; try { await setDoc(doc(db, "movs", movId), { topQuiz: { primeiro: document.getElementById('r-top1').value, segundo: document.getElementById('r-top2').value, terceiro: document.getElementById('r-top3').value } }, { merge: true }); } catch(e){ console.error("[PRZ Error]", e); } };
-    window.copiarRelatorioDiscord = async () => { const mov = window._state.movs.find(x => x._id === document.getElementById('r-docid').value); if(!mov) return; if(mov.tipo === 'Quiz') await window.salvarPodioLocal(); const pts = mov.participantes || []; const pC = pts.filter(p => p.posicao === 'comum'); const pS = pts.filter(p => p.posicao === 'subgestao'); const pG = pts.filter(p => p.posicao === 'gestao'); const mkL = (l) => l.length > 0 ? l.map(m => `${m.status.includes('ASSISTIU')?'👀':(m.status.includes('FALTOU')?'❌':'✅')} ${m.nome} | ${m.idDiscord}`).join('\n') : 'Nenhum.'; let txt = `**Relatório Mov - Games**\n\n• Responsável: ${mov.resp}\n• Auxiliar: ${mov.aux || '-'}\n• Data: ${mov.data.split('-').reverse().join('/')}\n• Horário: ${mov.horario}\n• Mov: ${mov.tipo}\n• Participantes: ${pts.length}\n\n•—•—•—• ✿ •—•—•—•\n### Membros:\n${mkL(pC)}\n\n•—•—•—• ✿ •—•—•—•\n### Sub-Gestão:\n${mkL(pS)}\n\n•—•—•—• ✿ •—•—•—•\n### Gestão:\n${mkL(pG)}\n\n•—•—•—• ✿ •—•—•—•\nParticipação:\n\n•—•—•—• ✿ •—•—•—•\n`; if(mov.tipo === 'Quiz') txt += `TOP QUIZ:\n🥇Lugar: ${document.getElementById('r-top1').value||'...'}\n🥈Lugar: ${document.getElementById('r-top2').value||'...'}\n🥉Lugar: ${document.getElementById('r-top3').value||'...'}\n•—•—•—• ✿ •—•—•—•\n`; // Upload any pending prints and append URLs
+    window.copiarRelatorioDiscord = async () => { const mov = window._state.movs.find(x => x._id === document.getElementById('r-docid').value); if(!mov) return; if(mov.tipo === 'Quiz') await window.salvarPodioLocal(); const pts = mov.participantes || []; const pC = pts.filter(p => p.posicao === 'comum'); const pS = pts.filter(p => p.posicao === 'subgestao'); const pG = pts.filter(p => p.posicao === 'gestao'); const mkL = (l) => l.length > 0 ? l.map(m => `${m.status.includes('ASSISTIU')?'\uD83D\uDC40':(m.status.includes('FALTOU')?'❌':'✅')} ${m.nome} | ${m.idDiscord}`).join('\n') : 'Nenhum.'; let txt = `**Relatório Mov - Games**\n\n• Responsável: ${mov.resp}\n• Auxiliar: ${mov.aux || '-'}\n• Data: ${mov.data.split('-').reverse().join('/')}\n• Horário: ${mov.horario}\n• Mov: ${mov.tipo}\n• Participantes: ${pts.length}\n\n•—•—•—• ✿ •—•—•—•\n### Membros:\n${mkL(pC)}\n\n•—•—•—• ✿ •—•—•—•\n### Sub-Gestão:\n${mkL(pS)}\n\n•—•—•—• ✿ •—•—•—•\n### Gestão:\n${mkL(pG)}\n\n•—•—•—• ✿ •—•—•—•\nParticipação:\n\n•—•—•—• ✿ •—•—•—•\n`; if(mov.tipo === 'Quiz') txt += `TOP QUIZ:\n\uD83E\uDD47Lugar: ${document.getElementById('r-top1').value||'...'}\n\uD83E\uDD48Lugar: ${document.getElementById('r-top2').value||'...'}\n\uD83E\uDD49Lugar: ${document.getElementById('r-top3').value||'...'}\n•—•—•—• ✿ •—•—•—•\n`; // Upload any pending prints and append URLs
         if(relPrints.length > 0) {
             try {
                 window.showToast("A enviar prints...", "success");
@@ -2843,7 +3522,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             } catch(e){ console.error("[PRZ Error]", e); window.showToast("Erro ao enviar prints.", "error"); }
         }
         try { await navigator.clipboard.writeText(txt); window.showToast("Copiado!", "success"); } catch(e){ console.error("[PRZ Error]", e); } };
-    window.gerarRelatorioSemana = async () => { let c = {}; window._state.movs.forEach(m => { if(m.participantes) m.participantes.forEach(p => { if(p.status !== '❌ FALTOU') { if(!c[p.idDiscord]) c[p.idDiscord] = { n: p.nome, id: p.idDiscord, count: 0 }; c[p.idDiscord].count++; } }); }); let txt = `**📊 Relatório Semanal - GAMES**\n\n`; Object.values(c).sort((a,b) => b.count - a.count).forEach(i => { txt += `• ${i.n} | ${i.id} - ${i.count} participações\n`; }); try { await navigator.clipboard.writeText(txt); window.showToast("Copiado!", "success"); } catch(e){ console.error("[PRZ Error]", e); } };
+    window.gerarRelatorioSemana = async () => { let c = {}; window._state.movs.forEach(m => { if(m.participantes) m.participantes.forEach(p => { if(p.status !== '❌ FALTOU') { if(!c[p.idDiscord]) c[p.idDiscord] = { n: p.nome, id: p.idDiscord, count: 0 }; c[p.idDiscord].count++; } }); }); let txt = `**\uD83D\uDCCA Relatório Semanal - GAMES**\n\n`; Object.values(c).sort((a,b) => b.count - a.count).forEach(i => { txt += `• ${i.n} | ${i.id} - ${i.count} participações\n`; }); try { await navigator.clipboard.writeText(txt); window.showToast("Copiado!", "success"); } catch(e){ console.error("[PRZ Error]", e); } };
 
     // ==========================================
     // ACOLHIMENTO E INSTRUÇÃO
@@ -2969,7 +3648,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
             let rA = Object.values(st).sort((a,b) => b.pts - a.pts);
             if(rA.length === 0) { rEl.innerHTML = '<div class="empty-state">Vazio.</div>'; } 
-            else { rEl.innerHTML = rA.map((r, i) => { let med = i === 0 ? '🥇' : (i===1 ? '🥈' : (i===2 ? '🥉' : `<span style="display:inline-block; width:16px; text-align:center;">${i+1}</span>`)); return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><div><b style="color:var(--white);">${med} ${escapeHTML(r.nome)}</b></div><div style="text-align:right;"><div style="color:var(--acol-color); font-weight:900; font-size:16px;">${r.pts} pts</div><div style="font-size:10px; color:var(--text);">Call:${r.call} (${r.hrs}h) Chat:${r.chat} MOV bónus:${r.bonusMov}</div></div></div>`; }).join(''); }
+            else { rEl.innerHTML = rA.map((r, i) => { let med = i === 0 ? '\uD83E\uDD47' : (i===1 ? '\uD83E\uDD48' : (i===2 ? '\uD83E\uDD49' : `<span style="display:inline-block; width:16px; text-align:center;">${i+1}</span>`)); return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><div><b style="color:var(--white);">${med} ${escapeHTML(r.nome)}</b></div><div style="text-align:right;"><div style="color:var(--acol-color); font-weight:900; font-size:16px;">${r.pts} pts</div><div style="font-size:10px; color:var(--text);">Call:${r.call} (${r.hrs}h) Chat:${r.chat} MOV bónus:${r.bonusMov}</div></div></div>`; }).join(''); }
             
             if(reg.length === 0) { fEl.innerHTML = '<div class="empty-state">Vazio.</div>'; } 
             else { fEl.innerHTML = reg.map(r => { 
@@ -3017,7 +3696,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             const reg = [...window._state.instrucoes].sort((a,b) => new Date(b.data) - new Date(a.data)); document.getElementById('inst-count-total').innerText = reg.length;
             let st = {}; reg.forEach(r => { const n = r.nomeInstrutor; if(!st[n]) st[n] = { nome: n, inst: 0, duv: 0, tick: 0, fbs: 0, pts: 0 }; if(r.assunto === 'Instrução') st[n].inst++; else if(r.assunto === 'Dúvida') st[n].duv++; else if(r.assunto === 'Ticket') st[n].tick++; if(r.feedback) st[n].fbs++; st[n].pts += r.pontosBase + (r.feedback ? 2 : 0); });
             let rA = Object.values(st).sort((a,b) => b.pts - a.pts);
-            if(rA.length === 0) { rEl.innerHTML = '<div class="empty-state">Vazio.</div>'; } else { rEl.innerHTML = rA.map((r, i) => { let med = i === 0 ? '🥇' : (i===1 ? '🥈' : (i===2 ? '🥉' : `<span style="display:inline-block; width:16px; text-align:center;">${i+1}</span>`)); return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><div><b style="color:var(--white);">${med} ${escapeHTML(r.nome)}</b></div><div style="text-align:right;"><div style="color:var(--inst-color); font-weight:900; font-size:16px;">${r.pts} pts</div><div style="font-size:10px; color:var(--text);">I:${r.inst} D:${r.duv} T:${r.tick} FB:${r.fbs}</div></div></div>`; }).join(''); }
+            if(rA.length === 0) { rEl.innerHTML = '<div class="empty-state">Vazio.</div>'; } else { rEl.innerHTML = rA.map((r, i) => { let med = i === 0 ? '\uD83E\uDD47' : (i===1 ? '\uD83E\uDD48' : (i===2 ? '\uD83E\uDD49' : `<span style="display:inline-block; width:16px; text-align:center;">${i+1}</span>`)); return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);"><div><b style="color:var(--white);">${med} ${escapeHTML(r.nome)}</b></div><div style="text-align:right;"><div style="color:var(--inst-color); font-weight:900; font-size:16px;">${r.pts} pts</div><div style="font-size:10px; color:var(--text);">I:${r.inst} D:${r.duv} T:${r.tick} FB:${r.fbs}</div></div></div>`; }).join(''); }
             if(reg.length === 0) { fEl.innerHTML = '<div class="empty-state">Vazio.</div>'; } else { fEl.innerHTML = reg.map(r => { 
                 const dStr = new Date(r.data).toLocaleString('pt-PT'); 
                 let c = r.assunto === 'Instrução' ? 'color:var(--inst-color);' : (r.assunto === 'Dúvida' ? 'color:var(--warning);' : 'color:var(--purple);'); 
@@ -3361,7 +4040,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         const opt = sel.options[sel.selectedIndex];
         const discordId = document.getElementById('notif-rpp-discord-id').value.trim()
             || (opt && opt.dataset.discord ? opt.dataset.discord : '');
-        if(!memId || !inicio) { window.showToast('Preencha membro e data!', 'error'); return; }
+        if(!memId || !inicio) { await window.logHistorico('RPP', document.getElementById('rpp-membro-nome')?.value||'—', document.getElementById('rpp-discord')?.value||'—', 'Entrou em RPP'); showToast('Preencha membro e data!', 'error'); return; }
         const mem = window._state.members.find(x => x._id === memId);
         if(!mem) return;
         const fim = addDays(inicio, dur);
@@ -3585,19 +4264,19 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         if(unsubNotifConta) unsubNotifConta();
         unsubNotifMov = onSnapshot(collection(db, 'notif_mov'), (s) => {
             window._state.notifMov = s.docs.map(d => ({ _id: d.id, ...d.data() }));
-            window.renderNotifMov();
+            window.renderNotifMov(); window.renderDashMovMembros();
         });
         unsubNotifUp = onSnapshot(collection(db, 'notif_up'), (s) => {
             window._state.notifUp = s.docs.map(d => ({ _id: d.id, ...d.data() }));
-            window.renderNotifUp();
+            window.renderNotifUp(); window.renderDashTrocaUp();
         });
         unsubNotifRpp = onSnapshot(collection(db, 'notif_rpp'), (s) => {
             window._state.notifRpp = s.docs.map(d => ({ _id: d.id, ...d.data() }));
-            window.renderNotifRpp();
+            window.renderNotifRpp(); window.renderDashRpp();
         });
         unsubNotifConta = onSnapshot(collection(db, 'notif_conta'), (s) => {
             window._state.notifConta = s.docs.map(d => ({ _id: d.id, ...d.data() }));
-            window.renderNotifConta();
+            window.renderNotifConta(); window.renderDashTrocaConta && window.renderDashTrocaConta();
         });
     };
 
@@ -3823,49 +4502,131 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             try { await deleteDoc(doc(db,'gestao_pautas',id)); window.showToast('Removida.','success'); }
             catch(e){ console.error('[PRZ]',e); window.showToast('Erro.','error'); }
     };
-    window.copiarPauta = async (id) => {
-        const p = window._state.pautas.find(x=>x._id===id); if(!p) return;
-        const tipoLabel = {'setorial':'Reunião Setorial','gestores':'Reunião de Gestores','geral':'Reunião Geral'}[p.tipo]||p.tipo;
-        let txt = `📋 ${p.titulo}
-📅 ${labelData(p.data)} | ${tipoLabel}`;
-        if(p.resp) txt += `
-👤 Moderador: ${p.resp}`;
-        if(p.items && p.items.length) { txt += `
 
-📌 PAUTA:
-`; p.items.forEach((item,i)=> txt += `${i+1}. ${item}
-`); }
-        if(p.obs) txt += `
-📝 ${p.obs}`;
-        try { await navigator.clipboard.writeText(txt); window.showToast('Pauta copiada!','success'); }
-        catch(e){ console.error('[PRZ]',e); window.showToast('Erro ao copiar.','error'); }
+    // ==========================================
+    // PAUTAS - 3 ABAS
+    // ==========================================
+    window._pautaTabAtiva = 'setorial';
+
+    window.switchPautaTab = (tipo) => {
+        window._pautaTabAtiva = tipo;
+        ['setorial','gestores','geral'].forEach(t => {
+            const btn = document.getElementById('pauta-tab-' + t);
+            const panel = document.getElementById('pauta-panel-' + t);
+            const ativo = t === tipo;
+            if(btn){ btn.style.borderBottomColor = ativo ? '#818cf8' : 'transparent'; btn.style.color = ativo ? '#818cf8' : 'var(--text)'; }
+            if(panel) panel.style.display = ativo ? 'block' : 'none';
+        });
     };
+
+    window.openNovaPauta = (tipo) => {
+        const prefix = tipo === 'gestores' ? 'pg' : tipo === 'geral' ? 'pge' : 'ps';
+        document.getElementById(prefix + '-docid').value = '';
+        document.getElementById(prefix + '-data').value = todayStr();
+        document.getElementById(prefix + '-hora').value = '';
+        document.getElementById(prefix + '-itens').value = '';
+        if(tipo === 'setorial'){ document.getElementById('ps-obs').value = ''; document.getElementById('ps-presenca').value = 'todos'; }
+        if(tipo === 'geral') document.getElementById('pge-aviso').value = '';
+        const mbs = (window._state.members||[]).filter(m => m.ativo).sort((a,b)=>(a.m||'').localeCompare(b.m||''));
+        const gestao = mbs.filter(m => ['lider_geral','lider','sublider','gerente','supervisor'].includes(m.posicao));
+        const lista = tipo === 'setorial' ? mbs : gestao.length ? gestao : mbs;
+        let h = '<option value="">Selecione...</option>';
+        lista.forEach(m => h += '<option value="' + escapeHTML(m.m) + '">' + escapeHTML(m.m) + '</option>');
+        document.getElementById(prefix + '-resp').innerHTML = h;
+        document.getElementById('modal-pauta-' + tipo).style.display = 'flex';
+    };
+
+    window.salvarPautaTipo = async (tipo) => {
+        const prefix = tipo === 'gestores' ? 'pg' : tipo === 'geral' ? 'pge' : 'ps';
+        const docId = document.getElementById(prefix + '-docid').value;
+        const data  = document.getElementById(prefix + '-data').value;
+        const hora  = document.getElementById(prefix + '-hora').value;
+        const resp  = document.getElementById(prefix + '-resp').value;
+        const itensRaw = document.getElementById(prefix + '-itens').value;
+        if(!data || !resp){ window.showToast('Preencha data e responsável!', 'error'); return; }
+        const itens = itensRaw.split('\n').map(s => s.trim()).filter(Boolean);
+        const d = { tipo, data, hora: hora||'', resp, itens, criadoEm: new Date().toISOString() };
+        if(tipo === 'setorial'){ d.presenca = document.getElementById('ps-presenca').value; d.obs = document.getElementById('ps-obs').value.trim(); }
+        if(tipo === 'geral') d.aviso = document.getElementById('pge-aviso').value.trim();
+        try {
+            if(docId) await setDoc(doc(db,'gestao_pautas',docId), d, {merge:true});
+            else await setDoc(doc(collection(db,'gestao_pautas')), d);
+            window.closeModal('modal-pauta-' + tipo);
+            window.showToast('Pauta guardada!', 'success');
+        } catch(e){ console.error('[PRZ]',e); window.showToast('Erro ao guardar.','error'); }
+    };
+
+    window.copiarPauta = async (id) => {
+        const p = (window._state.pautas||[]).find(x => x._id === id); if(!p) return;
+        const dtFmt = p.data ? p.data.split('-').reverse().join('/') : '-';
+        const horaFmt = p.hora ? (' \u00e0s ' + p.hora) : '';
+        let txt = '';
+        if(p.tipo === 'setorial') {
+            const pLabel = {todos:'Todos os membros ativos', gestao:'Apenas gest\u00e3o', subgestao:'Sub-gest\u00e3o e acima'}[p.presenca] || 'Todos';
+            txt = '\uD83D\uDCCB **PAUTA \u2014 REUNI\u00c3O SETORIAL**\n' +
+                  '\uD83D\uDCC5 Data: **' + dtFmt + horaFmt + '**\n' +
+                  '\uD83D\uDC64 Moderador: **' + p.resp + '**\n' +
+                  '\u2705 Presen\u00e7a: ' + pLabel + '\n\n' +
+                  '\uD83D\uDCCC **PAUTA:**\n' +
+                  (p.itens||[]).map((it,i) => (i+1) + '. ' + it).join('\n') +
+                  (p.obs ? ('\n\n\uD83D\uDCDD ' + p.obs) : '');
+        } else if(p.tipo === 'gestores') {
+            txt = '\uD83D\uDCCB **PAUTA \u2014 REUNI\u00c3O DE GESTORES**\n' +
+                  '\uD83D\uDCC5 Data: **' + dtFmt + horaFmt + '**\n' +
+                  '\uD83D\uDC64 Moderador: **' + p.resp + '**\n\n' +
+                  '\uD83D\uDCCC **PAUTA:**\n' +
+                  (p.itens||[]).map((it,i) => (i+1) + '. ' + it).join('\n');
+        } else {
+            txt = '\uD83D\uDCE3 **REUNI\u00c3O GERAL \u2014 GAMES PRZ**\n' +
+                  '\uD83D\uDCC5 Data: **' + dtFmt + horaFmt + '**\n' +
+                  '\uD83D\uDC64 Respons\u00e1vel: **' + p.resp + '**\n' +
+                  (p.aviso ? ('\n\u26A0\uFE0F **AVISO:** ' + p.aviso + '\n') : '') +
+                  '\n\uD83D\uDCCC **PAUTA:**\n' +
+                  (p.itens||[]).map((it,i) => (i+1) + '. ' + it).join('\n');
+        }
+        try { await navigator.clipboard.writeText(txt); window.showToast('Pauta copiada!', 'success'); }
+        catch(e){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); window.showToast('Copiado!','success'); }
+    };
+
+    window.apagarPauta = async (id) => {
+        if(!await window.showConfirm('Apagar esta pauta?','Apagar',true)) return;
+        try { await deleteDoc(doc(db,'gestao_pautas',id)); window.showToast('Apagada.','success'); }
+        catch(e){ console.error('[PRZ]',e); }
+    };
+
     window.renderPautas = () => {
-        const el = document.getElementById('pautas-list'); if(!el) return;
-        const list = [...window._state.pautas].sort((a,b)=>b.data.localeCompare(a.data));
-        document.getElementById('pautas-count').innerText = list.length;
-        if(list.length===0){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhuma pauta criada.</div>'; return; }
-        const tipoMap = { setorial:'pauta-tipo-setorial', gestores:'pauta-tipo-gestores', geral:'pauta-tipo-geral' };
-        const tipoLabel = { setorial:'Reunião Setorial', gestores:'Reunião de Gestores', geral:'Reunião Geral' };
-        const tipoIcon = { setorial:'ph-users-three', gestores:'ph-crown-simple', geral:'ph-globe' };
-        el.innerHTML = list.map(p=>`
-            <div class="pauta-card">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-                    <div>
-                        <span class="pauta-tipo-tag ${tipoMap[p.tipo]||'pauta-tipo-setorial'}"><i class="ph-fill ${tipoIcon[p.tipo]||'ph-users-three'}"></i> ${tipoLabel[p.tipo]||p.tipo}</span>
-                        <span style="font-family:'Share Tech Mono';font-size:11px;color:var(--text);margin-left:10px;">${labelData(p.data)}</span>
-                        ${p.resp?`<span style="font-size:11px;color:var(--text);margin-left:8px;">• ${escapeHTML(p.resp)}</span>`:''}
-                    </div>
-                    <div style="display:flex;gap:6px;">
-                        <button class="btn-acao outline-primary" style="padding:6px 10px;font-size:11px;" onclick="window.copiarPauta('${p._id}')"><i class="ph-bold ph-copy"></i> Copiar</button>
-                        <button class="btn-acao outline-danger" style="padding:6px 8px;" onclick="window.apagarPauta('${p._id}')"><i class="ph-bold ph-trash"></i></button>
-                    </div>
-                </div>
-                <div style="font-family:'Orbitron';font-size:14px;font-weight:900;color:var(--white);margin-bottom:12px;">${escapeHTML(p.titulo)}</div>
-                ${p.items && p.items.length ? '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:12px 14px;">' + p.items.map((item,i)=>`<div class="pauta-item"><span class="pauta-item-num">${i+1}.</span><span>${escapeHTML(item)}</span></div>`).join('') + '</div>' : ''}
-                ${p.obs?`<div style="font-size:12px;color:var(--text);margin-top:10px;font-style:italic;">${escapeHTML(p.obs)}</div>`:''}
-            </div>`).join('');
+        const presLabel = {todos:'Todos os membros', gestao:'Apenas gest\u00e3o', subgestao:'Sub-gest\u00e3o+'};
+        ['setorial','gestores','geral'].forEach(tipo => {
+            const el = document.getElementById('pautas-list-' + tipo); if(!el) return;
+            const list = [...(window._state.pautas||[])].filter(p => p.tipo === tipo).sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+            const countEl = document.getElementById('pautas-count-' + tipo);
+            if(countEl) countEl.textContent = list.length + (list.length === 1 ? ' pauta' : ' pautas');
+            if(!list.length){ el.innerHTML = '<div class="empty-state" style="padding:40px;">Nenhuma pauta criada.</div>'; return; }
+            el.innerHTML = list.map(p => {
+                const dtFmt = p.data ? p.data.split('-').reverse().join('/') : '-';
+                const horaFmt = p.hora ? (' \u00e0s ' + p.hora) : '';
+                const presTag = tipo === 'setorial' && p.presenca ? '<span style="font-size:10px;color:var(--success);font-family:\u0027Share Tech Mono\u0027;">\u2714 ' + (presLabel[p.presenca]||p.presenca) + '</span>' : '';
+                const avisoHtml = tipo === 'geral' && p.aviso ? '<div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:var(--warning);font-family:Rajdhani;font-weight:600;">\u26A0\uFE0F ' + escapeHTML(p.aviso) + '</div>' : '';
+                return '<div class="pauta-card">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">' +
+                        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+                            '<span style="font-family:\u0027Share Tech Mono\u0027;font-size:11px;color:var(--white);">' + dtFmt + horaFmt + '</span>' +
+                            '<span style="font-size:12px;color:var(--text);">\uD83D\uDC64 ' + escapeHTML(p.resp||'-') + '</span>' +
+                            presTag +
+                        '</div>' +
+                        '<div style="display:flex;gap:6px;">' +
+                            '<button class="btn-acao outline-primary" style="padding:6px 12px;font-size:11px;" onclick="window.copiarPauta(\'' + p._id + '\')"><i class="ph-bold ph-copy"></i> Copiar</button>' +
+                            '<button class="btn-acao outline-danger" style="padding:6px 8px;" onclick="window.apagarPauta(\'' + p._id + '\')"><i class="ph-bold ph-trash"></i></button>' +
+                        '</div>' +
+                    '</div>' +
+                    avisoHtml +
+                    (p.itens && p.itens.length ? '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:12px 14px;">' + p.itens.map((item,i) => '<div class="pauta-item"><span class="pauta-item-num">' + (i+1) + '.</span><span>' + escapeHTML(item) + '</span></div>').join('') + '</div>' : '') +
+                    (tipo === 'setorial' && p.obs ? '<div style="font-size:12px;color:var(--text);margin-top:8px;font-style:italic;">' + escapeHTML(p.obs) + '</div>' : '') +
+                '</div>';
+            }).join('');
+        });
     };
+
 
     // ─── ADVERTÊNCIAS ───
     window.openAdvModal = () => {
@@ -3884,7 +4645,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         const motivo = document.getElementById('adv-motivo').value.trim();
         const data = document.getElementById('adv-data').value;
         const discordId = document.getElementById('adv-discord-id').value.trim();
-        if(!memId||!motivo||!data){ window.showToast('Preencha todos os campos!','error'); return; }
+        if(!memId||!motivo||!data){ await window.logHistorico('ADV', document.getElementById('adv-nome')?.value||'—', document.getElementById('adv-discord')?.value||'—', `Advertência: ${document.getElementById('adv-tipo')?.value||'—'}`); showToast('Preencha todos os campos!','error'); return; }
         const mem = window._state.members.find(x=>x._id===memId);
         if(!mem) return;
         try {
@@ -3895,7 +4656,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     };
     window.apagarAdv = async (id) => {
         if(await window.showConfirm('Apagar esta advertência?','Apagar ADV',true))
-            try { await deleteDoc(doc(db,'gestao_adv',id)); window.showToast('Removida.','success'); }
+            try { await deleteDoc(doc(db,'gestao_adv',id)); await window.logHistorico('ADV REMOVIDA', '—', '—', 'Advertência removida'); showToast('Removida.','success'); }
             catch(e){ console.error('[PRZ]',e); window.showToast('Erro.','error'); }
     };
     window.copiarAdv = async (id) => {
@@ -3950,7 +4711,7 @@ ${r.motivo}`;
         const obs = document.getElementById('autorizacao-obs').value.trim();
         const data = document.getElementById('autorizacao-data').value;
         const discordId = document.getElementById('autorizacao-discord-id').value.trim();
-        if(!memId||!data){ window.showToast('Preencha os campos obrigatórios!','error'); return; }
+        if(!memId||!data){ await window.logHistorico('AUTORIZAÇÃO', document.getElementById('autorizacao-membro')?.options[document.getElementById('autorizacao-membro')?.selectedIndex]?.text||'—', '—', `Tipo: ${document.getElementById('autorizacao-tipo')?.value||'—'}`); showToast('Preencha os campos obrigatórios!','error'); return; }
         const mem = window._state.members.find(x=>x._id===memId);
         if(!mem) return;
         try {
@@ -4048,8 +4809,8 @@ ${r.motivo}`;
         });
         if(list.length===0){ window.showToast('Sem registos de atividade.','error'); return; }
         const semana = list[0]?.semana ? `Semana de ${labelData(list[0].semana)}` : '';
-        const stIcon = {ativo:'✅',alerta:'⚠️',inativo:'❌'};
-        let txt = `📊 RELATÓRIO DE ATIVIDADE — GAMES PRZ\n${semana}\n${'─'.repeat(40)}\n`;
+        const stIcon = {ativo:'✅',alerta:'\u26A0\uFE0F',inativo:'❌'};
+        let txt = `\uD83D\uDCCA RELATÓRIO DE ATIVIDADE — GAMES PRZ\n${semana}\n${'─'.repeat(40)}\n`;
         const ativos  = list.filter(x=>x.status==='ativo');
         const alertas = list.filter(x=>x.status==='alerta');
         const inativos= list.filter(x=>x.status==='inativo');
@@ -4062,7 +4823,7 @@ ${r.motivo}`;
             return `${stIcon[r.status]||'•'} ${r.membroNome} — ${r.movs||0} MOVs | ${r.pontos||0} pts${subStr}\n`;
         };
         if(ativos.length)  { txt += `\n✅ ATIVOS (${ativos.length})\n`;  ativos.forEach(r => txt += linha(r)); }
-        if(alertas.length) { txt += `\n⚠️ ALERTA (${alertas.length})\n`; alertas.forEach(r => txt += linha(r)); }
+        if(alertas.length) { txt += `\n⚠\uFE0F ALERTA (${alertas.length})\n`; alertas.forEach(r => txt += linha(r)); }
         if(inativos.length){ txt += `\n❌ INATIVOS (${inativos.length})\n`; inativos.forEach(r => txt += linha(r)); }
         txt += `\n${'─'.repeat(40)}\nTotal: ${list.length} membros`;
         try { await navigator.clipboard.writeText(txt); window.showToast('Relatório copiado!','success'); }
@@ -4129,7 +4890,7 @@ ${r.motivo}`;
         const maxPts = Math.max(...list.map(x=>x.pontos||0), 1);
         if(list.length===0){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhum registo. Use "Gerar Automático" para preencher com os dados actuais.</div>'; return; }
         const stClr  = {ativo:'var(--success)', alerta:'var(--warning)', inativo:'var(--danger)'};
-        const stIcon = {ativo:'✅', alerta:'⚠️', inativo:'❌'};
+        const stIcon = {ativo:'✅', alerta:'\u26A0\uFE0F', inativo:'❌'};
         el.innerHTML = list.map(r => {
             const subScore = (r.instCount||0) + (r.acolCount||0) + (r.gnCount||0);
             const { media } = calcStatus(r.movs||0, r.pontos||0, subScore, crit);
@@ -4142,6 +4903,7 @@ ${r.motivo}`;
             return `<div class="ativ-row">
                 <div>
                     <b style="color:var(--white);font-family:'Orbitron';font-size:12px;">${escapeHTML(r.membroNome)}</b>
+                    ${(()=>{ const hist=window._state.semanasAtividade&&window._state.semanasAtividade[r.membroId]; const sem=hist?hist.semanasSemPontuar:0; return sem>0?`<span style="font-size:9px;font-family:'Share Tech Mono';color:${sem>=4?'var(--danger)':'var(--warning)'};background:${sem>=4?'rgba(248,113,113,0.1)':'rgba(251,191,36,0.1)'};padding:1px 6px;border-radius:4px;margin-left:4px;">${sem} sem s/ pontuar</span>`:''; })()}
                     ${r.obs?`<div style="font-size:11px;color:var(--text);">${escapeHTML(r.obs)}</div>`:''}
                 </div>
                 ${subCell(r.movs||0, 'ph-calendar', 'var(--accent)')}
@@ -4151,7 +4913,7 @@ ${r.motivo}`;
                 <div class="ativ-score ${sc}">${r.pontos||0}</div>
                 <div>
                     <span style="font-size:11px;">${stIcon[r.status]||'•'} <span style="color:${stClr[r.status]};font-family:'Rajdhani';font-weight:700;">${r.status}</span></span>
-                    ${r.temSubArea && !r.subAtingiu ? `<div style="font-size:10px;color:var(--warning);margin-top:2px;">⚠️ sub-área em falta</div>` : ''}
+                    ${r.temSubArea && !r.subAtingiu ? `<div style="font-size:10px;color:var(--warning);margin-top:2px;">⚠\uFE0F sub-área em falta</div>` : ''}
                     <div style="font-size:10px;color:#52525b;font-family:'Share Tech Mono';margin-top:2px;">média ${mediaDisplay}%</div>
                 </div>
                 <div style="display:flex;gap:4px;justify-content:flex-end;">
@@ -4243,7 +5005,7 @@ ${r.motivo}`;
                 if(instPts > 0)  parts.push(`Inst: +${instPts}pts`);
                 if(acolPts > 0)  parts.push(`Acol: +${acolPts}pts`);
                 if(gnPts > 0)    parts.push(`GN: +${gnPts}pts`);
-                if(temSubArea && !subAtingiu) parts.push(`⚠️ Sub-área abaixo da média`);
+                if(temSubArea && !subAtingiu) parts.push(`⚠\uFE0F Sub-área abaixo da média`);
 
                 return {
                     membroId: m._id,
@@ -4400,7 +5162,7 @@ ${r.motivo}`;
         const memId = sel.value;
         const discordId = document.getElementById('lu-discord-id').value.trim();
         const pts = parseInt(document.getElementById('lu-pontos').value)||0;
-        if(!memId || !discordId) { window.showToast('Preencha membro e ID Discord!','error'); return; }
+        if(!memId || !discordId) { await window.logHistorico('LEVEL UP', document.getElementById('lv-membro-nome')?.value||document.getElementById('lv-membro')?.options[document.getElementById('lv-membro')?.selectedIndex]?.text||'—', '—', `Level UP aprovado: ${document.getElementById('lv-cargo-novo')?.value||'—'}`); showToast('Preencha membro e ID Discord!','error'); return; }
         const mem = window._state.members.find(x=>x._id===memId);
         if(!mem) return;
         const nivel = getCargoLvl(pts);
@@ -4766,7 +5528,7 @@ ${r.motivo}`;
     window._state.feedbacks   = [];
 
     // ─── helpers ───
-    const medidaLabel = { advertencia:'⚠️ Advertência', suspensao:'🚫 Suspensão', remocao:'❌ Remoção da Área', conversa:'💬 Conversa / Orientação', monitoramento:'👁️ Monitoramento', outra:'📋 Outra' };
+    const medidaLabel = { advertencia:'\u26A0\uFE0F Advertência', suspensao:'🚫 Suspensão', remocao:'❌ Remoção da Área', conversa:'💬 Conversa / Orientação', monitoramento:'\uD83D\uDC41\uFE0F Monitoramento', outra:'📋 Outra' };
     const fbTipoLabel = { positivo:'✅ Positivo', negativo:'❌ Negativo', sugestao:'💡 Sugestão', elogio:'⭐ Elogio', critica:'📝 Crítica Construtiva' };
     const fbTipoCor   = { positivo:'var(--success)', negativo:'var(--danger)', sugestao:'#f59e0b', elogio:'#fbbf24', critica:'var(--accent)' };
     const probStatusLabel = { aberto:'🔴 Aberto', em_andamento:'🟡 Em andamento', resolvido:'🟢 Resolvido' };
@@ -4813,6 +5575,7 @@ ${r.motivo}`;
             if(id) await setDoc(doc(db,'area_info_semana',id), d, {merge:true});
             else   await setDoc(doc(collection(db,'area_info_semana')), d);
             window.closeModal('modal-info-semana');
+            await window.logHistorico('INFO SEMANA', 'Sistema', '—', `Info semana registada: ${d.data||'—'}`);
             window.showToast('Informações guardadas!','success');
         } catch(e){ console.error('[PRZ]',e); window.showToast('Erro ao guardar.','error'); }
         finally { btn.disabled=false; btn.innerHTML='GUARDAR'; }
@@ -4910,7 +5673,7 @@ ${r.motivo}`;
             </div>
             <div style="font-size:13px; color:var(--white); font-family:'Rajdhani'; font-weight:600; line-height:1.6; margin-bottom:${r.solucao?'12px':'0'}; white-space:pre-line;">${escapeHTML(r.descricao)}</div>
             ${r.solucao ? `<div style="background:rgba(52,211,153,0.06); border:1px solid rgba(52,211,153,0.2); border-radius:8px; padding:12px; margin-top:8px;">
-                <div style="font-family:'Orbitron'; font-size:9px; color:var(--success); font-weight:900; margin-bottom:6px; letter-spacing:1px;">💡 SOLUÇÃO${r.dataSolucao ? ' — '+labelData(r.dataSolucao) : ''}</div>
+                <div style="font-family:'Orbitron'; font-size:9px; color:var(--success); font-weight:900; margin-bottom:6px; letter-spacing:1px;">\uD83D\uDCA1 SOLUÇÃO${r.dataSolucao ? ' — '+labelData(r.dataSolucao) : ''}</div>
                 <div style="font-size:13px; color:var(--white); font-family:'Rajdhani'; font-weight:600; line-height:1.6; white-space:pre-line;">${escapeHTML(r.solucao)}</div>
             </div>` : ''}
         </div>`;
@@ -5211,10 +5974,10 @@ ${r.motivo}`;
         if(unsubOcorrencias) unsubOcorrencias();
         if(unsubFeedbacks)   unsubFeedbacks();
         if(unsubSugestoes)   unsubSugestoes();
-        unsubInfoSemana  = onSnapshot(collection(db,'area_info_semana'),  s=>{ window._state.infoSemana  = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderInfoSemana(); });
-        unsubProblemas   = onSnapshot(collection(db,'area_problemas'),    s=>{ window._state.problemas   = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderProblemas(); });
-        unsubOcorrencias = onSnapshot(collection(db,'area_ocorrencias'),  s=>{ window._state.ocorrencias = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderOcorrencias(); });
-        unsubFeedbacks   = onSnapshot(collection(db,'area_feedbacks'),    s=>{ window._state.feedbacks   = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderFeedbacks(); });
+        unsubInfoSemana  = onSnapshot(collection(db,'area_info_semana'),  s=>{ window._state.infoSemana  = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderInfoSemana(); window.renderDashInfoSemana(); });
+        unsubProblemas   = onSnapshot(collection(db,'area_problemas'),    s=>{ window._state.problemas   = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderProblemas(); window.renderDashInfoSemana(); });
+        unsubOcorrencias = onSnapshot(collection(db,'area_ocorrencias'),  s=>{ window._state.ocorrencias = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderOcorrencias(); window.renderDashInfoSemana(); });
+        unsubFeedbacks   = onSnapshot(collection(db,'area_feedbacks'),    s=>{ window._state.feedbacks   = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderFeedbacks(); window.renderDashFeedbacks && window.renderDashFeedbacks(); });
         unsubSugestoes   = onSnapshot(collection(db,'area_sugestoes'),    s=>{ window._state.sugestoes   = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderSugestoes(); window.renderDashSugMovs(); });
     };
 
@@ -5254,7 +6017,7 @@ ${r.motivo}`;
             return `
             <div style="border:1px solid rgba(245,158,11,0.15); border-radius:6px; margin-bottom:5px; overflow:hidden;">
                 <div style="display:flex; align-items:center; gap:5px; padding:4px 8px; background:rgba(245,158,11,0.06);">
-                    <span style="font-size:9px; font-family:'Orbitron'; font-weight:900; color:#f59e0b;">💡 ${escapeHTML(tipo)}</span>
+                    <span style="font-size:9px; font-family:'Orbitron'; font-weight:900; color:#f59e0b;">\uD83D\uDCA1 ${escapeHTML(tipo)}</span>
                     ${movInfo}
                     <span style="font-size:8px; color:var(--text); margin-left:auto; font-family:'Share Tech Mono';">${sugs.length}x</span>
                 </div>
@@ -5310,7 +6073,7 @@ ${r.motivo}`;
         const registadoPor = document.getElementById('bl-registado-por').value;
         const data = document.getElementById('bl-data').value;
         if(!nome || !discordId || !motivo || !data) {
-            window.showToast('Preencha nome, ID Discord, motivo e data!', 'error');
+            await window.logHistorico('BLACKLIST', document.getElementById('bl-nome')?.value||'—', document.getElementById('bl-discord')?.value||'—', `Motivo: ${document.getElementById('bl-motivo')?.value||'—'}`); showToast('Preencha nome, ID Discord, motivo e data!', 'error');
             btn.disabled=false; btn.innerHTML='ADICIONAR À BL'; return;
         }
         try {
@@ -5325,7 +6088,7 @@ ${r.motivo}`;
 
     window.apagarBlacklist = async (id) => {
         if(await window.showConfirm('Remover este registo da blacklist?', 'Remover da Blacklist', true))
-            try { await deleteDoc(doc(db, 'gestao_blacklist', id)); window.showToast('Removido.', 'success'); }
+            try { await deleteDoc(doc(db, 'gestao_blacklist', id)); await window.logHistorico('BLACKLIST REMOVIDA', '—', '—', 'Removido da blacklist'); showToast('Removido.', 'success'); }
             catch(e){ console.error('[PRZ]', e); window.showToast('Erro.', 'error'); }
     };
 
@@ -5333,7 +6096,7 @@ ${r.motivo}`;
         const r = window._state.blacklist.find(x => x._id === id); if(!r) return;
         const tipoLabel = { kick:'Kick / Saída Forçada', ban:'Ban', comportamento:'Comportamento Inadequado', toxicidade:'Toxicidade', fraude:'Fraude / Desonestidade', outro:'Outro' }[r.tipo] || r.tipo;
         const ambitoLabel = (r.ambito||'setorial') === 'geral' ? '🌐 Geral' : '🏠 Setorial';
-        let txt = `🚫 BLACKLIST (${ambitoLabel})
+        let txt = `\uD83D\uDEAB BLACKLIST (${ambitoLabel})
 ID: ${r.nome} | ${r.discordId}
 Motivo: ${tipoLabel}
 ${r.motivo}
@@ -5418,8 +6181,8 @@ Registado por: ${r.registadoPor} | ${labelData(r.data)}`;
         unsubFuncoes = onSnapshot(collection(db,'gestao_funcoes'), s => { window._state.funcoes = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderFuncoes(); });
         unsubPautas = onSnapshot(collection(db,'gestao_pautas'), s => { window._state.pautas = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderPautas(); });
         unsubAdv = onSnapshot(collection(db,'gestao_adv'), s => { window._state.adv = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAdv(); });
-        unsubAutorizacoes = onSnapshot(collection(db,'gestao_autorizacoes'), s => { window._state.autorizacoes = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAutorizacoes(); });
-        unsubAtividade = onSnapshot(collection(db,'gestao_atividade'), s => { window._state.atividade = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAtividade(); });
+        unsubAutorizacoes = onSnapshot(collection(db,'gestao_autorizacoes'), s => { window._state.autorizacoes = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAutorizacoes(); window.renderDashInfoSemana(); });
+        unsubAtividade = onSnapshot(collection(db,'gestao_atividade'), s => { window._state.atividade = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAtividade(); window.renderDashTopMembros(); });
         if(unsubBlacklist) unsubBlacklist();
         unsubBlacklist = onSnapshot(collection(db,'gestao_blacklist'), s => { window._state.blacklist = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderBlacklist(); });
     };
