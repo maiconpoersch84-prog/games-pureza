@@ -384,7 +384,17 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
     </svg>
 </button>
 
-                <div id="nav-cat-membros" class="nav-category" onclick="window.toggleCategory(this)"><span>MEMBROS</span><i class="ph-bold ph-caret-down caret"></i></div>
+
+                <div id="nav-sep-area" style="height: 1px; background: rgba(255,255,255,0.05); margin: 6px 20px 8px;"></div>
+                <div id="nav-cat-area" class="nav-category" onclick="window.toggleCategory(this)"><span>ÁREA</span><i class="ph-bold ph-caret-down caret"></i></div>
+                <div id="nav-group-area" class="nav-group">
+                    <button id="btn-nav-avisos" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-avisos', this)"><i class="ph-fill ph-bell-ringing"></i> Avisos</button>
+                    <button id="btn-nav-info-semana" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-info-semana', this)"><i class="ph-fill ph-calendar-star"></i> Informações da Semana</button>
+                    <button id="btn-nav-sugestoes" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-sugestoes', this)"><i class="ph-fill ph-lightbulb"></i> Sugestões</button>
+                    <button id="btn-nav-feedbacks" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-feedbacks', this)"><i class="ph-fill ph-chat-circle-text"></i> Feedbacks</button>
+                </div>
+                <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 8px 20px;"></div>
+                                <div id="nav-cat-membros" class="nav-category" onclick="window.toggleCategory(this)"><span>MEMBROS</span><i class="ph-bold ph-caret-down caret"></i></div>
                 <div id="nav-group-membros" class="nav-group">
                     <button class="nav-btn nav-sub-btn" onclick="window.switchTab('page-membros', this)"><i class="ph-fill ph-user-check"></i> Ativos</button>
                     <button class="nav-btn nav-sub-btn" onclick="window.switchTab('page-rebocamento', this)"><i class="ph-fill ph-user-minus"></i> Inativos</button>
@@ -428,13 +438,6 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                     <button id="btn-nav-blacklist" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-blacklist', this)" style="color:var(--danger);"><i class="ph-fill ph-prohibit"></i> Blacklist</button>
                 </div>
 
-                <div id="nav-sep-area" style="height: 1px; background: rgba(255,255,255,0.05); margin: 12px 20px;"></div>
-                <div id="nav-cat-area" class="nav-category" onclick="window.toggleCategory(this)"><span>ÁREA</span><i class="ph-bold ph-caret-right caret"></i></div>
-                <div id="nav-group-area" class="nav-group closed">
-                    <button id="btn-nav-info-semana" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-info-semana', this)"><i class="ph-fill ph-calendar-star"></i> Informações da Semana</button>
-                    <button id="btn-nav-sugestoes" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-sugestoes', this)"><i class="ph-fill ph-lightbulb"></i> Sugestões</button>
-                    <button id="btn-nav-feedbacks" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-feedbacks', this)"><i class="ph-fill ph-chat-circle-text"></i> Feedbacks</button>
-                </div>
 
                 <div id="nav-admin-separator" style="height: 1px; background: rgba(255,255,255,0.05); margin: 12px 20px;"></div>
                 <div id="nav-cat-admin" class="nav-category" onclick="window.toggleCategory(this)"><span>ADMINISTRAÇÃO</span><i class="ph-bold ph-caret-right caret"></i></div>
@@ -466,62 +469,64 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
         <div id="page-dash" class="page active">
 
-            <!-- Linha 1: MOVs hoje + Game News + Sugestões + RPP + Entradas/Saídas -->
-            <div style="display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
-                <div class="dash-panel" style="border-color:rgba(0,220,255,0.2);">
-                    <div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-calendar-check"></i> MOVs DE HOJE</div>
-                    <div id="dash-movs-hoje"></div>
-                </div>
-                <div class="dash-panel" style="border-color:rgba(251,191,36,0.2);">
-                    <div class="dash-panel-hdr" style="color:var(--gn-color);"><i class="ph-fill ph-article"></i> GAME NEWS</div>
-                    <div id="dash-gamenews"></div>
-                </div>
-                <div class="dash-panel" style="border-color:rgba(245,158,11,0.2);">
-                    <div class="dash-panel-hdr" style="color:#f59e0b;"><i class="ph-fill ph-lightbulb"></i> SUGESTÕES</div>
-                    <div id="dash-sug-movs"></div>
-                </div>
-                <div class="dash-panel" style="border-color:rgba(251,191,36,0.2);">
-                    <div class="dash-panel-hdr" style="color:var(--warning);"><i class="ph-fill ph-shield-warning"></i> RPP</div>
-                    <div id="dash-rpp"></div>
-                </div>
-                <div class="dash-panel" style="border-color:rgba(52,211,153,0.2);">
-                    <div class="dash-panel-hdr" style="color:var(--success);"><i class="ph-fill ph-door"></i> ENTRADAS / SAÍDAS</div>
-                    <div id="dash-mov-membros"></div>
-                </div>
+            <!-- Hidden panels — renderizados dinamicamente pelo dashLayout -->
+            <div style="display:none;">
+                <div id="dash-panel-avisos" class="dash-panel" style="border-color:rgba(251,191,36,0.25);"><div class="dash-panel-hdr" style="color:var(--warning);"><i class="ph-fill ph-bell-ringing"></i> AVISOS RECENTES</div><div id="dash-avisos-recentes" style="display:flex;flex-direction:column;gap:8px;"></div></div>
+                <div id="dash-panel-alertas" class="dash-panel" style="border-color:rgba(248,113,113,0.25);"><div class="dash-panel-hdr" style="color:var(--danger);"><i class="ph-fill ph-warning-octagon"></i> ALERTAS &amp; PENDÊNCIAS</div><div id="dash-alertas" style="display:flex;flex-wrap:wrap;gap:8px;"></div></div>
+                <div id="dash-panel-movs" class="dash-panel" style="border-color:rgba(0,220,255,0.2);flex:1.4;"><div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-calendar-check"></i> MOVs DE HOJE</div><div id="dash-movs-hoje"></div></div>
+                <div id="dash-panel-gn" class="dash-panel" style="border-color:rgba(251,191,36,0.2);"><div class="dash-panel-hdr" style="color:var(--gn-color);"><i class="ph-fill ph-article"></i> GAME NEWS</div><div id="dash-gamenews"></div></div>
+                <div id="dash-panel-sug" class="dash-panel" style="border-color:rgba(245,158,11,0.2);"><div class="dash-panel-hdr" style="color:#f59e0b;"><i class="ph-fill ph-lightbulb"></i> SUGESTÕES</div><div id="dash-sug-movs"></div></div>
+                <div id="dash-panel-rpp" class="dash-panel" style="border-color:rgba(251,191,36,0.2);"><div class="dash-panel-hdr" style="color:var(--warning);"><i class="ph-fill ph-shield-warning"></i> RPP</div><div id="dash-rpp"></div></div>
+                <div id="dash-panel-entradas" class="dash-panel" style="border-color:rgba(52,211,153,0.2);"><div class="dash-panel-hdr" style="color:var(--success);"><i class="ph-fill ph-door"></i> ENTRADAS / SAÍDAS</div><div id="dash-mov-membros"></div></div>
+                <div id="dash-panel-trocaup" class="dash-panel" style="border-color:rgba(167,139,250,0.2);"><div class="dash-panel-hdr" style="color:var(--purple);"><i class="ph-fill ph-swap"></i> TROCA DE UP</div><div id="dash-troca-up"></div></div>
+                <div id="dash-panel-info" class="dash-panel" style="border-color:rgba(0,220,255,0.15);"><div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-calendar-star"></i> ÚCTIMAS INFORMAÇÕES</div><div id="dash-info-semana"></div></div>
+                <div id="dash-panel-destaques" class="dash-panel" style="border-color:rgba(251,191,36,0.2);"><div class="dash-panel-hdr" style="color:#fbbf24;"><i class="ph-fill ph-trophy"></i> MEMBROS EM DESTAQUE</div><div id="dash-top-membros"></div></div>
+                <div id="dash-panel-subareas" class="dash-panel" style="border-color:rgba(244,114,182,0.2);"><div class="dash-panel-hdr" style="color:#f472b6;"><i class="ph-fill ph-chart-bar"></i> RENDIMENTO SUB ÁREAS</div><div id="dash-subareas"></div></div>
+                <div id="dash-panel-feedbacks" class="dash-panel" style="border-color:rgba(167,139,250,0.2);"><div class="dash-panel-hdr" style="color:var(--purple);"><i class="ph-fill ph-chat-centered-text"></i> FEEDBACKS</div><div id="dash-feedbacks"></div></div>
+                <div id="dash-panel-trocaconta" class="dash-panel" style="border-color:rgba(0,220,255,0.2);"><div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-arrows-clockwise"></i> TROCA DE CONTA</div><div id="dash-troca-conta"></div></div>
             </div>
 
-            <!-- Linha 2: Troca de UP + Info da Semana -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-                <div class="dash-panel" style="border-color:rgba(167,139,250,0.2);">
-                    <div class="dash-panel-hdr" style="color:var(--purple);"><i class="ph-fill ph-swap"></i> TROCA DE UP</div>
-                    <div id="dash-troca-up"></div>
+            <!-- Container dinâmico -->
+            <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+                <button id="btn-config-dash" onclick="window.openConfigDash()" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--text);padding:7px 14px;border-radius:8px;font-family:'Orbitron';font-size:10px;font-weight:900;cursor:pointer;letter-spacing:1px;transition:0.2s;" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--text)'"><i class="ph-bold ph-layout"></i> CONFIGURAR</button>
+            </div>
+            <div id="dash-layout-container"></div>
+
+        </div>
+
+        <!-- MODAL CONFIGURAR DASHBOARD -->
+        <div id="modal-config-dash" class="modal-overlay">
+            <div class="modal-content" style="max-width:580px;max-height:90vh;overflow-y:auto;">
+                <!-- Header -->
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="width:34px;height:34px;border-radius:8px;background:rgba(0,220,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="ph-fill ph-layout" style="font-size:16px;color:var(--accent);"></i>
+                        </div>
+                        <div>
+                            <div style="font-family:'Orbitron';font-size:13px;font-weight:900;color:var(--white);letter-spacing:1px;">CONFIGURAR DASHBOARD</div>
+                            <div style="font-size:11px;color:var(--text);font-family:'Share Tech Mono';margin-top:2px;">Ative, oculte e redimensione cada painel</div>
+                        </div>
+                    </div>
+                    <div id="config-dash-counter" style="font-size:11px;color:var(--accent);background:rgba(0,220,255,0.08);border:1px solid rgba(0,220,255,0.2);padding:4px 12px;border-radius:20px;font-family:'Share Tech Mono';"></div>
                 </div>
-                <div class="dash-panel" style="border-color:rgba(0,220,255,0.15);">
-                    <div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-calendar-star"></i> ÚLTIMAS INFORMAÇÕES</div>
-                    <div id="dash-info-semana"></div>
+                <!-- Legenda tamanhos -->
+                <div style="display:flex;gap:12px;margin-bottom:14px;padding:10px 12px;background:rgba(0,0,0,0.2);border-radius:8px;flex-wrap:wrap;">
+                    <span style="font-size:10px;color:var(--text);font-family:'Orbitron';font-weight:900;letter-spacing:1px;margin-right:4px;">TAMANHO:</span>
+                    <div style="display:flex;align-items:center;gap:5px;"><div style="width:12px;height:8px;border-radius:2px;background:rgba(255,255,255,0.2);"></div><span style="font-size:11px;color:var(--text);">P — 1 col</span></div>
+                    <div style="display:flex;align-items:center;gap:5px;"><div style="width:20px;height:8px;border-radius:2px;background:rgba(255,255,255,0.2);"></div><span style="font-size:11px;color:var(--text);">M — 2 col</span></div>
+                    <div style="display:flex;align-items:center;gap:5px;"><div style="width:30px;height:8px;border-radius:2px;background:rgba(255,255,255,0.2);"></div><span style="font-size:11px;color:var(--text);">G — 3 col</span></div>
+                    <div style="display:flex;align-items:center;gap:5px;"><div style="width:40px;height:8px;border-radius:2px;background:rgba(255,255,255,0.2);"></div><span style="font-size:11px;color:var(--text);">XL — 4 col</span></div>
+                </div>
+                <!-- Lista -->
+                <div id="config-dash-lista" style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px;"></div>
+                <!-- Ações -->
+                <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06);">
+                    <button onclick="window.resetDashLayout()" style="background:transparent;border:1px solid rgba(248,113,113,0.3);color:var(--danger);padding:9px 16px;border-radius:8px;font-family:'Orbitron';font-size:10px;font-weight:900;cursor:pointer;letter-spacing:1px;">RESETAR</button>
+                    <button onclick="window.closeModal('modal-config-dash')" class="btn-cancel">CANCELAR</button>
+                    <button onclick="window.saveDashLayout()" class="btn-save" style="background:var(--accent);color:#000;"><i class="ph-bold ph-check"></i> SALVAR</button>
                 </div>
             </div>
-
-            <!-- Linha 3: Top membros + Sub áreas + Feedbacks + Troca de Conta -->
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
-                <div class="dash-panel" style="border-color:rgba(251,191,36,0.2);">
-                    <div class="dash-panel-hdr" style="color:#fbbf24;"><i class="ph-fill ph-trophy"></i> MEMBROS EM DESTAQUE</div>
-                    <div id="dash-top-membros"></div>
-                </div>
-                <div class="dash-panel" style="border-color:rgba(244,114,182,0.2);">
-                    <div class="dash-panel-hdr" style="color:#f472b6;"><i class="ph-fill ph-chart-bar"></i> RENDIMENTO SUB ÁREAS</div>
-                    <div id="dash-subareas"></div>
-                </div>
-                <div class="dash-panel" style="border-color:rgba(167,139,250,0.2);">
-                    <div class="dash-panel-hdr" style="color:var(--purple);"><i class="ph-fill ph-chat-centered-text"></i> FEEDBACKS</div>
-                    <div id="dash-feedbacks"></div>
-                </div>
-                <div class="dash-panel" style="border-color:rgba(0,220,255,0.2);">
-                    <div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-arrows-clockwise"></i> TROCA DE CONTA</div>
-                    <div id="dash-troca-conta"></div>
-                </div>
-            </div>
-
         </div>
 
         <div id="page-admin" class="page">
@@ -1337,6 +1342,51 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 </div>
 
 <!-- ========== SUGESTÕES ========== -->
+<!-- AVISOS -->
+<div id="page-avisos" class="page" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="color:var(--warning);"><i class="ph-fill ph-bell-ringing"></i> AVISOS</h2>
+        <button id="btn-add-aviso" class="btn-add" style="background:var(--warning);color:#000;" onclick="window.openAvisoModal()"><i class="ph-bold ph-plus"></i> NOVO AVISO</button>
+    </div>
+    <!-- Dashboard de avisos — visível para todos -->
+    <div id="avisos-dashboard" style="display:flex;flex-direction:column;gap:12px;"></div>
+</div>
+
+<!-- MODAL NOVO AVISO -->
+<div id="modal-aviso" class="modal-overlay">
+    <div class="modal-content" style="max-width:560px;">
+        <h2 style="color:var(--warning);margin-bottom:20px;"><i class="ph-fill ph-bell-ringing"></i> NOVO AVISO</h2>
+        <input type="hidden" id="aviso-docid">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div class="form-group"><label>DATA</label><input type="date" id="aviso-data"></div>
+            <div class="form-group"><label>HORÁRIO</label><input type="time" id="aviso-hora"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+            <label>TIPO DE AVISO</label>
+            <select id="aviso-tipo">
+                <option value="geral">&#128227; Aviso Geral</option>
+                <option value="reuniao">&#128197; Reunião</option>
+                <option value="mudanca">&#128260; Mudança</option>
+                <option value="comunicado">&#128172; Comunicado</option>
+                <option value="urgente">&#128680; Urgente</option>
+                <option value="evento">&#127881; Evento</option>
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+            <label>TÍTULO</label>
+            <input type="text" id="aviso-titulo" placeholder="Ex: Reunião Setorial esta sexta!">
+        </div>
+        <div class="form-group" style="margin-bottom:20px;">
+            <label>MENSAGEM</label>
+            <textarea id="aviso-msg" placeholder="Descreva o aviso com detalhes..." style="min-height:100px;"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button onclick="window.closeModal('modal-aviso')" class="btn-cancel">CANCELAR</button>
+            <button onclick="window.saveAviso()" class="btn-save" style="background:var(--warning);color:#000;">PUBLICAR AVISO</button>
+        </div>
+    </div>
+</div>
+
 <div id="page-sugestoes" class="page" style="display:none;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h2 style="color:#f59e0b; text-shadow:0 0 15px rgba(245,158,11,0.4);"><i class="ph-fill ph-lightbulb"></i> SUGESTÕES</h2>
@@ -2229,7 +2279,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, writeBatch, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, writeBatch, query, where, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
@@ -2368,6 +2418,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         idsToHide.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
 
         const btnMembro = document.getElementById('btn-add-membro'); if(btnMembro) btnMembro.style.display = 'none';
+        const btnAviso = document.getElementById('btn-add-aviso'); if(btnAviso) btnAviso.style.display = 'none';
         const btnMov = document.getElementById('btn-add-mov'); if(btnMov) btnMov.style.display = 'none';
         const btnAdmin = document.getElementById('btn-add-admin-user'); if(btnAdmin) btnAdmin.style.display = 'none';
 
@@ -2385,17 +2436,25 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         if(isGestaoAll) {
             idsToHide.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = (id.startsWith('nav-group')) ? 'block' : (id === 'nav-admin-separator' || id === 'nav-sep-notif' || id === 'nav-sep-gestao' ? 'block' : 'flex'); });
             if(btnMembro) btnMembro.style.display = 'flex';
+            const btnAv = document.getElementById('btn-add-aviso'); if(btnAv) btnAv.style.display = 'flex';
             if(btnMov) btnMov.style.display = 'flex';
             if(isGestaoMaster && btnAdmin) btnAdmin.style.display = 'flex'; 
         }
         else if(role === 'subgestao') {
-            // Sub-gestão: vê movimentações + todas as sub-áreas, mas NÃO notificações nem administração
-            document.getElementById('nav-cat-movs').style.display = 'flex'; document.getElementById('nav-group-movs').style.display = 'block'; 
+            // Sub-gestão: vê movimentações + sub-áreas + área (avisos, sugestões)
+            document.getElementById('nav-cat-movs').style.display = 'flex'; document.getElementById('nav-group-movs').style.display = 'block';
             document.getElementById('btn-nav-movs').style.display = 'flex'; document.getElementById('btn-nav-relatorios').style.display = 'flex';
             document.getElementById('nav-cat-sub').style.display = 'flex'; document.getElementById('nav-group-sub').style.display = 'block';
             document.getElementById('btn-nav-inst').style.display = 'flex';
             document.getElementById('btn-nav-acol').style.display = 'flex';
             document.getElementById('btn-nav-gn').style.display = 'flex';
+            // Área — avisos e sugestões visíveis para subgestão
+            document.getElementById('nav-sep-area').style.display = 'block';
+            document.getElementById('nav-cat-area').style.display = 'flex';
+            document.getElementById('nav-group-area').style.display = 'block';
+            document.getElementById('btn-nav-avisos').style.display = 'flex';
+            document.getElementById('btn-nav-sugestoes').style.display = 'flex';
+            document.getElementById('btn-nav-feedbacks').style.display = 'flex';
             // Limpar Semana só para gestão
             ['btn-limpar-inst','btn-limpar-acol','btn-limpar-gn'].forEach(id => {
                 const el = document.getElementById(id); if(el) el.style.display = 'none';
@@ -2530,11 +2589,16 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             ocors.forEach(o => { html += `<div class="dash-row"><span class="dash-label">${escapeHTML(o.membroNome||'—')}</span><span class="dash-tag">${o.data?o.data.split('-').reverse().join('/'):'—'}</span></div>`; });
         }
         const probs = [...(window._state.problemas||[])].sort((a,b) => ({aberto:0,em_andamento:1,resolvido:2}[a.status]??1)-({aberto:0,em_andamento:1,resolvido:2}[b.status]??1)).slice(0,2);
+        const probsAbertos = (window._state.problemas||[]).filter(p => p.status === 'aberto').length;
+        const probsAndamento = (window._state.problemas||[]).filter(p => p.status === 'em_andamento').length;
         if(probs.length) {
-            html += `<div style="font-size:9px;font-family:'Orbitron';color:var(--danger);font-weight:900;margin:6px 0 3px;">⚠\uFE0F PROBLEMAS</div>`;
+            let probHdr = '<div style="font-size:9px;font-family:\'Orbitron\';color:var(--danger);font-weight:900;margin:6px 0 3px;">\u26A0\uFE0F PROBLEMAS';
+            if(probsAbertos > 0) probHdr += ' <span style="background:rgba(248,113,113,0.15);color:var(--danger);padding:1px 6px;border-radius:4px;font-size:9px;">' + probsAbertos + ' aberto' + (probsAbertos>1?'s':'') + '</span>';
+            if(probsAndamento > 0) probHdr += ' <span style="background:rgba(251,191,36,0.15);color:var(--warning);padding:1px 6px;border-radius:4px;font-size:9px;">' + probsAndamento + ' andamento</span>';
+            html += probHdr + '</div>';
             probs.forEach(p => {
                 const cor = {aberto:'var(--danger)',em_andamento:'var(--warning)',resolvido:'var(--success)'}[p.status]||'var(--text)';
-                html += `<div class="dash-row"><span class="dash-label" style="font-size:11px;">${escapeHTML((p.descricao||'').substring(0,40))}${(p.descricao||'').length>40?'…':''}</span><span style="font-size:9px;color:${cor};font-family:'Share Tech Mono';">${{aberto:'Aberto',em_andamento:'Em andamento',resolvido:'✓'}[p.status]||p.status}</span></div>`;
+                html += '<div class="dash-row"><span class="dash-label" style="font-size:11px;">' + escapeHTML((p.descricao||'').substring(0,40)) + ((p.descricao||'').length>40?'…':'') + '</span><span style="font-size:9px;color:'+cor+';font-family:\'Share Tech Mono\';">' + ({aberto:'Aberto',em_andamento:'Em andamento',resolvido:'✓'}[p.status]||p.status) + '</span></div>';
             });
         }
         const auts = [...(window._state.autorizacoes||[])].sort((a,b) => (b.data||'').localeCompare(a.data||'')).slice(0,3);
@@ -2874,6 +2938,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                 window._state.semanasAtividade[data.membroId] = data;
             });
             window.renderAtividade();
+            window.renderDashAlertas && window.renderDashAlertas();
         } catch(e) { console.error('[PRZ] Erro semanas:', e); }
     };
 
@@ -3085,6 +3150,379 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         sel.disabled = !canEdit;
     };
 
+
+    window.renderDashAlertas = () => {
+        const el = document.getElementById('dash-alertas'); if(!el) return;
+        const alertas = [];
+
+        // Mapa de página → botão nav correto
+        const navMap = {
+            'page-atividade':   'btn-nav-atividade',
+            'page-adv':         'btn-nav-adv',
+            'page-ausencias':   null,
+            'page-blacklist':   'btn-nav-blacklist',
+            'page-info-semana': 'btn-nav-info-semana',
+        };
+
+        const ir = (page) => {
+            const btnId = navMap[page];
+            const btn = btnId ? document.getElementById(btnId) : null;
+            if(btn) window.switchTab(page, btn);
+            else {
+                // Fallback: mudar manualmente sem botão
+                document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                const pageEl = document.getElementById(page);
+                if(pageEl) pageEl.style.display = 'block';
+            }
+        };
+
+        // Membros inativos por semanas
+        const inativos = Object.values(window._state.semanasAtividade||{}).filter(s => s.statusCalculado === 'inativo');
+        const emAlerta = Object.values(window._state.semanasAtividade||{}).filter(s => s.statusCalculado === 'alerta');
+        if(inativos.length) alertas.push({ cor:'var(--danger)', bg:'rgba(248,113,113,0.1)', icon:'ph-user-minus', label: inativos.length + ' membro' + (inativos.length>1?'s':'') + ' inativo' + (inativos.length>1?'s':''), page:'page-atividade' });
+        if(emAlerta.length) alertas.push({ cor:'var(--warning)', bg:'rgba(251,191,36,0.1)', icon:'ph-warning', label: emAlerta.length + ' em alerta de atividade', page:'page-atividade' });
+
+        // Advertências 2ª/3ª
+        const advs = (window._state.adv||[]).filter(a => a.numero >= 2);
+        if(advs.length) alertas.push({ cor:'#f97316', bg:'rgba(249,115,22,0.1)', icon:'ph-warning-octagon', label: advs.length + ' adv. 2\u00aa/3\u00aa em aberto', page:'page-adv' });
+
+        // Ausências pendentes
+        const ausPend = (window._state.ausencias||[]).filter(a => a.status === 'Pendente');
+        if(ausPend.length) alertas.push({ cor:'var(--accent)', bg:'rgba(0,220,255,0.08)', icon:'ph-calendar-x', label: ausPend.length + ' aus\u00eancia' + (ausPend.length>1?'s':'') + ' pendente' + (ausPend.length>1?'s':''), page:'page-ausencias' });
+
+        // Problemas abertos
+        const probAbertos = (window._state.problemas||[]).filter(p => p.status === 'aberto');
+        if(probAbertos.length) alertas.push({ cor:'var(--danger)', bg:'rgba(248,113,113,0.1)', icon:'ph-bug', label: probAbertos.length + ' problema' + (probAbertos.length>1?'s':'') + ' aberto' + (probAbertos.length>1?'s':''), page:'page-info-semana' });
+
+        // Blacklist recente (últimos 7 dias)
+        const seteDias = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
+        const blRecente = (window._state.blacklist||[]).filter(b => (b.data||'') >= seteDias);
+        if(blRecente.length) alertas.push({ cor:'var(--danger)', bg:'rgba(248,113,113,0.1)', icon:'ph-skull', label: blRecente.length + ' entrada' + (blRecente.length>1?'s':'') + ' recente' + (blRecente.length>1?'s':'') + ' na blacklist', page:'page-blacklist' });
+
+        if(!alertas.length) {
+            el.innerHTML = '<span class="dash-empty" style="padding:8px 0;">\u2714 Nenhum alerta no momento.</span>';
+            return;
+        }
+
+        el.innerHTML = '';
+        alertas.forEach(a => {
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex;align-items:center;gap:8px;background:'+a.bg+';border:1px solid '+a.cor+'55;border-radius:8px;padding:8px 14px;cursor:pointer;transition:opacity 0.2s;flex:1;min-width:200px;';
+            div.innerHTML = '<i class="ph-fill '+a.icon+'" style="font-size:15px;color:'+a.cor+';flex-shrink:0;"></i>'
+                + '<span style="font-size:12px;color:var(--white);font-family:\'Rajdhani\';font-weight:700;">'+a.label+'</span>'
+                + '<i class="ph-bold ph-arrow-right" style="font-size:11px;color:'+a.cor+';margin-left:auto;opacity:0.6;"></i>';
+            div.addEventListener('mouseenter', function(){ this.style.opacity='0.8'; });
+            div.addEventListener('mouseleave', function(){ this.style.opacity='1'; });
+            div.addEventListener('click', function(){ ir(a.page); });
+            el.appendChild(div);
+        });
+    };
+
+
+
+    // ==========================================
+    // AVISOS
+    // ==========================================
+    window._state.avisos = [];
+
+    window.openAvisoModal = () => {
+        const isGestao = ['lider_geral','lider','sublider','gerente','supervisor'].includes(window.currentUserRole);
+        if(!isGestao) { window.showToast('Apenas gest\u00e3o pode publicar avisos!','error'); return; }
+        document.getElementById('aviso-docid').value = '';
+        document.getElementById('aviso-titulo').value = '';
+        document.getElementById('aviso-msg').value = '';
+        document.getElementById('aviso-tipo').value = 'geral';
+        document.getElementById('aviso-data').value = todayStr();
+        document.getElementById('aviso-hora').value = '';
+        document.getElementById('modal-aviso').style.display = 'flex';
+    };
+
+    window.saveAviso = async () => {
+        const titulo = document.getElementById('aviso-titulo').value.trim();
+        const msg    = document.getElementById('aviso-msg').value.trim();
+        const tipo   = document.getElementById('aviso-tipo').value;
+        const data   = document.getElementById('aviso-data').value;
+        const hora   = document.getElementById('aviso-hora').value;
+        const docId  = document.getElementById('aviso-docid').value;
+        if(!titulo || !msg){ window.showToast('Preencha t\u00edtulo e mensagem!','error'); return; }
+        const d = {
+            titulo, msg, tipo, data, hora: hora||'',
+            autor: window.currentUserName || window.currentUserRole,
+            criadoEm: new Date().toISOString()
+        };
+        try {
+            if(docId) await setDoc(doc(db,'area_avisos',docId), d, {merge:true});
+            else await setDoc(doc(collection(db,'area_avisos')), d);
+            window.closeModal('modal-aviso');
+            window.showToast('Aviso publicado!','success');
+        } catch(e){ console.error('[PRZ]',e); window.showToast('Erro ao publicar.','error'); }
+    };
+
+    window.apagarAviso = async (id) => {
+        if(!await window.showConfirm('Apagar este aviso?','Apagar',true)) return;
+        try { await deleteDoc(doc(db,'area_avisos',id)); window.showToast('Aviso removido.','success'); }
+        catch(e){ console.error('[PRZ]',e); }
+    };
+
+    window.renderAvisos = () => {
+        const el = document.getElementById('avisos-dashboard'); if(!el) return;
+        const list = [...(window._state.avisos||[])].sort((a,b) => (b.criadoEm||'').localeCompare(a.criadoEm||''));
+        const isGestao = ['lider_geral','lider','sublider','gerente','supervisor'].includes(window.currentUserRole);
+
+        const tipoCfg = {
+            geral:      { icon:'ph-megaphone',        cor:'var(--accent)',   bg:'rgba(0,220,255,0.06)',   label:'Aviso Geral' },
+            reuniao:    { icon:'ph-users-three',       cor:'#818cf8',         bg:'rgba(129,140,248,0.06)', label:'Reuni\u00e3o' },
+            mudanca:    { icon:'ph-arrows-clockwise',  cor:'var(--warning)',  bg:'rgba(251,191,36,0.06)',  label:'Mudan\u00e7a' },
+            comunicado: { icon:'ph-chat-circle-text',  cor:'var(--success)',  bg:'rgba(52,211,153,0.06)',  label:'Comunicado' },
+            urgente:    { icon:'ph-siren',             cor:'var(--danger)',   bg:'rgba(248,113,113,0.08)', label:'Urgente' },
+            evento:     { icon:'ph-confetti',          cor:'#f472b6',         bg:'rgba(244,114,182,0.06)', label:'Evento' },
+        };
+
+        if(!list.length){
+            el.innerHTML = '<div class="empty-state" style="padding:60px;">Nenhum aviso publicado.</div>';
+            return;
+        }
+
+        el.innerHTML = list.map(a => {
+            const cfg = tipoCfg[a.tipo] || tipoCfg.geral;
+            const dtFmt = a.data ? a.data.split('-').reverse().join('/') : '';
+            const horaFmt = a.hora ? ' \u00e0s ' + a.hora : '';
+            const btnDel = isGestao ? '<button onclick="window.apagarAviso(\''+a._id+'\')" style="background:transparent;border:none;color:var(--danger);cursor:pointer;padding:4px 8px;border-radius:6px;font-size:13px;" title="Apagar"><i class="ph-bold ph-trash"></i></button>' : '';
+            return '<div style="background:'+cfg.bg+';border:1px solid '+cfg.cor+'30;border-left:3px solid '+cfg.cor+';border-radius:10px;padding:16px 20px;">'
+                + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+                +   '<i class="ph-fill '+cfg.icon+'" style="font-size:18px;color:'+cfg.cor+';flex-shrink:0;"></i>'
+                +   '<div style="flex:1;">'
+                +     '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+                +       '<span style="font-family:\'Orbitron\';font-size:13px;font-weight:900;color:var(--white);">'+escapeHTML(a.titulo)+'</span>'
+                +       '<span style="font-size:10px;font-family:\'Orbitron\';font-weight:900;color:'+cfg.cor+';background:'+cfg.cor+'20;padding:2px 8px;border-radius:4px;">'+cfg.label+'</span>'
+                +     '</div>'
+                +     '<div style="font-size:11px;color:var(--text);font-family:\'Share Tech Mono\';margin-top:2px;">'+dtFmt+horaFmt+(a.autor?' · '+escapeHTML(a.autor):'')+'</div>'
+                +   '</div>'
+                +   btnDel
+                + '</div>'
+                + '<div style="font-size:14px;color:var(--white);font-family:\'Rajdhani\';font-weight:600;line-height:1.6;white-space:pre-line;">'+escapeHTML(a.msg)+'</div>'
+                + '</div>';
+        }).join('');
+    };
+
+
+    window.renderDashAvisosRecentes = () => {
+        const el = document.getElementById('dash-avisos-recentes'); if(!el) return;
+        const list = [...(window._state.avisos||[])].sort((a,b)=>(b.criadoEm||'').localeCompare(a.criadoEm||'')).slice(0,4);
+        if(!list.length){ el.innerHTML='<span class="dash-empty">Nenhum aviso publicado.</span>'; return; }
+        const tipoCor   = {geral:'var(--accent)',reuniao:'#818cf8',mudanca:'var(--warning)',comunicado:'var(--success)',urgente:'var(--danger)',evento:'#f472b6'};
+        const tipoIcon  = {geral:'ph-megaphone',reuniao:'ph-users-three',mudanca:'ph-arrows-clockwise',comunicado:'ph-chat-circle-text',urgente:'ph-siren',evento:'ph-confetti'};
+        const tipoLabel = {geral:'Geral',reuniao:'Reuni\u00e3o',mudanca:'Mudan\u00e7a',comunicado:'Comunicado',urgente:'Urgente',evento:'Evento'};
+        el.innerHTML = '';
+        list.forEach(a => {
+            const cor   = tipoCor[a.tipo]   || 'var(--accent)';
+            const icon  = tipoIcon[a.tipo]  || 'ph-megaphone';
+            const label = tipoLabel[a.tipo] || a.tipo;
+            const dtFmt = a.data ? a.data.split('-').reverse().join('/') : '';
+            const horaFmt = a.hora ? (' \u00e0s ' + a.hora) : '';
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:rgba(0,0,0,0.2);border-left:2px solid '+cor+';border-radius:6px;cursor:pointer;transition:opacity 0.2s;';
+            div.addEventListener('mouseenter', function(){ this.style.opacity='0.8'; });
+            div.addEventListener('mouseleave', function(){ this.style.opacity='1'; });
+            div.addEventListener('click', function(){
+                const btn = document.getElementById('btn-nav-avisos');
+                if(btn) window.switchTab('page-avisos', btn);
+            });
+            div.innerHTML = '<i class="ph-fill '+icon+'" style="font-size:14px;color:'+cor+';flex-shrink:0;margin-top:1px;"></i>'
+                + '<div style="flex:1;min-width:0;">'
+                + '<div style="font-size:12px;color:var(--white);font-family:Rajdhani;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escapeHTML(a.titulo)+'</div>'
+                + '<div style="font-size:10px;color:var(--text);font-family:Share Tech Mono;">'+label+(dtFmt?' \u00b7 '+dtFmt+horaFmt:'')+'</div>'
+                + '</div>';
+            el.appendChild(div);
+        });
+    };
+
+
+    // ==========================================
+    // DASHBOARD LAYOUT CONFIGURÁVEL v2
+    // ==========================================
+    const DASH_PANELS_DEF = [
+        { id:'dash-panel-avisos',    label:'Avisos Recentes',       icon:'ph-bell-ringing',       cor:'var(--warning)',  size:2, visible:true  },
+        { id:'dash-panel-alertas',   label:'Alertas & Pendências',  icon:'ph-warning-octagon',    cor:'var(--danger)',   size:1, visible:true  },
+        { id:'dash-panel-movs',      label:'MOVs de Hoje',          icon:'ph-calendar-check',     cor:'var(--accent)',   size:2, visible:true  },
+        { id:'dash-panel-gn',        label:'Game News',             icon:'ph-article',            cor:'var(--gn-color)', size:1, visible:true  },
+        { id:'dash-panel-sug',       label:'Sugestões',             icon:'ph-lightbulb',          cor:'#f59e0b',         size:1, visible:true  },
+        { id:'dash-panel-rpp',       label:'RPP',                   icon:'ph-shield-warning',     cor:'var(--warning)',  size:1, visible:true  },
+        { id:'dash-panel-entradas',  label:'Entradas / Saídas',     icon:'ph-door',               cor:'var(--success)',  size:1, visible:true  },
+        { id:'dash-panel-trocaup',   label:'Troca de UP',           icon:'ph-swap',               cor:'var(--purple)',   size:1, visible:true  },
+        { id:'dash-panel-info',      label:'Últimas Informações',   icon:'ph-calendar-star',      cor:'var(--accent)',   size:2, visible:true  },
+        { id:'dash-panel-destaques', label:'Membros em Destaque',   icon:'ph-trophy',             cor:'#fbbf24',         size:1, visible:true  },
+        { id:'dash-panel-subareas',  label:'Rendimento Sub Áreas',  icon:'ph-chart-bar',          cor:'#f472b6',         size:1, visible:true  },
+        { id:'dash-panel-feedbacks', label:'Feedbacks',             icon:'ph-chat-centered-text', cor:'var(--purple)',   size:1, visible:true  },
+        { id:'dash-panel-trocaconta',label:'Troca de Conta',        icon:'ph-arrows-clockwise',   cor:'var(--accent)',   size:1, visible:false },
+    ];
+
+    window._dashPanels = JSON.parse(JSON.stringify(DASH_PANELS_DEF));
+
+    window.renderDashLayout = () => {
+        const container = document.getElementById('dash-layout-container');
+        if(!container) return;
+        container.innerHTML = '';
+
+        const visible = window._dashPanels.filter(p => p.visible);
+        if(!visible.length) { container.innerHTML = '<div class="empty-state" style="padding:60px;">Nenhum painel ativo. Configure o dashboard.</div>'; return; }
+
+        // Montar linhas usando CSS grid com 6 colunas base
+        // size 1 = 1 col, size 2 = 2 cols, size 3 = 3 cols (de 6)
+        const colMap = {1:'span 1', 2:'span 2', 3:'span 3', 4:'span 4', 5:'span 5', 6:'span 6'};
+        const grid = document.createElement('div');
+        grid.style.cssText = 'display:grid;grid-template-columns:repeat(6,1fr);gap:12px;';
+
+        visible.forEach(p => {
+            const panel = document.getElementById(p.id);
+            if(!panel) return;
+            panel.style.display = '';
+            panel.style.gridColumn = colMap[Math.min(p.size,6)] || 'span 1';
+            grid.appendChild(panel);
+        });
+
+        container.appendChild(grid);
+    };
+
+    window.openConfigDash = () => {
+        window._dashPanelsTemp = JSON.parse(JSON.stringify(window._dashPanels));
+        window.renderConfigDashLista();
+        document.getElementById('modal-config-dash').style.display = 'flex';
+    };
+
+    window.renderConfigDashLista = () => {
+        const lista = document.getElementById('config-dash-lista');
+        lista.innerHTML = '';
+        const sizeOpts = [{k:1,l:'P'},{k:2,l:'M'},{k:3,l:'G'},{k:4,l:'XL'}];
+        const total = window._dashPanelsTemp.filter(p=>p.visible).length;
+        const counter = document.getElementById('config-dash-counter');
+        if(counter) counter.textContent = total + ' ativo' + (total!==1?'s':'');
+
+        window._dashPanelsTemp.forEach((p, i) => {
+            const isActive = p.visible;
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex;align-items:center;gap:10px;background:'+(isActive?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.2)')+';border:0.5px '+(isActive?'solid rgba(255,255,255,0.07)':'dashed rgba(255,255,255,0.04)')+';border-radius:8px;padding:10px 12px;transition:opacity 0.2s;'+(isActive?'':'opacity:0.55;');
+
+            // Barra cor lateral
+            const bar = document.createElement('div');
+            bar.style.cssText = 'width:4px;height:32px;border-radius:3px;background:'+(isActive?p.cor:'rgba(255,255,255,0.15)')+';flex-shrink:0;transition:background 0.2s;';
+
+            // Ícone
+            const ico = document.createElement('div');
+            ico.style.cssText = 'width:30px;height:30px;border-radius:6px;background:'+(isActive?p.cor+'18':'rgba(255,255,255,0.04)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+            ico.innerHTML = '<i class="ph-fill '+p.icon+'" style="font-size:14px;color:'+(isActive?p.cor:'rgba(255,255,255,0.2)');+'"></i>';
+
+            // Nome
+            const nome = document.createElement('span');
+            nome.style.cssText = 'flex:1;font-size:13px;font-weight:600;font-family:Rajdhani;color:'+(isActive?'var(--white)':'var(--text)')+';';
+            nome.textContent = p.label;
+
+            // Botões tamanho
+            const sizeWrap = document.createElement('div');
+            sizeWrap.style.cssText = 'display:flex;gap:3px;';
+            sizeOpts.forEach(s => {
+                const btn = document.createElement('button');
+                const isSel = p.size === s.k;
+                btn.textContent = s.l;
+                btn.style.cssText = 'width:24px;height:22px;border-radius:4px;font-size:10px;font-weight:700;font-family:Orbitron;cursor:pointer;transition:0.15s;border:1px solid '+(isSel?(p.cor||'var(--accent)'):'rgba(255,255,255,0.1)')+';background:'+(isSel?(p.cor||'var(--accent)')+'22':'transparent')+';color:'+(isSel?(p.cor||'var(--accent)'):'rgba(255,255,255,0.3)')+';';
+                btn.disabled = !isActive;
+                btn.dataset.pidx = i; btn.dataset.size = s.k;
+                btn.addEventListener('click', function(){
+                    window._dashPanelsTemp[parseInt(this.dataset.pidx)].size = parseInt(this.dataset.size);
+                    window.renderConfigDashLista();
+                });
+                sizeWrap.appendChild(btn);
+            });
+
+            // Setas
+            const arrows = document.createElement('div');
+            arrows.style.cssText = 'display:flex;gap:3px;';
+            [['↑',-1],['↓',1]].forEach(([lbl,dir]) => {
+                const b = document.createElement('button');
+                b.innerHTML = lbl;
+                b.style.cssText = 'width:24px;height:24px;border-radius:5px;border:0.5px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);cursor:pointer;font-size:12px;';
+                b.dataset.idx = i; b.dataset.dir = dir;
+                b.disabled = (dir===-1&&i===0)||(dir===1&&i===window._dashPanelsTemp.length-1);
+                b.addEventListener('click', function(){ window.moveDashPanel(parseInt(this.dataset.idx),parseInt(this.dataset.dir)); });
+                arrows.appendChild(b);
+            });
+
+            // Toggle switch
+            const tog = document.createElement('div');
+            tog.style.cssText = 'width:36px;height:20px;border-radius:10px;background:'+(isActive?p.cor||'var(--accent)':'rgba(255,255,255,0.1)')+';display:flex;align-items:center;padding:2px;cursor:pointer;transition:background 0.2s;flex-shrink:0;';
+            const knob = document.createElement('div');
+            knob.style.cssText = 'width:16px;height:16px;border-radius:50%;background:'+(isActive?'#000':'rgba(255,255,255,0.5)')+';transition:margin 0.2s;margin-left:'+(isActive?'auto':'0')+';';
+            tog.appendChild(knob);
+            tog.dataset.idx = i;
+            tog.addEventListener('click', function(){
+                const idx = parseInt(this.dataset.idx);
+                window._dashPanelsTemp[idx].visible = !window._dashPanelsTemp[idx].visible;
+                window.renderConfigDashLista();
+            });
+
+            div.appendChild(bar);
+            div.appendChild(ico);
+            div.appendChild(nome);
+            if(isActive) div.appendChild(sizeWrap);
+            else {
+                const ocBadge = document.createElement('span');
+                ocBadge.textContent = 'oculto';
+                ocBadge.style.cssText = 'font-size:10px;color:rgba(255,255,255,0.3);border:0.5px solid rgba(255,255,255,0.1);padding:2px 8px;border-radius:4px;font-family:Share Tech Mono;';
+                div.appendChild(ocBadge);
+            }
+            div.appendChild(arrows);
+            div.appendChild(tog);
+            lista.appendChild(div);
+        });
+    };
+    window.moveDashPanel = (i, dir) => {
+        const j = i + dir;
+        if(j < 0 || j >= window._dashPanelsTemp.length) return;
+        [window._dashPanelsTemp[i], window._dashPanelsTemp[j]] = [window._dashPanelsTemp[j], window._dashPanelsTemp[i]];
+        window.renderConfigDashLista();
+    };
+
+    window.saveDashLayout = async () => {
+        window._dashPanels = JSON.parse(JSON.stringify(window._dashPanelsTemp));
+        window.renderDashLayout();
+        try {
+            await setDoc(doc(db,'gestao_config','dash_layout_v2'), {
+                panels: window._dashPanels.map(p => ({id:p.id, size:p.size, visible:p.visible})),
+                atualizadoEm: new Date().toISOString()
+            });
+            window.showToast('Layout salvo! ✅','success');
+        } catch(e){ console.error('[PRZ]',e); window.showToast('Erro ao salvar.','error'); }
+        window.closeModal('modal-config-dash');
+    };
+
+    window.resetDashLayout = () => {
+        window._dashPanelsTemp = JSON.parse(JSON.stringify(DASH_PANELS_DEF));
+        window.renderConfigDashLista();
+    };
+
+    window.carregarDashLayout = async () => {
+        try {
+            const snap = await getDoc(doc(db,'gestao_config','dash_layout_v2'));
+            if(snap.exists() && snap.data().panels) {
+                const saved = snap.data().panels;
+                const merged = [];
+                saved.forEach(s => {
+                    const def = DASH_PANELS_DEF.find(d => d.id === s.id);
+                    if(def) merged.push({...JSON.parse(JSON.stringify(def)), size:s.size, visible:s.visible});
+                });
+                DASH_PANELS_DEF.forEach(d => {
+                    if(!merged.find(m => m.id === d.id)) merged.push(JSON.parse(JSON.stringify(d)));
+                });
+                window._dashPanels = merged;
+            }
+        } catch(e){ console.error('[PRZ dash]',e); }
+        window.renderDashLayout();
+        const canConfig = ['lider_geral','lider','sublider','gerente','supervisor'].includes(window.currentUserRole);
+        const btn = document.getElementById('btn-config-dash');
+        if(btn) btn.style.display = canConfig ? 'flex' : 'none';
+    };
+
     onAuthStateChanged(auth, async (user) => { 
         if(autoResetInterval) { clearInterval(autoResetInterval); autoResetInterval = null; }
         if (user) { 
@@ -3142,7 +3580,9 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         unsubGameNews = onSnapshot(collection(db, "gamenews"), (s) => { window._state.gamenews = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderGameNews(); window.renderDashGameNews(); window.renderDashSubareas(); });
         unsubInstrucoes = onSnapshot(collection(db, "instrucoes"), (s) => { window._state.instrucoes = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderInstrucoes(); window.renderDashSubareas(); });
         unsubAcolhimentos = onSnapshot(collection(db, "acolhimentos"), (s) => { window._state.acolhimentos = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderAcolhimentos(); window.renderDashSubareas(); });
+        window.carregarDashLayout && window.carregarDashLayout();
         window.carregarTopicosSetorial && window.carregarTopicosSetorial();
+        window.renderDashAlertas && window.renderDashAlertas();
         window.startListenNotif();
         window.startListenGestao();
 
@@ -6598,8 +7038,15 @@ Registado por: ${r.registadoPor} | ${labelData(r.data)}`;
         if(unsubAutorizacoes) unsubAutorizacoes();
         if(unsubAtividade) unsubAtividade();
         unsubFuncoes = onSnapshot(collection(db,'gestao_funcoes'), s => { window._state.funcoes = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderFuncoes(); });
+        // Avisos
+        let unsubAvisos;
+        unsubAvisos = onSnapshot(collection(db,'area_avisos'), s => {
+            window._state.avisos = s.docs.map(d=>({_id:d.id,...d.data()}));
+            window.renderAvisos && window.renderAvisos();
+            window.renderDashAvisosRecentes && window.renderDashAvisosRecentes();
+        });
         unsubPautas = onSnapshot(collection(db,'gestao_pautas'), s => { window._state.pautas = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderPautas(); });
-        unsubAdv = onSnapshot(collection(db,'gestao_adv'), s => { window._state.adv = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAdv(); });
+        unsubAdv = onSnapshot(collection(db,'gestao_adv'), s => { window._state.adv = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAdv(); ; window.renderDashAlertas && window.renderDashAlertas()});
         unsubAutorizacoes = onSnapshot(collection(db,'gestao_autorizacoes'), s => { window._state.autorizacoes = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAutorizacoes(); window.renderDashInfoSemana(); });
         unsubAtividade = onSnapshot(collection(db,'gestao_atividade'), s => { window._state.atividade = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAtividade(); window.renderDashTopMembros(); });
         if(unsubBlacklist) unsubBlacklist();
