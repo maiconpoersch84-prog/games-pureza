@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GAMES - PRZ // OPERATIONAL SYSTEM</title>
+<title>GAMES PRZ</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzA2MDYwOSIvPjxyZWN0IHg9IjQiIHk9IjExIiB3aWR0aD0iMjQiIGhlaWdodD0iMTIiIHJ4PSI2IiBmaWxsPSIjMDBkY2ZmIiBvcGFjaXR5PSIwLjE1Ii8+PHJlY3QgeD0iNCIgeT0iMTEiIHdpZHRoPSIyNCIgaGVpZ2h0PSIxMiIgcng9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwZGNmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48cmVjdCB4PSIxMyIgeT0iMTUiIHdpZHRoPSI2IiBoZWlnaHQ9IjIiIHJ4PSIxIiBmaWxsPSIjMDBkY2ZmIi8+PHJlY3QgeD0iMTUiIHk9IjEzIiB3aWR0aD0iMiIgaGVpZ2h0PSI2IiByeD0iMSIgZmlsbD0iIzAwZGNmZiIvPjxjaXJjbGUgY3g9IjIyIiBjeT0iMTUiIHI9IjEuMiIgZmlsbD0iIzAwZGNmZiIvPjxjaXJjbGUgY3g9IjI1IiBjeT0iMTciIHI9IjEuMiIgZmlsbD0iIzAwZGNmZiIvPjxjaXJjbGUgY3g9IjIyIiBjeT0iMTkiIHI9IjEuMiIgZmlsbD0iIzAwZGNmZiIvPjxjaXJjbGUgY3g9IjE5IiBjeT0iMTciIHI9IjEuMiIgZmlsbD0iIzAwZGNmZiIgb3BhY2l0eT0iMC40Ii8+PGxpbmUgeDE9IjgiIHkxPSIxMSIgeDI9IjciIHkyPSI4IiBzdHJva2U9IiMwMGRjZmYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48bGluZSB4MT0iMjQiIHkxPSIxMSIgeDI9IjI1IiB5Mj0iOCIgc3Ryb2tlPSIjMDBkY2ZmIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
@@ -871,24 +872,56 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 </div>
 
 <!-- MODAL PAUTA SETORIAL -->
+<!-- MODAL GERIR TÓPICOS SETORIAL -->
+<div id="modal-gerir-topicos" class="modal-overlay">
+    <div class="modal-content" style="max-width:580px; max-height:90vh; overflow-y:auto;">
+        <h2 style="color:#818cf8;margin-bottom:6px;"><i class="ph-bold ph-sliders"></i> GERIR TÓPICOS</h2>
+        <div style="font-size:11px;color:var(--text);font-family:'Share Tech Mono';margin-bottom:20px;">Tópicos padrão da Reunião Setorial — apenas gestão pode editar</div>
+
+        <!-- Lista de tópicos -->
+        <div id="gt-lista" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;max-height:400px;overflow-y:auto;padding-right:4px;"></div>
+
+        <!-- Adicionar novo -->
+        <div style="display:flex;gap:8px;margin-bottom:20px;">
+            <input type="text" id="gt-novo" placeholder="Nome do novo tópico..." style="flex:1;">
+            <button onclick="window.gtAddTopico()" style="background:rgba(129,140,248,0.15);border:1px solid rgba(129,140,248,0.3);color:#818cf8;padding:0 16px;border-radius:8px;cursor:pointer;font-family:'Orbitron';font-size:11px;font-weight:900;white-space:nowrap;letter-spacing:1px;">+ ADD</button>
+        </div>
+
+        <div class="modal-actions">
+            <button onclick="window.closeModal('modal-gerir-topicos')" class="btn-cancel">CANCELAR</button>
+            <button onclick="window.gtSalvar()" class="btn-save" style="background:#818cf8;color:#fff;"><i class="ph-bold ph-check"></i> SALVAR TÓPICOS</button>
+        </div>
+    </div>
+</div>
+
 <div id="modal-pauta-setorial" class="modal-overlay">
-    <div class="modal-content" style="max-width:560px;">
-        <h2 style="color:#818cf8;margin-bottom:20px;"><i class="ph-fill ph-users-three"></i> PAUTA — REUNIÃO SETORIAL</h2>
+    <div class="modal-content" style="max-width:640px; max-height:90vh; overflow-y:auto;">
+        <h2 style="color:#818cf8;margin-bottom:6px;"><i class="ph-fill ph-users-three"></i> REUNIÃO SETORIAL</h2>
+        <div style="font-size:11px;color:var(--text);font-family:'Share Tech Mono';margin-bottom:18px;">Preencha os campos — o bloco será montado automaticamente para copiar</div>
         <input type="hidden" id="ps-docid">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
             <div class="form-group"><label>DATA</label><input type="date" id="ps-data"></div>
             <div class="form-group"><label>HORA</label><input type="time" id="ps-hora"></div>
         </div>
-        <div class="form-group" style="margin-bottom:12px;"><label>RESPONSÁVEL</label><select id="ps-resp"></select></div>
-        <div class="form-group" style="margin-bottom:12px;"><label>PRESENÇA OBRIGATÓRIA</label>
-            <select id="ps-presenca"><option value="todos">Todos os membros ativos</option><option value="gestao">Apenas gestão</option><option value="subgestao">Sub-gestão e acima</option></select>
+
+        <!-- Tópicos com apresentadores e conteúdo -->
+        <div style="font-family:'Orbitron';font-size:10px;font-weight:900;color:#818cf8;letter-spacing:1px;margin-bottom:10px;">TÓPICOS DA REUNIÃO</div>
+        <div id="ps-topicos-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;max-height:420px;overflow-y:auto;padding-right:4px;"></div>
+
+        <!-- Adicionar tópico extra -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <input type="text" id="ps-novo-topico" placeholder="Adicionar tópico extra..." style="flex:1;">
+            <button onclick="window.psAddTopico()" style="background:rgba(129,140,248,0.15);border:1px solid rgba(129,140,248,0.3);color:#818cf8;padding:0 14px;border-radius:8px;cursor:pointer;font-family:'Orbitron';font-size:11px;font-weight:900;white-space:nowrap;letter-spacing:1px;">+ ADD</button>
         </div>
-        <div class="form-group" style="margin-bottom:12px;"><label>PAUTA <span style="font-size:10px;color:var(--text);font-weight:400;">(um tópico por linha)</span></label>
-            <textarea id="ps-itens" placeholder="Ex: Resultados da semana&#10;Metas para próxima semana" style="min-height:100px;"></textarea>
-        </div>
-        <div class="form-group" style="margin-bottom:20px;"><label>OBSERVAÇÕES</label><textarea id="ps-obs" placeholder="Informações adicionais..." style="min-height:60px;"></textarea></div>
-        <div class="modal-actions">
+
+        <!-- Preview -->
+        <div style="font-family:'Orbitron';font-size:10px;font-weight:900;color:var(--text);letter-spacing:1px;margin-bottom:8px;">PREVIEW DO DISCORD</div>
+        <pre id="ps-preview" onclick="window.psCopiar()" style="background:rgba(0,0,0,0.4);border:1px solid rgba(129,140,248,0.2);border-radius:8px;padding:14px;font-family:'Share Tech Mono';font-size:11px;color:var(--white);line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:180px;overflow-y:auto;cursor:pointer;" title="Clique para copiar"></pre>
+
+        <div class="modal-actions" style="margin-top:16px;">
             <button onclick="window.closeModal('modal-pauta-setorial')" class="btn-cancel">CANCELAR</button>
+            <button onclick="window.psGerarPreview()" style="background:rgba(129,140,248,0.15);border:1px solid rgba(129,140,248,0.3);color:#818cf8;padding:10px 18px;border-radius:8px;font-family:'Orbitron';font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;"><i class="ph-bold ph-eye"></i> PREVIEW</button>
+            <button onclick="window.psCopiar()" style="background:rgba(129,140,248,0.15);border:1px solid rgba(129,140,248,0.3);color:#818cf8;padding:10px 18px;border-radius:8px;font-family:'Orbitron';font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;"><i class="ph-bold ph-copy"></i> COPIAR</button>
             <button onclick="window.salvarPautaTipo('setorial')" class="btn-save" style="background:#818cf8;color:#fff;">GUARDAR</button>
         </div>
     </div>
@@ -896,19 +929,62 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
 <!-- MODAL PAUTA GESTORES -->
 <div id="modal-pauta-gestores" class="modal-overlay">
-    <div class="modal-content" style="max-width:520px;">
-        <h2 style="color:#818cf8;margin-bottom:20px;"><i class="ph-fill ph-crown-simple"></i> PAUTA — REUNIÃO DE GESTORES</h2>
+    <div class="modal-content" style="max-width:640px; max-height:90vh; overflow-y:auto;">
+        <h2 style="color:#818cf8;margin-bottom:6px;"><i class="ph-fill ph-crown-simple"></i> REUNIÃO DE GESTORES</h2>
+        <div style="font-size:11px;color:var(--text);font-family:'Share Tech Mono';margin-bottom:18px;">Preencha os campos — o bloco será montado automaticamente para copiar</div>
         <input type="hidden" id="pg-docid">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
             <div class="form-group"><label>DATA</label><input type="date" id="pg-data"></div>
             <div class="form-group"><label>HORA</label><input type="time" id="pg-hora"></div>
+            <div class="form-group"><label>ÁREA</label><input type="text" id="pg-area" value="Games" placeholder="Ex: Games"></div>
         </div>
-        <div class="form-group" style="margin-bottom:12px;"><label>RESPONSÁVEL</label><select id="pg-resp"></select></div>
-        <div class="form-group" style="margin-bottom:20px;"><label>PAUTA <span style="font-size:10px;color:var(--text);font-weight:400;">(um tópico por linha)</span></label>
-            <textarea id="pg-itens" placeholder="Ex: Análise de desempenho&#10;Decisões pendentes" style="min-height:100px;"></textarea>
+        <div class="form-group" style="margin-bottom:16px;"><label>PORTA-VOZ</label><select id="pg-resp"></select></div>
+
+        <!-- Campos do relatório -->
+        <div style="font-family:'Orbitron';font-size:10px;font-weight:900;color:#818cf8;letter-spacing:1px;margin-bottom:10px;">RELATÓRIO</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;">&#11088;</span> PONTOS POSITIVOS</label>
+                <textarea id="pg-positivos" placeholder="Ex: Aumento de membros, boa participação nas MOVs..." style="min-height:60px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;">&#11088;</span> PONTOS NEGATIVOS</label>
+                <textarea id="pg-negativos" placeholder="Ex: Baixa presença, membros inativos..." style="min-height:60px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;">&#11088;</span> FLUXO DE MEMBROS</label>
+                <textarea id="pg-fluxo" placeholder="Ex: 2 entradas, 1 saída esta semana..." style="min-height:50px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;">&#11088;</span> MELHORIAS PARA A SEMANA</label>
+                <textarea id="pg-melhorias" placeholder="Ex: Aumentar frequência das MOVs... (ou deixe vazio para 'Nenhuma')" style="min-height:50px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;">&#11088;</span> PROBLEMAS QUE OCORRERAM</label>
+                <textarea id="pg-problemas" placeholder="Descreva problemas da semana..." style="min-height:50px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;">&#11088;</span> RECLAMAÇÕES</label>
+                <textarea id="pg-reclamacoes" placeholder="Reclamações recebidas..." style="min-height:50px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;">&#11088;</span> CRÍTICAS CONSTRUTIVAS PARA OUTRA ÁREA</label>
+                <textarea id="pg-criticas" placeholder="Sugestões para outras áreas..." style="min-height:50px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;">&#11088;</span> NO QUE A ADMINISTRAÇÃO PODE AJUDAR?</label>
+                <textarea id="pg-admin-ajuda" placeholder="Pedidos para a administração..." style="min-height:50px;"></textarea>
+            </div>
         </div>
-        <div class="modal-actions">
+
+        <!-- Preview -->
+        <div style="font-family:'Orbitron';font-size:10px;font-weight:900;color:var(--text);letter-spacing:1px;margin-bottom:8px;">PREVIEW DO DISCORD</div>
+        <pre id="pg-preview" onclick="window.pgCopiar()" style="background:rgba(0,0,0,0.4);border:1px solid rgba(129,140,248,0.2);border-radius:8px;padding:14px;font-family:'Share Tech Mono';font-size:11px;color:var(--white);line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:200px;overflow-y:auto;cursor:pointer;" title="Clique para copiar"></pre>
+
+        <div class="modal-actions" style="margin-top:16px;">
             <button onclick="window.closeModal('modal-pauta-gestores')" class="btn-cancel">CANCELAR</button>
+            <button onclick="window.pgGerarPreview()" style="background:rgba(129,140,248,0.15);border:1px solid rgba(129,140,248,0.3);color:#818cf8;padding:10px 18px;border-radius:8px;font-family:'Orbitron';font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;"><i class="ph-bold ph-eye"></i> PREVIEW</button>
+            <button onclick="window.pgCopiar()" style="background:rgba(129,140,248,0.15);border:1px solid rgba(129,140,248,0.3);color:#818cf8;padding:10px 18px;border-radius:8px;font-family:'Orbitron';font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;"><i class="ph-bold ph-copy"></i> COPIAR</button>
             <button onclick="window.salvarPautaTipo('gestores')" class="btn-save" style="background:#818cf8;color:#fff;">GUARDAR</button>
         </div>
     </div>
@@ -1990,7 +2066,8 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                 <option value="3_meses">3 Meses OFF (Inativo)</option>
                 <option value="sem_pontos">Sem Pontos (Inativo)</option>
             </select></div>
-            <div class="form-group"><label>STAFF</label><select id="f-posicao"><option value="comum">Comum</option><option value="subgestao">Sub-Gestão</option><option value="gestao">Gestão</option></select></div>
+            <div class="form-group"><label>STAFF</label><select id="f-posicao" onchange="window.toggleHierarquia()"><option value="comum">Comum</option><option value="subgestao">Sub-Gestão</option><option value="gestao">Gestão</option></select></div>
+            <div class="form-group" id="f-hierarquia-wrap" style="display:none;"><label>HIERARQUIA</label><select id="f-hierarquia"><option value="">Selecione...</option><option value="supervisor">Supervisor</option><option value="gerente">Gerente</option><option value="sublider">Sub-Líder</option><option value="lider">Líder</option><option value="lider_geral">Líder Geral</option></select></div>
             <div class="form-group"><label>UP</label><select id="f-tipoup" onchange="window.atualizarCargos()"><option value="">S/ UP</option><option value="meta">Meta (Por Pontos)</option><option value="merito">Mérito (Promoção)</option></select></div>
             <div class="form-group"><label>CARGO</label><select id="f-cargo"><option value="">Selecione...</option></select></div>
             <div class="form-group col-span-2"><label>ÁREA DE UP</label><select id="f-upagames"><option value="sim">Games</option><option value="nao">Outra área</option></select></div>
@@ -2800,6 +2877,214 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         } catch(e) { console.error('[PRZ] Erro semanas:', e); }
     };
 
+
+    window.pgGerarTexto = () => {
+        const area    = document.getElementById('pg-area')?.value.trim() || 'Games';
+        const porta   = document.getElementById('pg-resp')?.value || '';
+        const pos     = document.getElementById('pg-positivos')?.value.trim() || '';
+        const neg     = document.getElementById('pg-negativos')?.value.trim() || '';
+        const fluxo   = document.getElementById('pg-fluxo')?.value.trim() || '';
+        const melh    = document.getElementById('pg-melhorias')?.value.trim() || 'Nenhuma,';
+        const prob    = document.getElementById('pg-problemas')?.value.trim() || '';
+        const recl    = document.getElementById('pg-reclamacoes')?.value.trim() || '';
+        const crit    = document.getElementById('pg-criticas')?.value.trim() || '';
+        const admin   = document.getElementById('pg-admin-ajuda')?.value.trim() || '';
+
+        const p = ':P_pontinho~11:';
+        const star = ':mariostarred71:';
+
+        return '### :BeegRed: :72237minecraftredp::78999minecraftreda::34926minecraftredu::94054minecraftredt::78999minecraftreda::23720minecraftreds: :15325minecraftredd::76418minecraftrede: :54257minecraftredg::78999minecraftreda::82573minecraftredm::76418minecraftrede::23720minecraftreds: :BeegRed:\n'
+            + ':invi_bubble: :invi_bubble: :invi_bubble: :invi_bubble:\n'
+            + '### ' + star + '  Pontos Positivos:\n' + p + (pos||' ') + '\n'
+            + '### ' + star + '   Pontos Negativos:\n' + p + (neg||' ') + '\n'
+            + '### ' + star + ' Como anda o fluxo de membros:\n' + p + (fluxo||' ') + '\n'
+            + '### ' + star + '  Melhorias para a semana;\n' + p + (melh) + '\n'
+            + '### ' + star + ' Problemas que ocorreram;\n' + p + (prob||' ') + '\n'
+            + '### ' + star + ' Quais Reclamações ocorreram:\n' + p + (recl||' ') + '\n'
+            + '### ' + star + '  Críticas construtivas para outra área:\n' + p + (crit||' ') + '\n'
+            + '### ' + star + '   No que administração pode ajudar?\n' + p + (admin||' ') + '\n\n'
+            + star + '** Porta-voz:** ' + (porta||'—') + '\n'
+            + star + ' **Área:** ' + area;
+    };
+
+    window.pgGerarPreview = () => {
+        const prev = document.getElementById('pg-preview');
+        if(prev) prev.textContent = window.pgGerarTexto();
+    };
+
+    window.pgCopiar = async () => {
+        const txt = window.pgGerarTexto();
+        try {
+            await navigator.clipboard.writeText(txt);
+            window.showToast('Copiado para o Discord! \uD83D\uDCCB', 'success');
+        } catch(e) {
+            const ta = document.createElement('textarea');
+            ta.value = txt; document.body.appendChild(ta); ta.select();
+            document.execCommand('copy'); document.body.removeChild(ta);
+            window.showToast('Copiado!', 'success');
+        }
+    };
+
+
+    // ==========================================
+    // GERIR TÓPICOS SETORIAL
+    // ==========================================
+    window._gtTopicos = []; // lista editável no modal
+
+    window.openGerirTopicos = () => {
+        // Verificar se é gestão
+        const isGestao = ['lider_geral','lider','sublider','gerente'].includes(window.currentUserRole);
+        if(!isGestao) { window.showToast('Apenas gestão pode editar os tópicos!','error'); return; }
+
+        // Carregar do Firestore ou usar os padrões
+        window._gtTopicos = (window._state.topicosSetorial && window._state.topicosSetorial.length)
+            ? window._state.topicosSetorial.map(t => ({...t}))
+            : window._PS_TOPICOS_DEFAULT.map(n => ({ nome: n }));
+
+        window.gtRenderLista();
+        document.getElementById('modal-gerir-topicos').style.display = 'flex';
+    };
+
+    window.gtRenderLista = () => {
+        const el = document.getElementById('gt-lista'); if(!el) return;
+        if(!window._gtTopicos.length) {
+            el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text);opacity:0.5;font-family:Rajdhani;">Nenhum tópico definido</div>';
+            return;
+        }
+        el.innerHTML = window._gtTopicos.map((t, i) => `
+            <div style="background:rgba(129,140,248,0.05);border:1px solid rgba(129,140,248,0.12);border-radius:8px;overflow:hidden;">
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;">
+                    <span style="font-size:12px;color:#818cf8;font-weight:700;min-width:22px;">${i+1}.</span>
+                    <input type="text" value="${escapeHTML(t.nome)}" onchange="window._gtTopicos[${i}].nome=this.value"
+                        style="flex:1;background:transparent;border:none;color:var(--white);font-family:'Rajdhani';font-size:13px;font-weight:600;outline:none;min-width:0;" placeholder="Nome do tópico...">
+                    <div style="display:flex;gap:4px;flex-shrink:0;">
+                        <button onclick="window.gtToggleConteudo(${i})"
+                            style="background:transparent;border:1px solid rgba(129,140,248,0.2);color:#818cf8;padding:3px 7px;border-radius:5px;cursor:pointer;font-size:10px;font-family:'Share Tech Mono';" title="Editar conteúdo/molde">molde</button>
+                        <button onclick="window.gtMover(${i},-1)" ${i===0?'disabled':''}
+                            style="background:transparent;border:1px solid rgba(255,255,255,0.08);color:var(--text);padding:3px 7px;border-radius:5px;cursor:pointer;font-size:11px;" title="Subir">&#8593;</button>
+                        <button onclick="window.gtMover(${i},1)" ${i===window._gtTopicos.length-1?'disabled':''}
+                            style="background:transparent;border:1px solid rgba(255,255,255,0.08);color:var(--text);padding:3px 7px;border-radius:5px;cursor:pointer;font-size:11px;" title="Descer">&#8595;</button>
+                        <button onclick="window.gtRemover(${i})"
+                            style="background:transparent;border:none;color:var(--danger);cursor:pointer;padding:3px 6px;font-size:13px;" title="Remover"><i class="ph-bold ph-x"></i></button>
+                    </div>
+                </div>
+                <div id="gt-conteudo-${i}" style="display:${t._expanded?'block':'none'};padding:0 12px 10px;">
+                    <textarea onchange="window._gtTopicos[${i}].conteudo=this.value" placeholder="Escreva o molde deste tópico... (aparece pré-preenchido ao criar pauta)"
+                        style="width:100%;min-height:70px;background:rgba(0,0,0,0.3);border:1px solid rgba(129,140,248,0.15);border-radius:6px;color:var(--white);font-family:'Rajdhani';font-size:12px;padding:8px;resize:vertical;box-sizing:border-box;">${escapeHTML(t.conteudo||'')}</textarea>
+                </div>
+            </div>`).join('');
+    };
+
+    window.gtToggleConteudo = (i) => {
+        window._gtTopicos[i]._expanded = !window._gtTopicos[i]._expanded;
+        const el = document.getElementById('gt-conteudo-' + i);
+        if(el) el.style.display = window._gtTopicos[i]._expanded ? 'block' : 'none';
+    };
+
+    window.gtMover = (i, dir) => {
+        const j = i + dir;
+        if(j < 0 || j >= window._gtTopicos.length) return;
+        [window._gtTopicos[i], window._gtTopicos[j]] = [window._gtTopicos[j], window._gtTopicos[i]];
+        window.gtRenderLista();
+    };
+
+    window.gtRemover = (i) => {
+        window._gtTopicos.splice(i, 1);
+        window.gtRenderLista();
+    };
+
+    window.gtAddTopico = () => {
+        const inp = document.getElementById('gt-novo');
+        const val = inp ? inp.value.trim() : '';
+        if(!val) { window.showToast('Digite o nome do tópico!','error'); return; }
+        window._gtTopicos.push({ nome: val });
+        inp.value = '';
+        window.gtRenderLista();
+        setTimeout(() => { const el=document.getElementById('gt-lista'); if(el) el.scrollTop=el.scrollHeight; }, 50);
+    };
+
+    window.gtSalvar = async () => {
+        // Ler os valores actuais dos inputs (podem ter sido editados inline)
+        const inputs = document.querySelectorAll('#gt-lista input[type="text"]');
+        inputs.forEach((inp, i) => { if(window._gtTopicos[i]) window._gtTopicos[i].nome = inp.value.trim(); });
+        const lista = window._gtTopicos.filter(t => t.nome);
+        if(!lista.length) { window.showToast('Adicione pelo menos um tópico!','error'); return; }
+
+        try {
+            // Guardar como documento único no Firestore
+            await setDoc(doc(db,'gestao_config','topicos_setorial'), {
+                topicos: lista, atualizadoEm: new Date().toISOString()
+            });
+            window._state.topicosSetorial = lista;
+            // Atualizar a lista padrão usada ao criar pauta
+            window._PS_TOPICOS_DEFAULT = lista.map(t => t.nome);
+            window.closeModal('modal-gerir-topicos');
+            window.showToast('Tópicos guardados! ✅','success');
+        } catch(e) {
+            console.error('[PRZ]',e);
+            window.showToast('Erro ao guardar.','error');
+        }
+    };
+
+    // Carregar tópicos do Firestore ao iniciar
+    window.carregarTopicosSetorial = async () => {
+        try {
+            const snap = await getDoc(doc(db,'gestao_config','topicos_setorial'));
+            if(snap.exists() && snap.data().topicos?.length) {
+                window._state.topicosSetorial = snap.data().topicos;
+                window._PS_TOPICOS_DEFAULT = snap.data().topicos.map(t => t.nome);
+            }
+        } catch(e) { console.error('[PRZ topicos]',e); }
+    };
+
+
+    window.psGerarTexto = () => {
+        const data = document.getElementById('ps-data')?.value || '';
+        const hora = document.getElementById('ps-hora')?.value || '';
+        const dtFmt = data ? data.split('-').reverse().join('/') : '--/--/----';
+        const horaFmt = hora ? ' \u00e0s ' + hora : '';
+        const linha = '\u2501'.repeat(22);
+        let txt = linha + '\n\u2756 REUNI\u00c3O SETORIAL \u2756\n' + dtFmt + horaFmt + '\n' + linha;
+        (window._psTopicosAtivos||[]).forEach(t => {
+            const mencao = t.discordId ? ' <@' + t.discordId + '>' : (t.resp ? ' \u2014 ' + t.resp : '');
+            txt += '\n### \u2605 ' + t.nome + mencao;
+            if(t.conteudo && t.conteudo.trim()) txt += '\n' + t.conteudo.trim();
+        });
+        return txt;
+    };
+
+    window.psGerarPreview = () => {
+        const prev = document.getElementById('ps-preview');
+        if(prev) prev.textContent = window.psGerarTexto();
+    };
+
+    window.psCopiar = async () => {
+        const txt = window.psGerarTexto();
+        try {
+            await navigator.clipboard.writeText(txt);
+            window.showToast('Pauta copiada! \uD83D\uDCCB','success');
+        } catch(e) {
+            const ta = document.createElement('textarea');
+            ta.value = txt; document.body.appendChild(ta); ta.select();
+            document.execCommand('copy'); document.body.removeChild(ta);
+            window.showToast('Copiado!','success');
+        }
+    };
+
+
+    window.toggleHierarquia = () => {
+        const pos = document.getElementById('f-posicao')?.value;
+        const wrap = document.getElementById('f-hierarquia-wrap');
+        const sel  = document.getElementById('f-hierarquia');
+        if(!wrap || !sel) return;
+        const isGestao = pos === 'gestao';
+        wrap.style.display = isGestao ? '' : 'none';
+        if(!isGestao) sel.value = '';
+        // Bloquear edição se não for lider_geral, lider ou sublider
+        const canEdit = ['lider_geral','lider','sublider'].includes(window.currentUserRole);
+        sel.disabled = !canEdit;
+    };
+
     onAuthStateChanged(auth, async (user) => { 
         if(autoResetInterval) { clearInterval(autoResetInterval); autoResetInterval = null; }
         if (user) { 
@@ -2857,6 +3142,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         unsubGameNews = onSnapshot(collection(db, "gamenews"), (s) => { window._state.gamenews = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderGameNews(); window.renderDashGameNews(); window.renderDashSubareas(); });
         unsubInstrucoes = onSnapshot(collection(db, "instrucoes"), (s) => { window._state.instrucoes = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderInstrucoes(); window.renderDashSubareas(); });
         unsubAcolhimentos = onSnapshot(collection(db, "acolhimentos"), (s) => { window._state.acolhimentos = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderAcolhimentos(); window.renderDashSubareas(); });
+        window.carregarTopicosSetorial && window.carregarTopicosSetorial();
         window.startListenNotif();
         window.startListenGestao();
 
@@ -2995,7 +3281,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         document.getElementById('modal-membro').style.display = 'flex'; 
     };
 
-    window.editMember = (id) => { const m = window._state.members.find(x => x._id === id); if(m){ document.getElementById('f-docid').value = m._id; document.getElementById('f-nv-origin-id').value = ""; document.getElementById('f-nome').value = m.m || ""; document.getElementById('f-id').value = m.id || ""; document.getElementById('f-posicao').value = m.posicao || "comum"; document.getElementById('f-pts').value = m.pts || 'sim'; document.getElementById('f-tipoup').value = m.tipoUp || ""; document.getElementById('f-upagames').value = m.upaGames || "sim"; window.atualizarCargos(); document.getElementById('f-cargo').value = m.cargo || ""; document.getElementById('f-sub-instrucao').checked = !!m.subAreas?.instrucao; document.getElementById('f-sub-acolhimento').checked = !!m.subAreas?.acolhimento; document.getElementById('f-sub-gamenews').checked = !!m.subAreas?.gamenews; document.getElementById('modal-membro').style.display = 'flex'; } };
+    window.editMember = (id) => { const m = window._state.members.find(x => x._id === id); if(m){ document.getElementById('f-docid').value = m._id; document.getElementById('f-nv-origin-id').value = ""; document.getElementById('f-nome').value = m.m || ""; document.getElementById('f-id').value = m.id || ""; document.getElementById('f-posicao').value = m.posicao || "comum"; window.toggleHierarquia(); document.getElementById('f-hierarquia').value = m.hierarquia || ''; document.getElementById('f-pts').value = m.pts || 'sim'; document.getElementById('f-tipoup').value = m.tipoUp || ""; document.getElementById('f-upagames').value = m.upaGames || "sim"; window.atualizarCargos(); document.getElementById('f-cargo').value = m.cargo || ""; document.getElementById('f-sub-instrucao').checked = !!m.subAreas?.instrucao; document.getElementById('f-sub-acolhimento').checked = !!m.subAreas?.acolhimento; document.getElementById('f-sub-gamenews').checked = !!m.subAreas?.gamenews; document.getElementById('modal-membro').style.display = 'flex'; } };
     
     window.saveMember = async () => { 
         const btn = document.getElementById('btn-salvar-membro'); 
@@ -3008,7 +3294,8 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         const d = { 
             m: nome, 
             id: document.getElementById('f-id').value.trim(), 
-            posicao: document.getElementById('f-posicao').value, 
+            posicao: document.getElementById('f-posicao').value,
+            hierarquia: document.getElementById('f-posicao').value === 'gestao' ? (document.getElementById('f-hierarquia').value||'') : '', 
             pts: document.getElementById('f-pts').value, 
             ativo: true, 
             cargo: document.getElementById('f-cargo').value, 
@@ -4519,20 +4806,126 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         });
     };
 
+    window._PS_TOPICOS_DEFAULT = [
+        'Abertura','O que é ser Staff','Área de Games','Métodos de Upar',
+        'Movimentações','Sub-áreas','Critérios de Upamento','Critérios de Destaque',
+        'Permissões','Conduta em Call','Aliciamentos','Suporte','VIP','Eventos','Links Importantes','Feedback'
+    ];
+    window._psTopicosAtivos = [];
+
+    window.psRenderTopicos = () => {
+        const el = document.getElementById('ps-topicos-list'); if(!el) return;
+        const mbs = (window._state.members||[]).filter(m => m.ativo && (m.posicao==='gestao') && m.hierarquia).sort((a,b)=>(a.m||'').localeCompare(b.m||''));
+        let optsHtml = '<option value="">— Sem apresentador —</option>';
+        mbs.forEach(m => {
+            const val = escapeHTML(m.m) + '|' + escapeHTML(m.id||'');
+            optsHtml += '<option value="' + val + '">' + escapeHTML(m.m) + '</option>';
+        });
+
+        const rows = window._psTopicosAtivos.map((t, i) => {
+            const isExtra = i >= (window._state.topicosSetorial && window._state.topicosSetorial.length
+                ? window._state.topicosSetorial.length
+                : window._PS_TOPICOS_DEFAULT.length);
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex;align-items:center;gap:8px;background:rgba(129,140,248,0.05);border:1px solid rgba(129,140,248,0.12);border-radius:8px;padding:8px 12px;';
+
+            const num = document.createElement('span');
+            num.style.cssText = 'font-size:13px;color:#818cf8;font-weight:700;min-width:16px;';
+            num.textContent = (i+1) + '.';
+
+            const nome = document.createElement('span');
+            nome.style.cssText = 'flex:1;font-size:13px;color:var(--white);font-family:Rajdhani;font-weight:600;';
+            nome.textContent = '\u2605 ' + t.nome;
+
+            const sel = document.createElement('select');
+            sel.innerHTML = optsHtml;
+            sel.style.cssText = 'background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.08);color:var(--white);padding:5px 8px;border-radius:6px;font-size:11px;max-width:160px;';
+            sel.dataset.idx = i;
+            sel.addEventListener('change', function() {
+                const parts = this.value.split('|');
+                window._psTopicosAtivos[this.dataset.idx].resp = parts[0] || '';
+                window._psTopicosAtivos[this.dataset.idx].discordId = parts[1] || '';
+            });
+            // Restaurar valor se já tinha sido selecionado
+            if(t.resp) {
+                const match = Array.from(sel.options).find(o => o.value.startsWith(t.resp + '|'));
+                if(match) sel.value = match.value;
+            }
+
+            // wrapper vertical para nome+sel e conteudo
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;';
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;align-items:center;gap:8px;';
+            row.appendChild(nome);
+            row.appendChild(sel);
+            const ta = document.createElement('textarea');
+            ta.placeholder = 'Conteúdo do tópico (opcional)...';
+            ta.value = t.conteudo || '';
+            ta.rows = 2;
+            ta.style.cssText = 'width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);color:var(--white);padding:6px 10px;border-radius:6px;font-size:11px;font-family:Share Tech Mono;resize:vertical;';
+            ta.dataset.idx = i;
+            ta.addEventListener('input', function(){ window._psTopicosAtivos[this.dataset.idx].conteudo = this.value; });
+            wrap.appendChild(row);
+            wrap.appendChild(ta);
+            div.appendChild(num);
+            div.appendChild(wrap);
+
+            if(isExtra) {
+                const btnRem = document.createElement('button');
+                btnRem.innerHTML = '<i class="ph-bold ph-x"></i>';
+                btnRem.title = 'Remover';
+                btnRem.style.cssText = 'background:transparent;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:2px 4px;';
+                btnRem.dataset.idx = i;
+                btnRem.addEventListener('click', function() {
+                    window._psTopicosAtivos.splice(parseInt(this.dataset.idx), 1);
+                    window.psRenderTopicos();
+                });
+                div.appendChild(btnRem);
+            }
+            return div;
+        });
+
+        el.innerHTML = '';
+        rows.forEach(r => el.appendChild(r));
+    };
+
+    window.psAddTopico = () => {
+        const inp = document.getElementById('ps-novo-topico');
+        const val = inp ? inp.value.trim() : '';
+        if(!val) { window.showToast('Digite o tópico!','error'); return; }
+        window._psTopicosAtivos.push({ nome: val, resp: '', discordId: '' });
+        inp.value = '';
+        window.psRenderTopicos();
+        setTimeout(() => { const el=document.getElementById('ps-topicos-list'); if(el) el.scrollTop=el.scrollHeight; }, 50);
+    };
+
     window.openNovaPauta = (tipo) => {
         const prefix = tipo === 'gestores' ? 'pg' : tipo === 'geral' ? 'pge' : 'ps';
         document.getElementById(prefix + '-docid').value = '';
         document.getElementById(prefix + '-data').value = todayStr();
         document.getElementById(prefix + '-hora').value = '';
-        document.getElementById(prefix + '-itens').value = '';
-        if(tipo === 'setorial'){ document.getElementById('ps-obs').value = ''; document.getElementById('ps-presenca').value = 'todos'; }
-        if(tipo === 'geral') document.getElementById('pge-aviso').value = '';
-        const mbs = (window._state.members||[]).filter(m => m.ativo).sort((a,b)=>(a.m||'').localeCompare(b.m||''));
-        const gestao = mbs.filter(m => ['lider_geral','lider','sublider','gerente','supervisor'].includes(m.posicao));
-        const lista = tipo === 'setorial' ? mbs : gestao.length ? gestao : mbs;
-        let h = '<option value="">Selecione...</option>';
-        lista.forEach(m => h += '<option value="' + escapeHTML(m.m) + '">' + escapeHTML(m.m) + '</option>');
-        document.getElementById(prefix + '-resp').innerHTML = h;
+        if(tipo === 'geral') { const itEl=document.getElementById('pge-itens'); if(itEl) itEl.value=''; document.getElementById('pge-aviso').value=''; }
+
+        if(tipo === 'setorial') {
+            // Inicializar tópicos — com conteúdo do molde salvo se existir
+            const saved = window._state.topicosSetorial || [];
+            window._psTopicosAtivos = (saved.length ? saved : window._PS_TOPICOS_DEFAULT.map(n => ({ nome: n })))
+                .map(t => ({ nome: t.nome, resp: '', discordId: '', conteudo: t.conteudo||'', _expanded: !!(t.conteudo&&t.conteudo.trim()) }));
+            window.psRenderTopicos();
+        } else {
+            // Gestores/Geral: popular select resp só com gestão
+            const gestao = (window._state.members||[]).filter(m => m.ativo && ['lider_geral','lider','sublider','gerente','supervisor'].includes(m.posicao)).sort((a,b)=>(a.m||'').localeCompare(b.m||''));
+            const lista = gestao.length ? gestao : (window._state.members||[]).filter(m=>m.ativo).sort((a,b)=>(a.m||'').localeCompare(b.m||''));
+            let h = '<option value="">Selecione...</option>';
+            lista.forEach(m => h += '<option value="'+escapeHTML(m.m)+'">'+escapeHTML(m.m)+'</option>');
+            document.getElementById(prefix + '-resp').innerHTML = h;
+            if(tipo === 'gestores') {
+                ['pg-positivos','pg-negativos','pg-fluxo','pg-melhorias','pg-problemas','pg-reclamacoes','pg-criticas','pg-admin-ajuda'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+                const prev = document.getElementById('pg-preview'); if(prev) prev.textContent='';
+                const areaEl = document.getElementById('pg-area'); if(areaEl) areaEl.value='Games';
+            }
+        }
         document.getElementById('modal-pauta-' + tipo).style.display = 'flex';
     };
 
@@ -4541,20 +4934,38 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         const docId = document.getElementById(prefix + '-docid').value;
         const data  = document.getElementById(prefix + '-data').value;
         const hora  = document.getElementById(prefix + '-hora').value;
-        const resp  = document.getElementById(prefix + '-resp').value;
-        const itensRaw = document.getElementById(prefix + '-itens').value;
-        if(!data || !resp){ window.showToast('Preencha data e responsável!', 'error'); return; }
-        const itens = itensRaw.split('\n').map(s => s.trim()).filter(Boolean);
-        const d = { tipo, data, hora: hora||'', resp, itens, criadoEm: new Date().toISOString() };
-        if(tipo === 'setorial'){ d.presenca = document.getElementById('ps-presenca').value; d.obs = document.getElementById('ps-obs').value.trim(); }
-        if(tipo === 'geral') d.aviso = document.getElementById('pge-aviso').value.trim();
+        if(!data){ window.showToast('Preencha a data!','error'); return; }
+        let d = { tipo, data, hora: hora||'', criadoEm: new Date().toISOString() };
+        if(tipo === 'setorial') {
+            if(!window._psTopicosAtivos.length){ window.showToast('Adicione pelo menos um tópico!','error'); return; }
+            d.topicos = window._psTopicosAtivos.map(t => ({ nome: t.nome, resp: t.resp||'', discordId: t.discordId||'', conteudo: t.conteudo||'' }));
+        } else if(tipo === 'gestores') {
+            const resp = document.getElementById('pg-resp').value;
+            d.resp = resp;
+            d.area = document.getElementById('pg-area').value.trim() || 'Games';
+            d.positivos   = document.getElementById('pg-positivos').value.trim();
+            d.negativos   = document.getElementById('pg-negativos').value.trim();
+            d.fluxo       = document.getElementById('pg-fluxo').value.trim();
+            d.melhorias   = document.getElementById('pg-melhorias').value.trim() || 'Nenhuma,';
+            d.problemas   = document.getElementById('pg-problemas').value.trim();
+            d.reclamacoes = document.getElementById('pg-reclamacoes').value.trim();
+            d.criticas    = document.getElementById('pg-criticas').value.trim();
+            d.adminAjuda  = document.getElementById('pg-admin-ajuda').value.trim();
+        } else {
+            const resp = document.getElementById(prefix+'-resp').value;
+            if(!resp){ window.showToast('Selecione o responsável!','error'); return; }
+            d.resp = resp;
+            d.itens = (document.getElementById(prefix+'-itens').value||'').split('\n').map(s=>s.trim()).filter(Boolean);
+            if(tipo === 'geral') d.aviso = document.getElementById('pge-aviso').value.trim();
+        }
         try {
             if(docId) await setDoc(doc(db,'gestao_pautas',docId), d, {merge:true});
             else await setDoc(doc(collection(db,'gestao_pautas')), d);
             window.closeModal('modal-pauta-' + tipo);
-            window.showToast('Pauta guardada!', 'success');
+            window.showToast('Pauta guardada!','success');
         } catch(e){ console.error('[PRZ]',e); window.showToast('Erro ao guardar.','error'); }
     };
+
 
     window.copiarPauta = async (id) => {
         const p = (window._state.pautas||[]).find(x => x._id === id); if(!p) return;
@@ -4562,20 +4973,28 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         const horaFmt = p.hora ? (' \u00e0s ' + p.hora) : '';
         let txt = '';
         if(p.tipo === 'setorial') {
-            const pLabel = {todos:'Todos os membros ativos', gestao:'Apenas gest\u00e3o', subgestao:'Sub-gest\u00e3o e acima'}[p.presenca] || 'Todos';
-            txt = '\uD83D\uDCCB **PAUTA \u2014 REUNI\u00c3O SETORIAL**\n' +
-                  '\uD83D\uDCC5 Data: **' + dtFmt + horaFmt + '**\n' +
-                  '\uD83D\uDC64 Moderador: **' + p.resp + '**\n' +
-                  '\u2705 Presen\u00e7a: ' + pLabel + '\n\n' +
-                  '\uD83D\uDCCC **PAUTA:**\n' +
-                  (p.itens||[]).map((it,i) => (i+1) + '. ' + it).join('\n') +
-                  (p.obs ? ('\n\n\uD83D\uDCDD ' + p.obs) : '');
+            const linha = '\u2501'.repeat(22);
+            txt = linha + '\n\u2756 REUNI\u00c3O SETORIAL \u2756\n' + dtFmt + (horaFmt ? horaFmt : '') + '\n' + linha;
+            (p.topicos||[]).forEach(t => {
+                const mencao = t.discordId ? ' <@' + t.discordId + '>' : (t.resp ? ' ' + t.resp : '');
+                txt += '\n### \u2605 ' + t.nome + (mencao ? ' \u2014' + mencao : '');
+                if(t.conteudo && t.conteudo.trim()) txt += '\n' + t.conteudo.trim();
+            });
         } else if(p.tipo === 'gestores') {
-            txt = '\uD83D\uDCCB **PAUTA \u2014 REUNI\u00c3O DE GESTORES**\n' +
-                  '\uD83D\uDCC5 Data: **' + dtFmt + horaFmt + '**\n' +
-                  '\uD83D\uDC64 Moderador: **' + p.resp + '**\n\n' +
-                  '\uD83D\uDCCC **PAUTA:**\n' +
-                  (p.itens||[]).map((it,i) => (i+1) + '. ' + it).join('\n');
+            const star = ':mariostarred71:';
+            const dot = ':P_pontinho~11:';
+            txt = '### :BeegRed: :72237minecraftredp::78999minecraftreda::34926minecraftredu::94054minecraftredt::78999minecraftreda::23720minecraftreds: :15325minecraftredd::76418minecraftrede: :54257minecraftredg::78999minecraftreda::82573minecraftredm::76418minecraftrede::23720minecraftreds: :BeegRed:\n'
+                + ':invi_bubble: :invi_bubble: :invi_bubble: :invi_bubble:\n'
+                + '### ' + star + '  Pontos Positivos:\n' + dot + (p.positivos||' ') + '\n'
+                + '### ' + star + '   Pontos Negativos:\n' + dot + (p.negativos||' ') + '\n'
+                + '### ' + star + ' Como anda o fluxo de membros:\n' + dot + (p.fluxo||' ') + '\n'
+                + '### ' + star + '  Melhorias para a semana;\n' + dot + (p.melhorias||'Nenhuma,') + '\n'
+                + '### ' + star + ' Problemas que ocorreram;\n' + dot + (p.problemas||' ') + '\n'
+                + '### ' + star + ' Quais Reclamações ocorreram:\n' + dot + (p.reclamacoes||' ') + '\n'
+                + '### ' + star + '  Críticas construtivas para outra área:\n' + dot + (p.criticas||' ') + '\n'
+                + '### ' + star + '   No que administração pode ajudar?\n' + dot + (p.adminAjuda||' ') + '\n\n'
+                + star + '** Porta-voz:** ' + (p.resp||'—') + '\n'
+                + star + ' **Área:** ' + (p.area||'Games');
         } else {
             txt = '\uD83D\uDCE3 **REUNI\u00c3O GERAL \u2014 GAMES PRZ**\n' +
                   '\uD83D\uDCC5 Data: **' + dtFmt + horaFmt + '**\n' +
@@ -4620,8 +5039,8 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                         '</div>' +
                     '</div>' +
                     avisoHtml +
-                    (p.itens && p.itens.length ? '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:12px 14px;">' + p.itens.map((item,i) => '<div class="pauta-item"><span class="pauta-item-num">' + (i+1) + '.</span><span>' + escapeHTML(item) + '</span></div>').join('') + '</div>' : '') +
-                    (tipo === 'setorial' && p.obs ? '<div style="font-size:12px;color:var(--text);margin-top:8px;font-style:italic;">' + escapeHTML(p.obs) + '</div>' : '') +
+                    (tipo === 'setorial' && p.topicos && p.topicos.length ? '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:5px;">' + p.topicos.map((t,i) => '<div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="color:#818cf8;font-weight:700;">'+(i+1)+'.</span><span style="color:var(--white);font-family:Rajdhani;font-weight:600;flex:1;">&#9733; '+escapeHTML(t.nome)+'</span>'+(t.discordId?'<span style="font-family:Share Tech Mono;font-size:10px;color:#818cf8;">&lt;@'+escapeHTML(t.discordId)+'&gt;</span>':(t.resp?'<span style="font-size:11px;color:var(--text);">'+escapeHTML(t.resp)+'</span>':''))+'</div>').join('') + '</div>' : '') +
+                    (tipo !== 'setorial' && p.itens && p.itens.length ? '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:12px 14px;">' + p.itens.map((item,i) => '<div class="pauta-item"><span class="pauta-item-num">' + (i+1) + '.</span><span>' + escapeHTML(item) + '</span></div>').join('') + '</div>' : '') +
                 '</div>';
             }).join('');
         });
