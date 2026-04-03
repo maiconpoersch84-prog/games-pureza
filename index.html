@@ -692,19 +692,38 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
             </div>
         </div>
 <div id="page-movs" class="page">
-            <div class="card" style="padding: 0; background: transparent; border: none; box-shadow: none; display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="color: var(--accent); text-shadow:0 0 15px var(--accent-glow);"><i class="ph-fill ph-calendar-check"></i> CRONOGRAMA DE MOVS</h2>
+            <div class="card" style="padding: 0; background: transparent; border: none; box-shadow: none; display: flex; justify-content: space-between; align-items: center; margin-bottom:14px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <h2 style="color: var(--accent); text-shadow:0 0 15px var(--accent-glow);"><i class="ph-fill ph-calendar-check"></i> CRONOGRAMA DE MOVS</h2>
+                    <span id="movs-count-ag" style="background:rgba(0,220,255,0.1); border:1px solid rgba(0,220,255,0.25); color:var(--accent); font-family:'Share Tech Mono'; font-size:11px; padding:3px 10px; border-radius:20px;">0 agendadas</span>
+                    <span id="movs-count-fi" style="background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.25); color:var(--success); font-family:'Share Tech Mono'; font-size:11px; padding:3px 10px; border-radius:20px;">0 finalizadas</span>
+                </div>
                 <div style="display:flex; gap:10px;">
                     <button class="btn-acao btn-outline primary" style="padding:10px 18px;" onclick="window.copiarCronograma()"><i class="ph-bold ph-copy"></i> Copiar Cronograma</button>
                     <button id="btn-add-mov" onclick="window.openMovModal()" class="btn-add"><i class="ph-bold ph-calendar-plus"></i> AGENDAR MOV</button>
                 </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+                <input type="text" id="movs-search" placeholder="🔍 Pesquisar por responsável ou auxiliar..." oninput="window.renderMovs()" style="flex:1; min-width:200px; background:rgba(0,0,0,0.35); border:1px solid var(--border); color:var(--white); padding:8px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; transition:0.2s;">
+                <select id="movs-filter-tipo" onchange="window.renderMovs()" style="background:rgba(0,0,0,0.4); border:1px solid var(--border); color:var(--white); padding:8px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; cursor:pointer;">
+                    <option value="">Todos os tipos</option>
+                    <option value="Temática">Temática</option>
+                    <option value="Quiz">Quiz</option>
+                    <option value="Jogatina">Jogatina</option>
+                    <option value="Cine">Cine</option>
+                    <option value="Reunião Setorial">Reunião Setorial</option>
+                </select>
             </div>
             <div id="div-movs-list"></div>
         </div>
 
         <div id="page-relatorios" class="page">
             <div class="card" style="padding: 0; background: transparent; border: none; box-shadow: none; display: flex; justify-content: space-between; align-items: center; margin-bottom:14px;">
-                <h2 style="color: var(--purple); text-shadow:0 0 15px rgba(168,85,247,0.3);"><i class="ph-fill ph-chart-line-up"></i> GERAR RELATÓRIOS DAS MOVS</h2>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <h2 style="color: var(--purple); text-shadow:0 0 15px rgba(168,85,247,0.3);"><i class="ph-fill ph-chart-line-up"></i> RELATÓRIOS DAS MOVS</h2>
+                    <span id="rel-count-total" style="background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.25); color:var(--purple); font-family:'Share Tech Mono'; font-size:11px; padding:3px 10px; border-radius:20px;">0</span>
+                    <span id="rel-count-sem" style="display:none; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.25); color:var(--danger); font-family:'Share Tech Mono'; font-size:11px; padding:3px 10px; border-radius:20px;"></span>
+                </div>
                 <div style="display: flex; gap: 15px;"><button onclick="window.gerarRelatorioSemana()" class="btn-acao btn-outline warning" style="padding:10px 20px;"><i class="ph-bold ph-share-network"></i> Relatório Semanal</button><button id="btn-limpar-relatorios" onclick="window.openLimpezaModal('movs')" class="btn-acao btn-outline danger" style="padding:10px 20px;"><i class="ph-bold ph-trash"></i> Limpar Tudo</button></div>
             </div>
             <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
@@ -2263,7 +2282,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         <h2 style="color: var(--accent); margin-bottom: 25px;"><i class="ph-bold ph-calendar-plus"></i> AGENDAR MOVIMENTAÇÃO</h2>
         <input type="hidden" id="m-docid">
         <div class="form-grid">
-            <div class="form-group"><label>TIPO DE MOV</label><select id="m-tipo" onchange="window.autoPontos()"><option>Temática</option><option>Jogatina</option><option>Quiz</option><option>Livre</option><option>Evento</option><option>Cine</option><option>Reunião</option><option>Outras</option></select></div>
+            <div class="form-group"><label>TIPO DE MOV</label><select id="m-tipo" onchange="window.autoPontos()"><option>Temática</option><option>Quiz</option><option>Jogatina</option><option>Cine</option><option>Reunião Setorial</option></select></div>
             <div class="form-group"><label>PONTUAÇÃO BASE</label><input type="number" id="m-pontos" value="15"></div>
             <div class="form-group"><label>DATA</label><input type="date" id="m-data"></div>
             <div class="form-group"><label>HORÁRIO</label><input type="time" id="m-hora"></div>
@@ -2457,7 +2476,11 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         let texto = "";
         switch(tipo) {
             case 'historico': texto = "Tem a certeza que deseja apagar <b>todo o histórico</b> da área?"; break;
-            case 'movs': texto = "Tem a certeza que deseja apagar <b>todas as MOVs, Relatórios e Upamentos</b> da semana?"; break;
+            case 'movs': {
+                const total = window._state.movs.length;
+                texto = `Tem a certeza que deseja apagar <b>todas as ${total} MOV${total!==1?'s':''}, Relatórios e Upamentos</b> da semana? Esta ação não pode ser desfeita.`;
+                break;
+            }
             case 'instrucao': texto = "Tem a certeza que deseja apagar <b>todos os registos de Instrução</b>?"; break;
             case 'acolhimento': texto = "Tem a certeza que deseja apagar <b>todos os registos de Acolhimento</b>?"; break;
             case 'gamenews': texto = "Tem a certeza que deseja apagar <b>todas as Postagens de Game News</b>?"; break;
@@ -4315,15 +4338,28 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
     window.renderMovs = () => { 
         try {
-            const c = document.getElementById('div-movs-list'); if(!c) return; 
-            const o = [...window._state.movs].sort((a,b) => ((a.data||'')+'T'+(a.horario||'')).localeCompare((b.data||'')+'T'+(b.horario||''))); 
-            if(o.length===0) { c.innerHTML='<div class="empty-state">Nenhum cronograma definido.</div>'; return; } 
-            
-            const isGestao = ['lider_geral', 'lider', 'sublider', 'gerente', 'supervisor'].includes(window.currentUserRole);
+            const c = document.getElementById('div-movs-list'); if(!c) return;
+            const search = (document.getElementById('movs-search')?.value || '').toLowerCase();
+            const tipoFilter = document.getElementById('movs-filter-tipo')?.value || '';
+            let o = [...window._state.movs].sort((a,b) => ((a.data||'')+'T'+(a.horario||'')).localeCompare((b.data||'')+'T'+(b.horario||'')));
 
-            o.forEach(m => { m._f = m.finalizada || (m.data && m.horario && new Date().getTime() > new Date(`${m.data}T${m.horario}:00`).getTime() + (m.tipo==='Cine'?5400000:3600000)); }); 
-            const ag = o.filter(m => !m._f); const fi = o.filter(m => m._f).reverse(); 
-            
+            o.forEach(m => { m._f = m.finalizada || (m.data && m.horario && new Date().getTime() > new Date(`${m.data}T${m.horario}:00`).getTime() + (m.tipo==='Cine'?5400000:3600000)); });
+
+            // update counters
+            const cAg = document.getElementById('movs-count-ag'); const cFi = document.getElementById('movs-count-fi');
+            const totalAg = o.filter(m=>!m._f).length; const totalFi = o.filter(m=>m._f).length;
+            if(cAg) cAg.innerText = `${totalAg} agendada${totalAg!==1?'s':''}`;
+            if(cFi) cFi.innerText = `${totalFi} finalizada${totalFi!==1?'s':''}`;
+
+            // apply filters
+            if(tipoFilter) o = o.filter(m => m.tipo === tipoFilter);
+            if(search) o = o.filter(m => (m.resp||'').toLowerCase().includes(search) || (m.aux||'').toLowerCase().includes(search));
+
+            if(o.length===0) { c.innerHTML='<div class="empty-state">Nenhuma MOV encontrada.</div>'; return; }
+
+            const isGestao = ['lider_geral', 'lider', 'sublider', 'gerente', 'supervisor'].includes(window.currentUserRole);
+            const ag = o.filter(m => !m._f); const fi = o.filter(m => m._f).reverse();
+
             const rL = (lista, colorBase, glowBase) => {
                 if(lista.length === 0) return '';
                 const agrupado = {}; lista.forEach(m => { const k = m.data || 'N/A'; if(!agrupado[k]) agrupado[k] = []; agrupado[k].push(m); });
@@ -4337,7 +4373,6 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                         const bF = (!m._f && isGestao) ? `<button class="btn-acao outline-success" style="flex:1;" onclick="window.finalizarMov('${m._id}')"><i class="ph-bold ph-check"></i> Finalizar</button>` : '';
                         let auxT = m.aux ? `<div style="font-size:12px; color:var(--text); margin-top:4px;">Aux: <span style="color:#e0e0e0;">${escapeHTML(m.aux)}</span></div>` : '';
                         const bActs = isGestao ? `<button class="btn-acao outline-primary" onclick="window.editMov('${m._id}')"><i class="ph-bold ph-pencil-simple"></i></button><button class="btn-acao outline-danger" onclick="window.apagarMov('${m._id}')"><i class="ph-bold ph-trash"></i></button>` : '';
-
                         lh += `<div class="mov-card" style="border-left:3px solid ${colorBase};">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
                                     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;"><span class="badge" style="background:${colorBase}15; color:${colorBase}; border:1px solid ${colorBase}40;">${escapeHTML(m.tipo)}</span><b style="color:var(--success); font-family:'Share Tech Mono'; font-size:12px;">+${m.pontos||0} Pts</b>${window.getSugBadge(m._id)}</div>
@@ -4370,9 +4405,18 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             const search = (document.getElementById('rel-search')?.value || '').toLowerCase();
             const tipoFilter = document.getElementById('rel-filter-tipo')?.value || '';
             let o = [...window._state.movs].sort((a,b) => ((b.data||'')+'T'+(b.horario||'')).localeCompare((a.data||'')+'T'+(a.horario||'')));
+
+            // update counters
+            const semPart = o.filter(m => !m.participantes || m.participantes.length === 0).length;
+            const ctTotal = document.getElementById('rel-count-total');
+            const ctSem   = document.getElementById('rel-count-sem');
+            if(ctTotal) ctTotal.innerText = `${o.length} MOV${o.length!==1?'s':''}`;
+            if(ctSem) { if(semPart > 0) { ctSem.innerText = `${semPart} sem participantes`; ctSem.style.display='inline'; } else ctSem.style.display='none'; }
+
             if(tipoFilter) o = o.filter(m => m.tipo === tipoFilter);
             if(search) o = o.filter(m => (m.resp||'').toLowerCase().includes(search) || (m.aux||'').toLowerCase().includes(search));
             if(o.length===0) { c.innerHTML='<div class="empty-state">Nenhum resultado.</div>'; return; }
+
             const agrupado = {}; o.forEach(m => { const dataChave = m.data || 'N/A'; if(!agrupado[dataChave]) agrupado[dataChave] = []; agrupado[dataChave].push(m); });
             let h = '';
             for(const [k, movs] of Object.entries(agrupado)) {
@@ -4381,11 +4425,13 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                 h += `<div class="mov-grid">`;
                 movs.forEach(m => {
                     const cont = m.participantes ? m.participantes.length : 0;
+                    const semPartBadge = cont === 0 ? `<span class="badge" style="background:rgba(248,113,113,0.15);color:var(--danger);border:1px solid rgba(248,113,113,0.3);font-size:9px;"><i class="ph-bold ph-warning"></i> SEM PARTICIPANTES</span>` : '';
                     h += `<div class="mov-card" style="border-left:3px solid var(--purple);">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                                 <span class="badge" style="background:rgba(168,85,247,0.1); color:var(--purple); border:1px solid rgba(168,85,247,0.4);">${escapeHTML(m.tipo)}</span>
                                 <div style="font-family:'Share Tech Mono'; font-size:20px; font-weight:bold; color:var(--success);"><i class="ph-bold ph-clock"></i> ${escapeHTML(m.horario)}</div>
                             </div>
+                            ${semPartBadge ? `<div style="margin-bottom:10px;">${semPartBadge}</div>` : ''}
                             <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px;">
                                 <div style="font-size:14px; color:var(--white); font-weight:bold; margin-bottom:5px;">Resp: <span style="color:var(--purple);">${escapeHTML(m.resp)}</span></div>
                                 <div style="font-size:12px; color:var(--text);">Aux: <span style="color:var(--white);">${m.aux?escapeHTML(m.aux):'-'}</span></div>
