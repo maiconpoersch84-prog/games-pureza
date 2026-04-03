@@ -1375,7 +1375,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 <!-- ========== UPAMENTOS ========== -->
 <div id="page-upamentos" class="page" style="display:none;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-        <h2 style="color:var(--warning); text-shadow:0 0 15px var(--warning-glow);"><i class="ph-fill ph-arrow-fat-up"></i> UPAMENTOS DE META</h2>
+        <h2 style="color:var(--warning); text-shadow:0 0 15px var(--warning-glow);"><i class="ph-fill ph-arrow-fat-up"></i> UPAMENTOS</h2>
         <div style="display:flex; gap:10px;">
             <button class="btn-acao btn-outline primary" style="padding:10px 18px;" onclick="window.copiarUpamentos()"><i class="ph-bold ph-copy"></i> Copiar UPs</button>
             <button class="btn-acao btn-outline warning" style="padding:10px 20px;" onclick="window.verificarUPs()"><i class="ph-bold ph-magnifying-glass"></i> Verificar UPs</button>
@@ -2550,7 +2550,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             'nav-sep-notif', 'nav-cat-notif', 'nav-group-notif', 'btn-nav-notif-mov', 'btn-nav-notif-up', 'btn-nav-notif-rpp', 'btn-nav-notif-conta',
             'nav-sep-gestao', 'nav-cat-gestao', 'nav-group-gestao', 'btn-nav-funcoes', 'btn-nav-pautas', 'btn-nav-adv', 'btn-nav-autorizacoes', 'btn-nav-atividade', 'btn-nav-blacklist',
             'nav-admin-separator', 'nav-cat-admin', 'nav-group-admin', 'btn-nav-acessos', 'btn-nav-historico',
-            'btn-nav-relatorios', 'btn-nav-movs', 'btn-nav-ind', 'btn-nav-destaques', 'btn-nav-levelup', 'btn-nav-upamentos', 'nav-sep-area', 'nav-cat-area', 'nav-group-area', 'btn-nav-sugestoes', 'btn-nav-feedbacks'
+            'btn-nav-relatorios', 'btn-nav-movs', 'btn-nav-ind', 'btn-nav-destaques', 'btn-nav-levelup', 'btn-nav-upamentos', 'nav-sep-area', 'nav-cat-area', 'nav-group-area', 'btn-nav-membros-area', 'btn-nav-sugestoes', 'btn-nav-feedbacks'
         ];
         idsToHide.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
 
@@ -4277,7 +4277,73 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 // ==========================================
     // MOVS (GRID) E RESTO
     // ==========================================
-    window.autoPontos = () => { document.getElementById('m-pontos').value = { 'Temática':15, 'Jogatina':16, 'Quiz':12, 'Livre':10, 'Evento':20, 'Cine':30, 'Reunião':40 }[document.getElementById('m-tipo').value] || 0; };
+    window.gerarRelatorioInstrucao = async () => {
+        const reg = window._state.instrucoes || [];
+        if(reg.length === 0) return window.showToast("Sem registos de instrução.", "error");
+        let st = {};
+        reg.forEach(r => {
+            const n = r.nomeInstrutor || '—';
+            if(!st[n]) st[n] = { nome:n, id: r.idDiscordInstrutor || '—', inst:0, duv:0, tick:0, fbs:0, pts:0 };
+            if(r.assunto === 'Instrução') st[n].inst++;
+            else if(r.assunto === 'Dúvida') st[n].duv++;
+            else if(r.assunto === 'Ticket') st[n].tick++;
+            if(r.feedback) st[n].fbs++;
+            st[n].pts += (r.pontosBase||0) + (r.feedback ? 2 : 0);
+        });
+        const ranked = Object.values(st).sort((a,b) => b.pts - a.pts);
+        let txt = `**📚 Relatório de Instrução — GAMES PRZ**\nGerado em: ${new Date().toLocaleString('pt-PT')}\n\n`;
+        ranked.forEach((r,i) => { txt += `${i+1}º ${r.nome} | ${r.id} — ${r.pts} pts (Inst:${r.inst} Dúv:${r.duv} Tick:${r.tick} FB:${r.fbs})\n`; });
+        txt += `\nTotal de registos: ${reg.length}`;
+        try { await navigator.clipboard.writeText(txt); window.showToast("Relatório copiado!", "success"); } catch(e){ window.showToast("Erro ao copiar.", "error"); }
+    };
+
+    window.gerarRelatorioAcolhimento = async () => {
+        const reg = window._state.acolhimentos || [];
+        if(reg.length === 0) return window.showToast("Sem registos de acolhimento.", "error");
+        let st = {};
+        reg.forEach(r => {
+            const n = r.nomeAcolhedor || '—';
+            if(!st[n]) st[n] = { nome:n, id: r.idDiscordAcolhedor || '—', count:0, pts:0 };
+            st[n].count++;
+            st[n].pts += (r.pontos||0);
+        });
+        const ranked = Object.values(st).sort((a,b) => b.pts - a.pts);
+        let txt = `**🤝 Relatório de Acolhimento — GAMES PRZ**\nGerado em: ${new Date().toLocaleString('pt-PT')}\n\n`;
+        ranked.forEach((r,i) => { txt += `${i+1}º ${r.nome} | ${r.id} — ${r.pts} pts (${r.count} acolhimento${r.count!==1?'s':''})\n`; });
+        txt += `\nTotal de registos: ${reg.length}`;
+        try { await navigator.clipboard.writeText(txt); window.showToast("Relatório copiado!", "success"); } catch(e){ window.showToast("Erro ao copiar.", "error"); }
+    };
+
+    window.gerarRelatorioGN = async () => {
+        const posts = window._state.gamenews || [];
+        if(posts.length === 0) return window.showToast("Sem postagens de Game News.", "error");
+        let st = {};
+        posts.forEach(p => {
+            if(p.passtimer) {
+                if(!st[p.passtimer]) {
+                    const mem = window._state.members.find(m => m.m === p.passtimer);
+                    st[p.passtimer] = { nome:p.passtimer, id: mem?.id || '—', posts:0, corr:0, pts:0 };
+                }
+                st[p.passtimer].posts++;
+                if(p.status === 'Publicado') st[p.passtimer].pts += 15;
+            }
+            if(p.monitor) {
+                if(!st[p.monitor]) {
+                    const mem = window._state.members.find(m => m.m === p.monitor);
+                    st[p.monitor] = { nome:p.monitor, id: mem?.id || '—', posts:0, corr:0, pts:0 };
+                }
+                st[p.monitor].corr++;
+                if(p.status === 'Publicado') st[p.monitor].pts += 10;
+            }
+        });
+        const ranked = Object.values(st).sort((a,b) => b.pts - a.pts);
+        const pub = posts.filter(p => p.status === 'Publicado').length;
+        let txt = `**📰 Relatório de Game News — GAMES PRZ**\nGerado em: ${new Date().toLocaleString('pt-PT')}\n\n`;
+        txt += `Total de posts: ${posts.length} | Publicados: ${pub}\n\n`;
+        ranked.forEach((r,i) => { txt += `${i+1}º ${r.nome} | ${r.id} — ${r.pts} pts (Posts:${r.posts} Correções:${r.corr})\n`; });
+        try { await navigator.clipboard.writeText(txt); window.showToast("Relatório copiado!", "success"); } catch(e){ window.showToast("Erro ao copiar.", "error"); }
+    };
+    window.autoPontos = () => { document.getElementById('m-pontos').value = { 'Temática':15, 'Jogatina':16, 'Quiz':12, 'Cine':30, 'Reunião Setorial':40 }[document.getElementById('m-tipo').value] || 15; };
     window.openMovModal = () => { document.getElementById('m-docid').value = ""; document.getElementById('m-tipo').value = "Temática"; window.autoPontos(); const gm = window._state.members.filter(m => m.ativo && !['1_mes','2_meses','3_meses','sem_pontos'].includes(m.pts)).sort((x,y) => (x.m||'').localeCompare(y.m||'')); let hG = '<option value="">Gestor...</option><option value="Gestão">Gestão</option>'; let hS = '<option value="">Nenhum</option>'; gm.forEach(m => { if(m.posicao==='gestao') hG += `<option value="${escapeHTML(m.m)}">${escapeHTML(m.m)}</option>`; if(m.posicao==='subgestao') hS += `<option value="${escapeHTML(m.m)}">${escapeHTML(m.m)}</option>`; }); document.getElementById('m-resp').innerHTML = hG; document.getElementById('m-aux').innerHTML = hS; document.getElementById('modal-mov').style.display = 'flex'; };
     window.editMov = (id) => { const m = window._state.movs.find(x => x._id === id); if(!m) return; document.getElementById('m-docid').value = m._id; document.getElementById('m-tipo').value = m.tipo; document.getElementById('m-pontos').value = m.pontos; document.getElementById('m-data').value = m.data; document.getElementById('m-hora').value = m.horario; const gm = window._state.members.filter(x => x.ativo && !['1_mes','2_meses','3_meses','sem_pontos'].includes(x.pts)).sort((a,b) => (a.m||'').localeCompare(b.m||'')); let hG = '<option value="">Gestor...</option><option value="Gestão">Gestão</option>'; let hS = '<option value="">Nenhum</option>'; gm.forEach(x => { if(x.posicao==='gestao') hG += `<option value="${escapeHTML(x.m)}" ${x.m===m.resp?'selected':''}>${escapeHTML(x.m)}</option>`; if(x.posicao==='subgestao') hS += `<option value="${escapeHTML(x.m)}" ${x.m===m.aux?'selected':''}>${escapeHTML(x.m)}</option>`; }); if(m.resp && !gm.find(x=>x.m===m.resp)) hG+=`<option value="${escapeHTML(m.resp)}" selected>${escapeHTML(m.resp)} (Atual)</option>`; if(m.aux && !gm.find(x=>x.m===m.aux)) hS+=`<option value="${escapeHTML(m.aux)}" selected>${escapeHTML(m.aux)} (Atual)</option>`; document.getElementById('m-resp').innerHTML = hG; document.getElementById('m-aux').innerHTML = hS; document.getElementById('modal-mov').style.display = 'flex'; };
     window.saveMov = async () => { const btn = document.getElementById('btn-salvar-mov'); btn.disabled=true; btn.innerHTML="A GUARDAR..."; const id = document.getElementById('m-docid').value; const d = { tipo: document.getElementById('m-tipo').value, pontos: parseInt(document.getElementById('m-pontos').value)||0, data: document.getElementById('m-data').value, horario: document.getElementById('m-hora').value, resp: document.getElementById('m-resp').value, aux: document.getElementById('m-aux').value }; if(!d.data || !d.horario || !d.resp) { window.showToast("Preencha data, hora e responsável!", "error"); btn.disabled=false; btn.innerHTML="SALVAR MOV"; return; } if (id) { const o = window._state.movs.find(x => x._id === id); if (o) { d.participantes = o.participantes || []; d.topQuiz = o.topQuiz || { primeiro: '', segundo: '', terceiro: '' }; d.finalizada = o.finalizada || false; } } else { d.participantes = []; d.topQuiz = { primeiro: '', segundo: '', terceiro: '' }; d.finalizada = false; } try { if(id) await setDoc(doc(db, "movs", id), d, { merge: true }); else await setDoc(doc(collection(db, "movs")), d); window.closeModal('modal-mov'); window.showToast("Salvo com sucesso!", "success"); } catch(e){ console.error("[PRZ Error]", e); window.showToast("Erro ao guardar MOV.", "error"); } finally { btn.disabled=false; btn.innerHTML="SALVAR MOV"; } };
@@ -5269,7 +5335,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     // ==========================================
     // GESTÃO — FUNÇÕES, PAUTAS, ADV, AUTORIZAÇÕES, ATIVIDADE
     // ==========================================
-    let unsubFuncoes, unsubPautas, unsubAdv, unsubAutorizacoes, unsubAtividade;
+    let unsubFuncoes, unsubPautas, unsubAdv, unsubAutorizacoes, unsubAtividade, unsubAvisos;
     window._state.funcoes = [];
     window._state.pautas = [];
     window._state.adv = [];
@@ -7439,16 +7505,15 @@ Registado por: ${r.registadoPor} | ${labelData(r.data)}`;
         if(unsubAdv) unsubAdv();
         if(unsubAutorizacoes) unsubAutorizacoes();
         if(unsubAtividade) unsubAtividade();
+        if(unsubAvisos) unsubAvisos();
         unsubFuncoes = onSnapshot(collection(db,'gestao_funcoes'), s => { window._state.funcoes = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderFuncoes(); });
-        // Avisos
-        let unsubAvisos;
         unsubAvisos = onSnapshot(collection(db,'area_avisos'), s => {
             window._state.avisos = s.docs.map(d=>({_id:d.id,...d.data()}));
             window.renderAvisos && window.renderAvisos();
             window.renderDashAvisosRecentes && window.renderDashAvisosRecentes();
         });
         unsubPautas = onSnapshot(collection(db,'gestao_pautas'), s => { window._state.pautas = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderPautas(); });
-        unsubAdv = onSnapshot(collection(db,'gestao_adv'), s => { window._state.adv = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAdv(); ; window.renderDashAlertas && window.renderDashAlertas()});
+        unsubAdv = onSnapshot(collection(db,'gestao_adv'), s => { window._state.adv = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAdv(); window.renderDashAlertas && window.renderDashAlertas(); });
         unsubAutorizacoes = onSnapshot(collection(db,'gestao_autorizacoes'), s => { window._state.autorizacoes = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAutorizacoes(); window.renderDashInfoSemana(); });
         unsubAtividade = onSnapshot(collection(db,'gestao_atividade'), s => { window._state.atividade = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAtividade(); window.renderDashTopMembros(); });
         if(unsubBlacklist) unsubBlacklist();
