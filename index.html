@@ -389,14 +389,13 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                 <div id="nav-cat-area" class="nav-category" onclick="window.toggleCategory(this)"><span>ÁREA</span><i class="ph-bold ph-caret-down caret"></i></div>
                 <div id="nav-group-area" class="nav-group">
                     <button id="btn-nav-avisos" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-avisos', this)"><i class="ph-fill ph-bell-ringing"></i> Avisos</button>
-                    <button id="btn-nav-info-semana" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-info-semana', this)"><i class="ph-fill ph-calendar-star"></i> Informações da Semana</button>
+                    <button id="btn-nav-membros-area" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-membros', this)"><i class="ph-fill ph-user-check"></i> Membros</button>
                     <button id="btn-nav-sugestoes" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-sugestoes', this)"><i class="ph-fill ph-lightbulb"></i> Sugestões</button>
                     <button id="btn-nav-feedbacks" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-feedbacks', this)"><i class="ph-fill ph-chat-circle-text"></i> Feedbacks</button>
                 </div>
                 <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 8px 20px;"></div>
                                 <div id="nav-cat-membros" class="nav-category" onclick="window.toggleCategory(this)"><span>MEMBROS</span><i class="ph-bold ph-caret-down caret"></i></div>
                 <div id="nav-group-membros" class="nav-group">
-                    <button class="nav-btn nav-sub-btn" onclick="window.switchTab('page-membros', this)"><i class="ph-fill ph-user-check"></i> Ativos</button>
                     <button class="nav-btn nav-sub-btn" onclick="window.switchTab('page-rebocamento', this)"><i class="ph-fill ph-user-minus"></i> Inativos</button>
                     <button class="nav-btn nav-sub-btn" onclick="window.switchTab('page-ausencias', this)"><i class="ph-fill ph-calendar-x"></i> Ausências</button>
                     <button id="btn-nav-ind" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-indicacoes', this)"><i class="ph-fill ph-user-plus"></i> Indicações</button>
@@ -430,6 +429,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                 <div id="nav-sep-gestao" style="height: 1px; background: rgba(255,255,255,0.05); margin: 12px 20px;"></div>
                 <div id="nav-cat-gestao" class="nav-category" onclick="window.toggleCategory(this)"><span>GESTÃO</span><i class="ph-bold ph-caret-right caret"></i></div>
                 <div id="nav-group-gestao" class="nav-group closed">
+                    <button id="btn-nav-info-semana" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-info-semana', this)"><i class="ph-fill ph-calendar-star"></i> Registro Semanal</button>
                     <button id="btn-nav-funcoes" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-funcoes', this)"><i class="ph-fill ph-identification-badge"></i> Funções</button>
                     <button id="btn-nav-pautas" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-pautas', this)"><i class="ph-fill ph-note-pencil"></i> Pautas</button>
                     <button id="btn-nav-adv" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-adv', this)"><i class="ph-fill ph-warning-circle"></i> Advertências</button>
@@ -449,8 +449,9 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         </div>
 
         <div id="nav-info-user" style="padding: 15px; text-align: center; background: rgba(0,0,0,0.4); border-top: 1px solid var(--border);">
-            <div style="font-size: 10px; color: var(--text); font-family: 'Orbitron'; letter-spacing: 1px;">SESSÃO COMO:</div>
-            <div id="nav-user-role" style="color: var(--accent); font-weight: 900; font-family: 'Orbitron'; margin-top: 5px; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; text-shadow: 0 0 10px var(--accent-glow);">A CARREGAR...</div>
+            <div id="nav-user-name" style="color: #ececf4; font-weight: 900; font-family: 'Orbitron'; font-size: 12px; letter-spacing: 2px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+            <div style="height:1px; background:linear-gradient(90deg,transparent,rgba(0,220,255,0.4),transparent); margin-bottom:6px;"></div>
+            <div id="nav-user-role" style="color: var(--accent); font-weight: 900; font-family: 'Orbitron'; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; text-shadow: 0 0 10px var(--accent-glow);">A CARREGAR...</div>
         </div>
 
         <button onclick="window.doLogout()" class="btn-logout"><i class="ph-bold ph-power"></i> DESCONECTAR</button>
@@ -479,7 +480,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                 <div id="dash-panel-rpp" class="dash-panel" style="border-color:rgba(251,191,36,0.2);"><div class="dash-panel-hdr" style="color:var(--warning);"><i class="ph-fill ph-shield-warning"></i> RPP</div><div id="dash-rpp"></div></div>
                 <div id="dash-panel-entradas" class="dash-panel" style="border-color:rgba(52,211,153,0.2);"><div class="dash-panel-hdr" style="color:var(--success);"><i class="ph-fill ph-door"></i> ENTRADAS / SAÍDAS</div><div id="dash-mov-membros"></div></div>
                 <div id="dash-panel-trocaup" class="dash-panel" style="border-color:rgba(167,139,250,0.2);"><div class="dash-panel-hdr" style="color:var(--purple);"><i class="ph-fill ph-swap"></i> TROCA DE UP</div><div id="dash-troca-up"></div></div>
-                <div id="dash-panel-info" class="dash-panel" style="border-color:rgba(0,220,255,0.15);"><div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-calendar-star"></i> ÚCTIMAS INFORMAÇÕES</div><div id="dash-info-semana"></div></div>
+                <div id="dash-panel-info" class="dash-panel" style="border-color:rgba(0,220,255,0.15);"><div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-calendar-star"></i> REGISTRO SEMANAL</div><div id="dash-info-semana"></div></div>
                 <div id="dash-panel-destaques" class="dash-panel" style="border-color:rgba(251,191,36,0.2);"><div class="dash-panel-hdr" style="color:#fbbf24;"><i class="ph-fill ph-trophy"></i> MEMBROS EM DESTAQUE</div><div id="dash-top-membros"></div></div>
                 <div id="dash-panel-subareas" class="dash-panel" style="border-color:rgba(244,114,182,0.2);"><div class="dash-panel-hdr" style="color:#f472b6;"><i class="ph-fill ph-chart-bar"></i> RENDIMENTO SUB ÁREAS</div><div id="dash-subareas"></div></div>
                 <div id="dash-panel-feedbacks" class="dash-panel" style="border-color:rgba(167,139,250,0.2);"><div class="dash-panel-hdr" style="color:var(--purple);"><i class="ph-fill ph-chat-centered-text"></i> FEEDBACKS</div><div id="dash-feedbacks"></div></div>
@@ -506,6 +507,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                         <div>
                             <div style="font-family:'Orbitron';font-size:13px;font-weight:900;color:var(--white);letter-spacing:1px;">CONFIGURAR DASHBOARD</div>
                             <div style="font-size:11px;color:var(--text);font-family:'Share Tech Mono';margin-top:2px;">Ative, oculte e redimensione cada painel</div>
+                            <div id="config-dash-tipo-label" style="font-size:10px;color:var(--accent);font-family:'Share Tech Mono';margin-top:3px;letter-spacing:1px;"></div>
                         </div>
                     </div>
                     <div id="config-dash-counter" style="font-size:11px;color:var(--accent);background:rgba(0,220,255,0.08);border:1px solid rgba(0,220,255,0.2);padding:4px 12px;border-radius:20px;font-family:'Share Tech Mono';"></div>
@@ -544,13 +546,32 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         </div>
 
         <div id="page-historico" class="page">
-            <div class="card" style="padding: 0; background: transparent; border: none; box-shadow: none; display: flex; justify-content: space-between; align-items: center;">
+            <div class="card" style="padding: 0; background: transparent; border: none; box-shadow: none; display: flex; justify-content: space-between; align-items: center; margin-bottom:14px;">
                 <h2 style="color: var(--warning);"><i class="ph-fill ph-clock-counter-clockwise"></i> HISTÓRICO DA ÁREA</h2>
                 <div style="display:flex; gap:10px;">
                     <button onclick="window.gerarRelatorioHistorico()" class="btn-acao btn-outline purple" style="padding:10px 20px;"><i class="ph-bold ph-file-text"></i> RELATÓRIO</button>
                     <button id="btn-limpar-historico" onclick="window.openLimpezaModal('historico')" class="btn-acao btn-outline danger" style="padding:10px 20px;"><i class="ph-bold ph-trash"></i> LIMPAR HISTÓRICO</button>
                 </div>
             </div>
+            <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+                <input type="text" id="hist-search" placeholder="🔍 Pesquisar por membro, ação ou detalhe..." oninput="window.renderHistorico()" style="flex:1; min-width:220px; background:rgba(0,0,0,0.35); border:1px solid var(--border); color:var(--white); padding:9px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; transition:0.2s;">
+                <select id="hist-filter-acao" onchange="window.renderHistorico()" style="background:rgba(0,0,0,0.4); border:1px solid var(--border); color:var(--white); padding:9px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; cursor:pointer;">
+                    <option value="">Todas as ações</option>
+                    <option value="ADICIONADO">ADICIONADO</option>
+                    <option value="EDITADO">EDITADO</option>
+                    <option value="REMOVIDO">REMOVIDO</option>
+                    <option value="REBOCADO">REBOCADO</option>
+                    <option value="STATUS">STATUS</option>
+                    <option value="STAFF">STAFF</option>
+                    <option value="CARGO">CARGO</option>
+                    <option value="ADVERTÊNCIA">ADVERTÊNCIA</option>
+                    <option value="OCORRÊNCIA">OCORRÊNCIA</option>
+                    <option value="PROBLEMA">PROBLEMA</option>
+                    <option value="BLACKLIST">BLACKLIST</option>
+                    <option value="REGISTRO SEMANAL">REGISTRO SEMANAL</option>
+                </select>
+            </div>
+            <div style="font-size:11px; color:var(--text); font-family:'Share Tech Mono'; margin-bottom:10px;"><span id="hist-count">0</span> registos</div>
             <div class="card" style="padding: 0; overflow-x: auto;">
                 <table><thead><tr><th>DATA / HORA</th><th>MEMBRO ENVOLVIDO</th><th>AÇÃO</th><th>MOTIVO / DETALHES</th></tr></thead><tbody id="tbody-historico"></tbody></table>
             </div>
@@ -558,13 +579,35 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
         <div id="page-membros" class="page">
             <div class="card" style="padding: 0; background: transparent; border: none; box-shadow: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2><i class="ph-fill ph-users" style="color: var(--accent);"></i> MEMBROS ATIVOS</h2>
-                    <div style="display: flex; gap: 15px;"><input type="text" id="ipt-search" placeholder="Procurar membro..." style="min-width: 300px; margin-bottom: 0;"><button id="btn-add-membro" onclick="window.openMemberModal('ativo')" class="btn-add"><i class="ph-bold ph-user-plus"></i> NOVO MEMBRO</button></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <h2><i class="ph-fill ph-users" style="color: var(--accent);"></i> MEMBROS</h2>
+                        <span id="membros-counter" style="background:rgba(0,220,255,0.1); border:1px solid rgba(0,220,255,0.25); color:var(--accent); font-family:'Share Tech Mono'; font-size:11px; padding:3px 10px; border-radius:20px;">0</span>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items:center;">
+                        <input type="text" id="ipt-search" placeholder="Procurar membro..." style="min-width: 260px; margin-bottom: 0;">
+                        <button id="btn-add-membro" onclick="window.openMemberModal('ativo')" class="btn-add"><i class="ph-bold ph-user-plus"></i> NOVO MEMBRO</button>
+                    </div>
+                </div>
+                <!-- Filtros por posição -->
+                <div id="membros-pos-filtros" style="display:flex; gap:7px; flex-wrap:wrap; margin-bottom:14px;">
+                    <button class="membros-pos-btn" onclick="window.setMembrosFilter('todos',this)" style="padding:5px 14px; border-radius:7px; font-family:'Orbitron'; font-size:10px; font-weight:900; cursor:pointer; border:1px solid rgba(0,220,255,0.4); background:rgba(0,220,255,0.15); color:var(--accent); transition:0.2s;">TODOS <span id="mf-count-todos" style="background:rgba(0,0,0,0.3);border-radius:10px;padding:1px 7px;font-size:9px;"></span></button>
+                    <button class="membros-pos-btn" onclick="window.setMembrosFilter('comum',this)" style="padding:5px 14px; border-radius:7px; font-family:'Orbitron'; font-size:10px; font-weight:900; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text); transition:0.2s;">COMUM <span id="mf-count-comum" style="background:rgba(0,0,0,0.3);border-radius:10px;padding:1px 7px;font-size:9px;"></span></button>
+                    <button class="membros-pos-btn" onclick="window.setMembrosFilter('subgestao',this)" style="padding:5px 14px; border-radius:7px; font-family:'Orbitron'; font-size:10px; font-weight:900; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text); transition:0.2s;">SUB-GESTÃO <span id="mf-count-subgestao" style="background:rgba(0,0,0,0.3);border-radius:10px;padding:1px 7px;font-size:9px;"></span></button>
+                    <button class="membros-pos-btn" onclick="window.setMembrosFilter('gestao',this)" style="padding:5px 14px; border-radius:7px; font-family:'Orbitron'; font-size:10px; font-weight:900; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text); transition:0.2s;">GESTÃO <span id="mf-count-gestao" style="background:rgba(0,0,0,0.3);border-radius:10px;padding:1px 7px;font-size:9px;"></span></button>
                 </div>
             </div>
             <div class="card" style="overflow-x: auto; padding: 0;">
-                <table><thead><tr><th style="text-align: center; width: 60px;">STATUS</th><th>NOME / ID</th><th>STAFF</th><th>ÁREA DE UP</th><th>UP</th><th>CARGO</th><th>SUB-ÁREAS</th><th style="text-align: right;">AÇÕES</th></tr></thead><tbody id="tbody-membros"></tbody></table>
+                <table><thead><tr>
+                    <th style="text-align: center; width: 60px;">STATUS</th>
+                    <th style="cursor:pointer; user-select:none;" onclick="window.sortMembros('nome')">NOME / ID <span id="sort-ind-nome" style="font-size:9px; color:var(--accent);">↑</span></th>
+                    <th style="cursor:pointer; user-select:none;" onclick="window.sortMembros('staff')">STAFF <span id="sort-ind-staff" style="font-size:9px; color:rgba(255,255,255,0.2);">⇅</span></th>
+                    <th>ÁREA DE UP</th>
+                    <th>UP</th>
+                    <th style="cursor:pointer; user-select:none;" onclick="window.sortMembros('cargo')">CARGO <span id="sort-ind-cargo" style="font-size:9px; color:rgba(255,255,255,0.2);">⇅</span></th>
+                    <th>SUB-ÁREAS</th>
+                    <th style="text-align: right;">AÇÕES</th>
+                </tr></thead><tbody id="tbody-membros"></tbody></table>
             </div>
         </div>
 
@@ -594,9 +637,21 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
         <div id="page-ausencias" class="page">
             <div class="card" style="padding: 0; background: transparent; border: none; box-shadow: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="color: var(--warning);"><i class="ph-fill ph-user-switch"></i> AUSÊNCIAS</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom:14px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <h2 style="color: var(--warning);"><i class="ph-fill ph-user-switch"></i> AUSÊNCIAS</h2>
+                        <span id="ausencias-counter" style="background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3); color:var(--warning); font-family:'Share Tech Mono'; font-size:11px; padding:3px 10px; border-radius:20px;">0</span>
+                    </div>
                     <button onclick="window.openAusenciaModal()" class="btn-add" style="background:var(--warning); color:#000;"><i class="ph-bold ph-plus"></i> REGISTAR AUSÊNCIA</button>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+                    <input type="text" id="ausencias-search" placeholder="🔍 Pesquisar por membro ou motivo..." oninput="window.renderAusencias()" style="flex:1; min-width:200px; background:rgba(0,0,0,0.35); border:1px solid var(--border); color:var(--white); padding:8px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; transition:0.2s;">
+                    <div style="display:flex; gap:7px;">
+                        <button class="aus-status-btn" onclick="window.setAusenciasFilter('todos',this)" style="padding:5px 14px;border-radius:7px;font-family:'Orbitron';font-size:10px;font-weight:900;cursor:pointer;border:1px solid rgba(251,191,36,0.4);background:rgba(251,191,36,0.15);color:var(--warning);transition:0.2s;">TODOS</button>
+                        <button class="aus-status-btn" onclick="window.setAusenciasFilter('Pendente',this)" style="padding:5px 14px;border-radius:7px;font-family:'Orbitron';font-size:10px;font-weight:900;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);transition:0.2s;">PENDENTES</button>
+                        <button class="aus-status-btn" onclick="window.setAusenciasFilter('Validada',this)" style="padding:5px 14px;border-radius:7px;font-family:'Orbitron';font-size:10px;font-weight:900;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);transition:0.2s;">VALIDADAS</button>
+                        <button class="aus-status-btn" onclick="window.setAusenciasFilter('Recusada',this)" style="padding:5px 14px;border-radius:7px;font-family:'Orbitron';font-size:10px;font-weight:900;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);transition:0.2s;">RECUSADAS</button>
+                    </div>
                 </div>
             </div>
             <div class="card" style="overflow-x: auto; padding: 0;">
@@ -648,9 +703,20 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         </div>
 
         <div id="page-relatorios" class="page">
-            <div class="card" style="padding: 0; background: transparent; border: none; box-shadow: none; display: flex; justify-content: space-between; align-items: center;">
+            <div class="card" style="padding: 0; background: transparent; border: none; box-shadow: none; display: flex; justify-content: space-between; align-items: center; margin-bottom:14px;">
                 <h2 style="color: var(--purple); text-shadow:0 0 15px rgba(168,85,247,0.3);"><i class="ph-fill ph-chart-line-up"></i> GERAR RELATÓRIOS DAS MOVS</h2>
                 <div style="display: flex; gap: 15px;"><button onclick="window.gerarRelatorioSemana()" class="btn-acao btn-outline warning" style="padding:10px 20px;"><i class="ph-bold ph-share-network"></i> Relatório Semanal</button><button id="btn-limpar-relatorios" onclick="window.openLimpezaModal('movs')" class="btn-acao btn-outline danger" style="padding:10px 20px;"><i class="ph-bold ph-trash"></i> Limpar Tudo</button></div>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+                <input type="text" id="rel-search" placeholder="🔍 Pesquisar por responsável ou auxiliar..." oninput="window.renderRelatorios()" style="flex:1; min-width:200px; background:rgba(0,0,0,0.35); border:1px solid var(--border); color:var(--white); padding:8px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; transition:0.2s;">
+                <select id="rel-filter-tipo" onchange="window.renderRelatorios()" style="background:rgba(0,0,0,0.4); border:1px solid var(--border); color:var(--white); padding:8px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; cursor:pointer;">
+                    <option value="">Todos os tipos</option>
+                    <option value="Temática">Temática</option>
+                    <option value="Quiz">Quiz</option>
+                    <option value="Jogatina">Jogatina</option>
+                    <option value="Cine">Cine</option>
+                    <option value="Reunião Setorial">Reunião Setorial</option>
+                </select>
             </div>
             <div id="div-relatorios-list"></div>
         </div>
@@ -834,9 +900,20 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
 <!-- FUNÇÕES -->
 <div id="page-funcoes" class="page" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <h2 style="color:#818cf8; text-shadow:0 0 15px rgba(129,140,248,0.3);"><i class="ph-fill ph-identification-badge"></i> FUNÇÕES DA GESTÃO</h2>
         <button class="btn-add" style="background:#818cf8; color:#fff;" onclick="window.openFuncaoModal()"><i class="ph-bold ph-plus"></i> ATRIBUIR FUNÇÃO</button>
+    </div>
+    <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+        <input type="text" id="funcoes-search" placeholder="🔍 Pesquisar por membro ou função..." oninput="window.renderFuncoes()" style="flex:1; min-width:200px; background:rgba(0,0,0,0.35); border:1px solid var(--border); color:var(--white); padding:8px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; transition:0.2s;">
+        <select id="funcoes-filter-hierarquia" onchange="window.renderFuncoes()" style="background:rgba(0,0,0,0.4); border:1px solid var(--border); color:var(--white); padding:8px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; cursor:pointer;">
+            <option value="">Todas as hierarquias</option>
+            <option value="Líder Geral">Líder Geral</option>
+            <option value="Líder">Líder</option>
+            <option value="Sub-Líder">Sub-Líder</option>
+            <option value="Gerente">Gerente</option>
+            <option value="Supervisor">Supervisor</option>
+        </select>
     </div>
     <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(380px,1fr)); gap:20px;" id="funcoes-grid">
         <div class="empty-state" style="grid-column:1/-1; padding:60px;">Nenhuma função atribuída.</div>
@@ -1020,11 +1097,11 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
 <!-- ADVERTÊNCIAS -->
 <div id="page-adv" class="page" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <h2 style="color:var(--danger);"><i class="ph-fill ph-warning-octagon"></i> ADVERTÊNCIAS</h2>
         <button class="btn-add" style="background:var(--danger); color:#fff;" onclick="window.openAdvModal()"><i class="ph-bold ph-plus"></i> REGISTAR ADV</button>
     </div>
-    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px;">
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px;">
         <div class="card" style="padding:20px; border-left:4px solid var(--warning); margin:0; text-align:center;">
             <div style="font-size:10px; color:var(--text); font-family:'Orbitron'; font-weight:bold; letter-spacing:1px; margin-bottom:6px;">1ª ADV</div>
             <div id="adv-count-1" style="font-size:32px; color:var(--warning); font-family:'Share Tech Mono'; font-weight:900;">0</div>
@@ -1038,14 +1115,15 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
             <div id="adv-count-3" style="font-size:32px; color:var(--danger); font-family:'Share Tech Mono'; font-weight:900;">0</div>
         </div>
     </div>
+    <input type="text" id="adv-search" placeholder="🔍 Pesquisar por membro, ID ou motivo..." oninput="window.renderAdv()" style="width:100%; background:rgba(0,0,0,0.35); border:1px solid var(--border); color:var(--white); padding:10px 16px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; margin-bottom:14px; transition:0.2s;">
     <div id="adv-list"></div>
 </div>
 
 <!-- AUTORIZAÇÕES -->
 <div id="page-autorizacoes" class="page" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h2 style="color:var(--success);"><i class="ph-fill ph-seal-check"></i> AUTORIZAÇÕES DE PERM</h2>
-        <button class="btn-add" style="background:var(--success); color:#000;" onclick="window.openAutorizacaoModal()"><i class="ph-bold ph-plus"></i> NOVA AUTORIZAÇÃO</button>
+        <button class="btn-add" style="background:var(--success); color:#000;" onclick="window.openAutorizacaoModal()"><i class="ph-bold ph-plus"></i> ADICIONAR CANDIDATO</button>
     </div>
     <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px;">
         <div class="card" style="padding:18px; border-left:4px solid var(--warning); margin:0; text-align:center;">
@@ -1070,12 +1148,26 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
             <div id="autorizacoes-count-coroa" style="font-size:28px; color:var(--purple); font-family:'Share Tech Mono'; font-weight:900;">0</div>
         </div>
     </div>
+
+    <!-- Pesquisa -->
+    <input type="text" id="autorizacoes-search" placeholder="🔍 Pesquisar por membro ou ID..." oninput="window.renderAutorizacoes()" style="width:100%; background:rgba(0,0,0,0.35); border:1px solid var(--border); color:var(--white); padding:9px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; margin-bottom:18px; transition:0.2s;">
+
+    <!-- Secção: Pendentes -->
     <div class="card" style="padding:0; overflow:hidden; margin-bottom:20px;">
-        <div style="padding:14px 20px; font-family:'Orbitron'; font-size:11px; color:var(--success); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-            <span><i class="ph-fill ph-seal-check"></i> MEMBROS AUTORIZADOS</span>
-            <span id="autorizacoes-count" style="font-family:'Share Tech Mono'; color:var(--white); font-size:13px;">0 total</span>
+        <div style="padding:14px 20px; font-family:'Orbitron'; font-size:11px; color:var(--warning); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <span><i class="ph-fill ph-clock"></i> AGUARDANDO AUTORIZAÇÃO</span>
+            <span id="autorizacoes-count" style="font-family:'Share Tech Mono'; color:var(--white); font-size:13px;">0</span>
         </div>
-        <div id="autorizacoes-list" style="padding:15px; max-height:calc(100vh - 480px); overflow-y:auto;"></div>
+        <div id="autorizacoes-list" style="padding:15px; max-height:400px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- Secção: Já Autorizados -->
+    <div class="card" style="padding:0; overflow:hidden;">
+        <div style="padding:14px 20px; font-family:'Orbitron'; font-size:11px; color:var(--success); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <span><i class="ph-fill ph-seal-check"></i> JÁ AUTORIZADOS</span>
+            <span id="autorizacoes-count-ok" style="font-family:'Share Tech Mono'; color:var(--white); font-size:13px;">0</span>
+        </div>
+        <div id="autorizacoes-list-ok" style="padding:15px; max-height:400px; overflow-y:auto;"></div>
     </div>
 </div>
 
@@ -1214,8 +1306,11 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 </div>
 
 <div id="page-levelup" class="page" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-        <h2 style="color:var(--success); text-shadow:0 0 15px var(--success-glow);"><i class="ph-fill ph-trophy"></i> LEVEL UP</h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <h2 style="color:var(--success); text-shadow:0 0 15px var(--success-glow);"><i class="ph-fill ph-trophy"></i> LEVEL UP</h2>
+            <span id="levelup-counter" style="background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); color:var(--success); font-family:'Share Tech Mono'; font-size:11px; padding:3px 10px; border-radius:20px;">0</span>
+        </div>
         <div style="display:flex; gap:10px;">
             <button class="btn-acao btn-outline primary" style="padding:10px 18px;" onclick="window.copiarTodosLevelUp()"><i class="ph-bold ph-copy"></i> Copiar Todos</button>
             <button class="btn-add" style="background:var(--success); color:#000;" onclick="window.openLevelUpModal()"><i class="ph-bold ph-plus"></i> GERAR LVL UP</button>
@@ -1254,6 +1349,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
     </div>
 
     <!-- Lista de level ups registados -->
+    <input type="text" id="levelup-search" placeholder="🔍 Pesquisar por membro ou ID..." oninput="window.renderLevelUps()" style="width:100%; background:rgba(0,0,0,0.35); border:1px solid var(--border); color:var(--white); padding:9px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; margin-bottom:14px; transition:0.2s;">
     <div id="levelup-list"></div>
 </div>
 
@@ -1297,22 +1393,22 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 <!-- ========== INFORMAÇÕES DA SEMANA ========== -->
 <div id="page-info-semana" class="page" style="display:none;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 style="color:var(--accent); text-shadow:0 0 15px var(--accent-glow);"><i class="ph-fill ph-calendar-star"></i> INFORMAÇÕES DA SEMANA</h2>
+        <h2 style="color:var(--accent); text-shadow:0 0 15px var(--accent-glow);"><i class="ph-fill ph-calendar-star"></i> REGISTRO SEMANAL</h2>
     </div>
 
-    <!-- Tabs internas -->
+    <!-- Tabs internas com contadores -->
     <div style="display:flex; gap:0; margin-bottom:24px; border-bottom:1px solid var(--border);">
         <button id="tab-btn-info" onclick="window.switchInnerTab('info')"
-            style="padding:10px 22px; background:transparent; border:none; border-bottom:2px solid var(--accent); color:var(--accent); font-family:'Orbitron'; font-size:11px; font-weight:900; letter-spacing:1px; cursor:pointer; transition:0.2s;">
-            <i class="ph-fill ph-calendar-star"></i> INFORMAÇÕES
+            style="padding:10px 22px; background:transparent; border:none; border-bottom:2px solid var(--accent); color:var(--accent); font-family:'Orbitron'; font-size:11px; font-weight:900; letter-spacing:1px; cursor:pointer; transition:0.2s; display:flex; align-items:center; gap:7px;">
+            <i class="ph-fill ph-calendar-star"></i> INFORMAÇÕES <span id="tab-count-info" style="background:rgba(0,220,255,0.15);border:1px solid rgba(0,220,255,0.3);border-radius:10px;padding:1px 7px;font-size:9px;"></span>
         </button>
         <button id="tab-btn-problemas" onclick="window.switchInnerTab('problemas')"
-            style="padding:10px 22px; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--text); font-family:'Orbitron'; font-size:11px; font-weight:900; letter-spacing:1px; cursor:pointer; transition:0.2s;">
-            <i class="ph-fill ph-warning-diamond"></i> PROBLEMAS
+            style="padding:10px 22px; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--text); font-family:'Orbitron'; font-size:11px; font-weight:900; letter-spacing:1px; cursor:pointer; transition:0.2s; display:flex; align-items:center; gap:7px;">
+            <i class="ph-fill ph-warning-diamond"></i> PROBLEMAS <span id="tab-count-problemas" style="background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);border-radius:10px;padding:1px 7px;font-size:9px;color:var(--danger);"></span>
         </button>
         <button id="tab-btn-ocorrencias" onclick="window.switchInnerTab('ocorrencias')"
-            style="padding:10px 22px; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--text); font-family:'Orbitron'; font-size:11px; font-weight:900; letter-spacing:1px; cursor:pointer; transition:0.2s;">
-            <i class="ph-fill ph-shield-warning"></i> OCORRÊNCIAS
+            style="padding:10px 22px; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--text); font-family:'Orbitron'; font-size:11px; font-weight:900; letter-spacing:1px; cursor:pointer; transition:0.2s; display:flex; align-items:center; gap:7px;">
+            <i class="ph-fill ph-shield-warning"></i> OCORRÊNCIAS <span id="tab-count-ocorrencias" style="background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);border-radius:10px;padding:1px 7px;font-size:9px;color:var(--purple);"></span>
         </button>
     </div>
 
@@ -1326,7 +1422,13 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
     <!-- Painel: Problemas -->
     <div id="inner-panel-problemas" style="display:none;">
-        <div style="display:flex; justify-content:flex-end; margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <div style="display:flex; gap:7px;">
+                <button class="prob-filter-btn" onclick="window.setProbFilter('todos',this)" style="padding:5px 14px;border-radius:7px;font-family:'Orbitron';font-size:10px;font-weight:900;cursor:pointer;border:1px solid rgba(0,220,255,0.4);background:rgba(0,220,255,0.15);color:var(--accent);transition:0.2s;">TODOS</button>
+                <button class="prob-filter-btn" onclick="window.setProbFilter('aberto',this)" style="padding:5px 14px;border-radius:7px;font-family:'Orbitron';font-size:10px;font-weight:900;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);transition:0.2s;">🔴 ABERTOS</button>
+                <button class="prob-filter-btn" onclick="window.setProbFilter('em_andamento',this)" style="padding:5px 14px;border-radius:7px;font-family:'Orbitron';font-size:10px;font-weight:900;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);transition:0.2s;">🟡 EM ANDAMENTO</button>
+                <button class="prob-filter-btn" onclick="window.setProbFilter('resolvido',this)" style="padding:5px 14px;border-radius:7px;font-family:'Orbitron';font-size:10px;font-weight:900;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);transition:0.2s;">🟢 RESOLVIDOS</button>
+            </div>
             <button class="btn-add" style="background:var(--danger); color:#fff;" onclick="window.openProblemaModal()"><i class="ph-bold ph-plus"></i> NOVO PROBLEMA</button>
         </div>
         <div id="problemas-list"></div>
@@ -1334,7 +1436,8 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
     <!-- Painel: Ocorrências -->
     <div id="inner-panel-ocorrencias" style="display:none;">
-        <div style="display:flex; justify-content:flex-end; margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <input type="text" id="ocor-search" placeholder="🔍 Pesquisar por membro..." oninput="window.renderOcorrencias()" style="width:280px; background:rgba(0,0,0,0.35); border:1px solid var(--border); color:var(--white); padding:8px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; transition:0.2s;" onfocus="this.style.borderColor='rgba(167,139,250,0.5)'" onblur="this.style.borderColor='var(--border)'">
             <button class="btn-add" style="background:var(--purple); color:#fff;" onclick="window.openOcorrenciaModal()"><i class="ph-bold ph-plus"></i> NOVA OCORRÊNCIA</button>
         </div>
         <div id="ocorrencias-list"></div>
@@ -1393,25 +1496,36 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         <button class="btn-add" style="background:#f59e0b; color:#000;" onclick="window.openSugestaoModal()"><i class="ph-bold ph-plus"></i> NOVA SUGESTÃO</button>
     </div>
 
-    <!-- Filtro por categoria -->
-    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
-        <button class="sug-filter-btn active" id="sug-filter-todas" onclick="window.setSugFilter('todas', this)" style="padding:6px 14px; border-radius:8px; font-family:'Orbitron'; font-size:10px; font-weight:900; cursor:pointer; border:1px solid rgba(245,158,11,0.4); background:rgba(245,158,11,0.15); color:#f59e0b; transition:0.2s;">TODAS</button>
-        <button class="sug-filter-btn" id="sug-filter-mov" onclick="window.setSugFilter('mov', this)" style="padding:6px 14px; border-radius:8px; font-family:'Orbitron'; font-size:10px; font-weight:900; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text); transition:0.2s;">🎮 MOVs</button>
-        <button class="sug-filter-btn" id="sug-filter-atividade" onclick="window.setSugFilter('atividade', this)" style="padding:6px 14px; border-radius:8px; font-family:'Orbitron'; font-size:10px; font-weight:900; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text); transition:0.2s;">⚡ ATIVIDADES</button>
-        <button class="sug-filter-btn" id="sug-filter-campeonato" onclick="window.setSugFilter('campeonato', this)" style="padding:6px 14px; border-radius:8px; font-family:'Orbitron'; font-size:10px; font-weight:900; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text); transition:0.2s;">🏆 CAMPEONATOS</button>
-        <button class="sug-filter-btn" id="sug-filter-gamenews" onclick="window.setSugFilter('gamenews', this)" style="padding:6px 14px; border-radius:8px; font-family:'Orbitron'; font-size:10px; font-weight:900; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text); transition:0.2s;">📰 GAME NEWS</button>
-        <button class="sug-filter-btn" id="sug-filter-outro" onclick="window.setSugFilter('outro', this)" style="padding:6px 14px; border-radius:8px; font-family:'Orbitron'; font-size:10px; font-weight:900; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text); transition:0.2s;">📋 OUTROS</button>
-        <button class="sug-filter-btn" id="sug-filter-usadas" onclick="window.setSugFilter('usadas', this)" style="padding:6px 14px; border-radius:8px; font-family:'Orbitron'; font-size:10px; font-weight:900; cursor:pointer; border:1px solid rgba(52,211,153,0.3); background:transparent; color:#34d399; transition:0.2s;">🎯 JÁ USADAS</button>
+    <!-- Pesquisa -->
+    <div style="margin-bottom:14px;">
+        <input type="text" id="sug-search" placeholder="🔍  Pesquisar por descrição, título ou autor..." oninput="window.renderSugestoes()" style="width:100%; background:rgba(0,0,0,0.35); border:1px solid var(--border); color:var(--white); padding:10px 16px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; transition:0.2s;" onfocus="this.style.borderColor='rgba(245,158,11,0.5)'; this.style.boxShadow='0 0 0 1px rgba(245,158,11,0.15)'" onblur="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
     </div>
+
+    <!-- Filtros dinâmicos -->
+    <div id="sug-filtros-wrap" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;"></div>
 
     <div id="sugestoes-list"></div>
 </div>
 
 <!-- ========== FEEDBACKS ========== -->
 <div id="page-feedbacks" class="page" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-        <h2 style="color:var(--success); text-shadow:0 0 15px var(--success-glow);"><i class="ph-fill ph-chat-circle-text"></i> FEEDBACKS DOS MEMBROS</h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <h2 style="color:var(--success); text-shadow:0 0 15px var(--success-glow);"><i class="ph-fill ph-chat-circle-text"></i> FEEDBACKS DOS MEMBROS</h2>
+            <span id="feedbacks-counter" style="background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); color:var(--success); font-family:'Share Tech Mono'; font-size:11px; padding:3px 10px; border-radius:20px;">0</span>
+        </div>
         <button class="btn-add" style="background:var(--success); color:#000;" onclick="window.openFeedbackModal()"><i class="ph-bold ph-plus"></i> NOVO FEEDBACK</button>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+        <input type="text" id="feedbacks-search" placeholder="🔍 Pesquisar por membro ou texto..." oninput="window.renderFeedbacks()" style="flex:1; min-width:200px; background:rgba(0,0,0,0.35); border:1px solid var(--border); color:var(--white); padding:8px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; transition:0.2s;">
+        <select id="feedbacks-filter-tipo" onchange="window.renderFeedbacks()" style="background:rgba(0,0,0,0.4); border:1px solid var(--border); color:var(--white); padding:8px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none; cursor:pointer;">
+            <option value="">Todos os tipos</option>
+            <option value="positivo">✅ Positivo</option>
+            <option value="negativo">❌ Negativo</option>
+            <option value="elogio">⭐ Elogio</option>
+            <option value="critica">📝 Crítica Construtiva</option>
+            <option value="sugestao">💡 Sugestão</option>
+        </select>
     </div>
     <div id="feedbacks-list"></div>
 </div>
@@ -1434,6 +1548,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                     <option value="atividade">⚡ Atividade / Dinâmica</option>
                     <option value="campeonato">🏆 Campeonato</option>
                     <option value="gamenews">📰 Game News</option>
+                    <option value="ideias">💡 Melhorias / Ideias</option>
                     <option value="outro">📋 Outro</option>
                 </select>
             </div>
@@ -1449,7 +1564,6 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                 <option value="Quiz">Quiz</option>
                 <option value="Jogatina">Jogatina</option>
                 <option value="Cine">Cine</option>
-                <option value="Reunião Setorial">Reunião Setorial</option>
             </select>
         </div>
 
@@ -1472,13 +1586,10 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
             <label>STATUS</label>
             <select id="sug-status">
                 <option value="pendente">🟡 Pendente</option>
-                <option value="aprovada">✅ Aprovada</option>
-                <option value="recusada">❌ Recusada</option>
-                <option value="implementada">🚀 Implementada</option>
                 <option value="usada">🎯 Usada</option>
+                <option value="recusada">❌ Recusada</option>
             </select>
         </div>
-        <div class="modal-actions">
             <button onclick="window.closeModal('modal-sugestao')" class="btn-cancel">CANCELAR</button>
             <button onclick="window.saveSugestao()" class="btn-save" id="btn-salvar-sug" style="background:#f59e0b; color:#000;">GUARDAR</button>
         </div>
@@ -1488,7 +1599,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 <!-- MODAL INFORMAÇÕES DA SEMANA -->
 <div id="modal-info-semana" class="modal-overlay">
     <div class="modal-content" style="max-width:620px;">
-        <h2 style="color:var(--accent); margin-bottom:25px;"><i class="ph-fill ph-calendar-star"></i> INFORMAÇÕES DA SEMANA</h2>
+        <h2 style="color:var(--accent); margin-bottom:25px;"><i class="ph-fill ph-calendar-star"></i> REGISTRO SEMANAL</h2>
         <input type="hidden" id="is-docid">
         <div class="form-group" style="margin-bottom:15px;"><label>SEMANA DE REFERÊNCIA</label><input type="date" id="is-data"></div>
         <div class="form-group" style="margin-bottom:15px;">
@@ -2403,7 +2514,10 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
     window.applyRBAC = () => {
         const role = window.currentUserRole;
-        document.getElementById('nav-user-role').innerText = role.replace('_', ' ');
+        const roleLabels = { lider_geral: 'Administrador', lider: 'Líder', sublider: 'Sub-Líder', gerente: 'Gerente', supervisor: 'Supervisor', convidado: 'Convidado' };
+        document.getElementById('nav-user-role').innerText = roleLabels[role] || role.replace('_', ' ');
+        const nameEl = document.getElementById('nav-user-name');
+        if(nameEl) nameEl.innerText = window.currentUserName || '—';
 
         const idsToHide = [
             'nav-cat-membros', 'nav-group-membros', 
@@ -2413,7 +2527,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             'nav-sep-notif', 'nav-cat-notif', 'nav-group-notif', 'btn-nav-notif-mov', 'btn-nav-notif-up', 'btn-nav-notif-rpp', 'btn-nav-notif-conta',
             'nav-sep-gestao', 'nav-cat-gestao', 'nav-group-gestao', 'btn-nav-funcoes', 'btn-nav-pautas', 'btn-nav-adv', 'btn-nav-autorizacoes', 'btn-nav-atividade', 'btn-nav-blacklist',
             'nav-admin-separator', 'nav-cat-admin', 'nav-group-admin', 'btn-nav-acessos', 'btn-nav-historico',
-            'btn-nav-relatorios', 'btn-nav-movs', 'btn-nav-ind', 'btn-nav-destaques', 'btn-nav-levelup', 'btn-nav-upamentos', 'nav-sep-area', 'nav-cat-area', 'nav-group-area', 'btn-nav-info-semana', 'btn-nav-sugestoes', 'btn-nav-feedbacks'
+            'btn-nav-relatorios', 'btn-nav-movs', 'btn-nav-ind', 'btn-nav-destaques', 'btn-nav-levelup', 'btn-nav-upamentos', 'nav-sep-area', 'nav-cat-area', 'nav-group-area', 'btn-nav-sugestoes', 'btn-nav-feedbacks'
         ];
         idsToHide.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
 
@@ -2448,13 +2562,16 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             document.getElementById('btn-nav-inst').style.display = 'flex';
             document.getElementById('btn-nav-acol').style.display = 'flex';
             document.getElementById('btn-nav-gn').style.display = 'flex';
-            // Área — avisos e sugestões visíveis para subgestão
+            // Área — avisos, membros (só add) e sugestões visíveis para subgestão
             document.getElementById('nav-sep-area').style.display = 'block';
             document.getElementById('nav-cat-area').style.display = 'flex';
             document.getElementById('nav-group-area').style.display = 'block';
             document.getElementById('btn-nav-avisos').style.display = 'flex';
+            document.getElementById('btn-nav-membros-area').style.display = 'flex';
             document.getElementById('btn-nav-sugestoes').style.display = 'flex';
             document.getElementById('btn-nav-feedbacks').style.display = 'flex';
+            // Sub-gestão pode adicionar membros mas não editar/apagar
+            if(btnMembro) btnMembro.style.display = 'flex';
             // Limpar Semana só para gestão
             ['btn-limpar-inst','btn-limpar-acol','btn-limpar-gn'].forEach(id => {
                 const el = document.getElementById(id); if(el) el.style.display = 'none';
@@ -3351,12 +3468,34 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         { id:'dash-panel-rpp',       label:'RPP',                   icon:'ph-shield-warning',     cor:'var(--warning)',  size:1, visible:true  },
         { id:'dash-panel-entradas',  label:'Entradas / Saídas',     icon:'ph-door',               cor:'var(--success)',  size:1, visible:true  },
         { id:'dash-panel-trocaup',   label:'Troca de UP',           icon:'ph-swap',               cor:'var(--purple)',   size:1, visible:true  },
-        { id:'dash-panel-info',      label:'Últimas Informações',   icon:'ph-calendar-star',      cor:'var(--accent)',   size:2, visible:true  },
+        { id:'dash-panel-info',      label:'Registro Semanal',      icon:'ph-calendar-star',      cor:'var(--accent)',   size:2, visible:true  },
         { id:'dash-panel-destaques', label:'Membros em Destaque',   icon:'ph-trophy',             cor:'#fbbf24',         size:1, visible:true  },
         { id:'dash-panel-subareas',  label:'Rendimento Sub Áreas',  icon:'ph-chart-bar',          cor:'#f472b6',         size:1, visible:true  },
         { id:'dash-panel-feedbacks', label:'Feedbacks',             icon:'ph-chat-centered-text', cor:'var(--purple)',   size:1, visible:true  },
         { id:'dash-panel-trocaconta',label:'Troca de Conta',        icon:'ph-arrows-clockwise',   cor:'var(--accent)',   size:1, visible:false },
     ];
+
+    const DASH_PANELS_DEF_GERAL = [
+        { id:'dash-panel-avisos',    label:'Avisos Recentes',       icon:'ph-bell-ringing',       cor:'var(--warning)',  size:3, visible:true  },
+        { id:'dash-panel-movs',      label:'MOVs de Hoje',          icon:'ph-calendar-check',     cor:'var(--accent)',   size:3, visible:true  },
+        { id:'dash-panel-sug',       label:'Sugestões',             icon:'ph-lightbulb',          cor:'#f59e0b',         size:2, visible:true  },
+        { id:'dash-panel-gn',        label:'Game News',             icon:'ph-article',            cor:'var(--gn-color)', size:2, visible:true  },
+        { id:'dash-panel-entradas',  label:'Entradas / Saídas',     icon:'ph-door',               cor:'var(--success)',  size:2, visible:true  },
+        { id:'dash-panel-alertas',   label:'Alertas & Pendências',  icon:'ph-warning-octagon',    cor:'var(--danger)',   size:1, visible:false },
+        { id:'dash-panel-rpp',       label:'RPP',                   icon:'ph-shield-warning',     cor:'var(--warning)',  size:1, visible:false },
+        { id:'dash-panel-trocaup',   label:'Troca de UP',           icon:'ph-swap',               cor:'var(--purple)',   size:1, visible:false },
+        { id:'dash-panel-info',      label:'Registro Semanal',      icon:'ph-calendar-star',      cor:'var(--accent)',   size:2, visible:false },
+        { id:'dash-panel-destaques', label:'Membros em Destaque',   icon:'ph-trophy',             cor:'#fbbf24',         size:1, visible:false },
+        { id:'dash-panel-subareas',  label:'Rendimento Sub Áreas',  icon:'ph-chart-bar',          cor:'#f472b6',         size:1, visible:false },
+        { id:'dash-panel-feedbacks', label:'Feedbacks',             icon:'ph-chat-centered-text', cor:'var(--purple)',   size:1, visible:false },
+        { id:'dash-panel-trocaconta',label:'Troca de Conta',        icon:'ph-arrows-clockwise',   cor:'var(--accent)',   size:1, visible:false },
+    ];
+
+    const ROLES_GESTAO   = ['lider_geral','lider','sublider','gerente','supervisor'];
+    const ROLES_PODE_CFG = ['lider_geral','lider','sublider'];
+
+    window.getDashKey = () => ROLES_GESTAO.includes(window.currentUserRole) ? 'dash_layout_gestao' : 'dash_layout_geral';
+    window.getDashDef = () => ROLES_GESTAO.includes(window.currentUserRole) ? DASH_PANELS_DEF : DASH_PANELS_DEF_GERAL;
 
     window._dashPanels = JSON.parse(JSON.stringify(DASH_PANELS_DEF));
 
@@ -3364,16 +3503,11 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         const container = document.getElementById('dash-layout-container');
         if(!container) return;
         container.innerHTML = '';
-
         const visible = window._dashPanels.filter(p => p.visible);
         if(!visible.length) { container.innerHTML = '<div class="empty-state" style="padding:60px;">Nenhum painel ativo. Configure o dashboard.</div>'; return; }
-
-        // Montar linhas usando CSS grid com 6 colunas base
-        // size 1 = 1 col, size 2 = 2 cols, size 3 = 3 cols (de 6)
         const colMap = {1:'span 1', 2:'span 2', 3:'span 3', 4:'span 4', 5:'span 5', 6:'span 6'};
         const grid = document.createElement('div');
         grid.style.cssText = 'display:grid;grid-template-columns:repeat(6,1fr);gap:12px;';
-
         visible.forEach(p => {
             const panel = document.getElementById(p.id);
             if(!panel) return;
@@ -3381,12 +3515,15 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             panel.style.gridColumn = colMap[Math.min(p.size,6)] || 'span 1';
             grid.appendChild(panel);
         });
-
         container.appendChild(grid);
     };
 
     window.openConfigDash = () => {
         window._dashPanelsTemp = JSON.parse(JSON.stringify(window._dashPanels));
+        // show which dashboard is being edited
+        const isGestao = ROLES_GESTAO.includes(window.currentUserRole);
+        const hdr = document.getElementById('config-dash-tipo-label');
+        if(hdr) hdr.textContent = isGestao ? 'Dashboard Gestão' : 'Dashboard Geral';
         window.renderConfigDashLista();
         document.getElementById('modal-config-dash').style.display = 'flex';
     };
@@ -3403,22 +3540,14 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             const isActive = p.visible;
             const div = document.createElement('div');
             div.style.cssText = 'display:flex;align-items:center;gap:10px;background:'+(isActive?'rgba(255,255,255,0.03)':'rgba(0,0,0,0.2)')+';border:0.5px '+(isActive?'solid rgba(255,255,255,0.07)':'dashed rgba(255,255,255,0.04)')+';border-radius:8px;padding:10px 12px;transition:opacity 0.2s;'+(isActive?'':'opacity:0.55;');
-
-            // Barra cor lateral
             const bar = document.createElement('div');
             bar.style.cssText = 'width:4px;height:32px;border-radius:3px;background:'+(isActive?p.cor:'rgba(255,255,255,0.15)')+';flex-shrink:0;transition:background 0.2s;';
-
-            // Ícone
             const ico = document.createElement('div');
             ico.style.cssText = 'width:30px;height:30px;border-radius:6px;background:'+(isActive?p.cor+'18':'rgba(255,255,255,0.04)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;';
-            ico.innerHTML = '<i class="ph-fill '+p.icon+'" style="font-size:14px;color:'+(isActive?p.cor:'rgba(255,255,255,0.2)');+'"></i>';
-
-            // Nome
+            ico.innerHTML = '<i class="ph-fill '+p.icon+'" style="font-size:14px;color:'+(isActive?p.cor:'rgba(255,255,255,0.2)')+'"></i>';
             const nome = document.createElement('span');
             nome.style.cssText = 'flex:1;font-size:13px;font-weight:600;font-family:Rajdhani;color:'+(isActive?'var(--white)':'var(--text)')+';';
             nome.textContent = p.label;
-
-            // Botões tamanho
             const sizeWrap = document.createElement('div');
             sizeWrap.style.cssText = 'display:flex;gap:3px;';
             sizeOpts.forEach(s => {
@@ -3434,8 +3563,6 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                 });
                 sizeWrap.appendChild(btn);
             });
-
-            // Setas
             const arrows = document.createElement('div');
             arrows.style.cssText = 'display:flex;gap:3px;';
             [['↑',-1],['↓',1]].forEach(([lbl,dir]) => {
@@ -3447,8 +3574,6 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                 b.addEventListener('click', function(){ window.moveDashPanel(parseInt(this.dataset.idx),parseInt(this.dataset.dir)); });
                 arrows.appendChild(b);
             });
-
-            // Toggle switch
             const tog = document.createElement('div');
             tog.style.cssText = 'width:36px;height:20px;border-radius:10px;background:'+(isActive?p.cor||'var(--accent)':'rgba(255,255,255,0.1)')+';display:flex;align-items:center;padding:2px;cursor:pointer;transition:background 0.2s;flex-shrink:0;';
             const knob = document.createElement('div');
@@ -3460,10 +3585,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                 window._dashPanelsTemp[idx].visible = !window._dashPanelsTemp[idx].visible;
                 window.renderConfigDashLista();
             });
-
-            div.appendChild(bar);
-            div.appendChild(ico);
-            div.appendChild(nome);
+            div.appendChild(bar); div.appendChild(ico); div.appendChild(nome);
             if(isActive) div.appendChild(sizeWrap);
             else {
                 const ocBadge = document.createElement('span');
@@ -3471,11 +3593,11 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                 ocBadge.style.cssText = 'font-size:10px;color:rgba(255,255,255,0.3);border:0.5px solid rgba(255,255,255,0.1);padding:2px 8px;border-radius:4px;font-family:Share Tech Mono;';
                 div.appendChild(ocBadge);
             }
-            div.appendChild(arrows);
-            div.appendChild(tog);
+            div.appendChild(arrows); div.appendChild(tog);
             lista.appendChild(div);
         });
     };
+
     window.moveDashPanel = (i, dir) => {
         const j = i + dir;
         if(j < 0 || j >= window._dashPanelsTemp.length) return;
@@ -3487,7 +3609,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         window._dashPanels = JSON.parse(JSON.stringify(window._dashPanelsTemp));
         window.renderDashLayout();
         try {
-            await setDoc(doc(db,'gestao_config','dash_layout_v2'), {
+            await setDoc(doc(db,'gestao_config', window.getDashKey()), {
                 panels: window._dashPanels.map(p => ({id:p.id, size:p.size, visible:p.visible})),
                 atualizadoEm: new Date().toISOString()
             });
@@ -3497,30 +3619,34 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     };
 
     window.resetDashLayout = () => {
-        window._dashPanelsTemp = JSON.parse(JSON.stringify(DASH_PANELS_DEF));
+        window._dashPanelsTemp = JSON.parse(JSON.stringify(window.getDashDef()));
         window.renderConfigDashLista();
     };
 
     window.carregarDashLayout = async () => {
+        const key = window.getDashKey();
+        const def = window.getDashDef();
         try {
-            const snap = await getDoc(doc(db,'gestao_config','dash_layout_v2'));
+            const snap = await getDoc(doc(db,'gestao_config', key));
             if(snap.exists() && snap.data().panels) {
                 const saved = snap.data().panels;
                 const merged = [];
                 saved.forEach(s => {
-                    const def = DASH_PANELS_DEF.find(d => d.id === s.id);
-                    if(def) merged.push({...JSON.parse(JSON.stringify(def)), size:s.size, visible:s.visible});
+                    const d = def.find(d => d.id === s.id);
+                    if(d) merged.push({...JSON.parse(JSON.stringify(d)), size:s.size, visible:s.visible});
                 });
-                DASH_PANELS_DEF.forEach(d => {
+                def.forEach(d => {
                     if(!merged.find(m => m.id === d.id)) merged.push(JSON.parse(JSON.stringify(d)));
                 });
                 window._dashPanels = merged;
+            } else {
+                window._dashPanels = JSON.parse(JSON.stringify(def));
             }
-        } catch(e){ console.error('[PRZ dash]',e); }
+        } catch(e){ console.error('[PRZ dash]',e); window._dashPanels = JSON.parse(JSON.stringify(def)); }
         window.renderDashLayout();
-        const canConfig = ['lider_geral','lider','sublider','gerente','supervisor'].includes(window.currentUserRole);
+        const podeConfig = ROLES_PODE_CFG.includes(window.currentUserRole) || window.currentUserRole === 'lider_geral';
         const btn = document.getElementById('btn-config-dash');
-        if(btn) btn.style.display = canConfig ? 'flex' : 'none';
+        if(btn) btn.style.display = podeConfig ? 'flex' : 'none';
     };
 
     onAuthStateChanged(auth, async (user) => { 
@@ -3529,8 +3655,8 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             try {
                 const q = query(collection(db, "portal_users"), where("email", "==", user.email));
                 const snap = await getDocs(q);
-                if(!snap.empty) { window.currentUserRole = snap.docs[0].data().cargo; }
-                else { window.currentUserRole = 'lider_geral'; } 
+                if(!snap.empty) { window.currentUserRole = snap.docs[0].data().cargo; window.currentUserName = snap.docs[0].data().nome || ''; }
+                else { window.currentUserRole = 'lider_geral'; window.currentUserName = ''; }
             } catch(e) { window.currentUserRole = 'convidado'; }
 
             window.applyRBAC();
@@ -3652,7 +3778,16 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     window.deleteAdminUser = async (id) => { if(await window.showConfirm("Apagar a permissão deste usuário?", "Apagar Acesso", true)) { try { await deleteDoc(doc(db, "portal_users", id)); window.showToast("Removido.", "success"); } catch(e){ console.error("Erro ao apagar usuário:", e); window.showToast("Erro ao apagar.", "error"); } } };
 
     window.logHistorico = async (acao, nome, id, motivo) => { try { await setDoc(doc(collection(db, "historico")), { data: new Date().toISOString(), acao, nome, idDiscord: id, motivo: motivo||'N/A' }); } catch(e){ console.error("[PRZ Error]", e); } };
-    window.renderHistorico = () => { const tb = document.getElementById('tbody-historico'); const o = [...window._state.historico].sort((a,b) => new Date(b.data) - new Date(a.data)); tb.innerHTML = o.length ? o.map(h => `<tr><td><span style="font-size:12px; color:var(--text); font-family:'Share Tech Mono';">${new Date(h.data).toLocaleString('pt-PT')}</span></td><td><b style="font-family:'Orbitron'; color:var(--white);">${escapeHTML(h.nome)}</b></td><td><span class="badge b-gray">${h.acao}</span></td><td style="color:var(--white);">${escapeHTML(h.motivo)}</td></tr>`).join('') : '<tr><td colspan="4" class="empty-state">Sem histórico recente.</td></tr>'; };
+    window.renderHistorico = () => {
+        const tb = document.getElementById('tbody-historico'); if(!tb) return;
+        const search = (document.getElementById('hist-search')?.value || '').toLowerCase();
+        const acaoFilter = document.getElementById('hist-filter-acao')?.value || '';
+        let o = [...window._state.historico].sort((a,b) => new Date(b.data) - new Date(a.data));
+        if(acaoFilter) o = o.filter(h => (h.acao||'').toUpperCase().includes(acaoFilter.toUpperCase()));
+        if(search) o = o.filter(h => (h.nome||'').toLowerCase().includes(search) || (h.acao||'').toLowerCase().includes(search) || (h.motivo||'').toLowerCase().includes(search));
+        const counter = document.getElementById('hist-count'); if(counter) counter.innerText = o.length;
+        tb.innerHTML = o.length ? o.map(h => `<tr><td><span style="font-size:12px; color:var(--text); font-family:'Share Tech Mono';">${new Date(h.data).toLocaleString('pt-PT')}</span></td><td><b style="font-family:'Orbitron'; color:var(--white);">${escapeHTML(h.nome)}</b></td><td><span class="badge b-gray">${h.acao}</span></td><td style="color:var(--white);">${escapeHTML(h.motivo)}</td></tr>`).join('') : '<tr><td colspan="4" class="empty-state">Sem registos encontrados.</td></tr>';
+    };
     window.gerarRelatorioHistorico = async () => {
         if(window._state.historico.length === 0) return window.showToast("Sem histórico.", "error");
         const o = [...window._state.historico].sort((a,b) => new Date(b.data) - new Date(a.data));
@@ -3664,25 +3799,91 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     // ==========================================
     // TABELA DE MEMBROS E INATIVOS
     // ==========================================
+    window._membrosFilter = 'todos';
+    window._membrosSort = { col: 'nome', dir: 1 };
+
+    window.setMembrosFilter = (filter, btn) => {
+        window._membrosFilter = filter;
+        document.querySelectorAll('.membros-pos-btn').forEach(b => {
+            b.style.background = 'transparent';
+            b.style.color = 'var(--text)';
+            b.style.borderColor = 'var(--border)';
+        });
+        btn.style.background = 'rgba(0,220,255,0.15)';
+        btn.style.color = 'var(--accent)';
+        btn.style.borderColor = 'rgba(0,220,255,0.4)';
+        window.renderMembers();
+    };
+
+    window.sortMembros = (col) => {
+        if(window._membrosSort.col === col) window._membrosSort.dir *= -1;
+        else { window._membrosSort.col = col; window._membrosSort.dir = 1; }
+        // update indicators
+        ['nome','staff','cargo'].forEach(c => {
+            const el = document.getElementById('sort-ind-'+c);
+            if(!el) return;
+            if(c === col) { el.style.color = 'var(--accent)'; el.innerText = window._membrosSort.dir === 1 ? '↑' : '↓'; }
+            else { el.style.color = 'rgba(255,255,255,0.2)'; el.innerText = '⇅'; }
+        });
+        window.renderMembers();
+    };
+
     window.renderMembers = () => {
         try {
             const tbM = document.getElementById('tbody-membros'), tbR = document.getElementById('tbody-rebocamento'); if(!tbM || !tbR) return;
             const t = (document.getElementById('ipt-search')?.value || '').toLowerCase();
-            const filt = window._state.members.filter(m => { const n = m.m ? String(m.m).toLowerCase() : ''; const id = m.id ? String(m.id) : ''; return n.includes(t) || id.includes(t); });
-            const reb = filt.filter(m => ['1_mes', '2_meses', '3_meses', 'sem_pontos'].includes(m.pts)); 
-            const nor = filt.filter(m => !['1_mes', '2_meses', '3_meses', 'sem_pontos'].includes(m.pts));
-            
-            document.getElementById('count-ativos').innerText = window._state.members.filter(m => m.ativo && !['1_mes', '2_meses', '3_meses', 'sem_pontos'].includes(m.pts)).length;
-            document.getElementById('count-rebocados').innerText = window._state.members.filter(m => ['1_mes', '2_meses', '3_meses', 'sem_pontos'].includes(m.pts)).length + window._state.naoVerificados.length;
-            document.getElementById('count-total').innerText = window._state.members.length + window._state.naoVerificados.length;
-            
-            const isGestaoMaster = ['lider_geral', 'lider', 'sublider', 'gerente'].includes(window.currentUserRole);
+            const posFilter = window._membrosFilter || 'todos';
+            const { col, dir } = window._membrosSort;
+
+            const sortFn = (a, b) => {
+                let va, vb;
+                if(col === 'nome') { va = (a.m||'').toLowerCase(); vb = (b.m||'').toLowerCase(); }
+                else if(col === 'staff') { const ord = {gestao:0,subgestao:1,comum:2}; va = ord[a.posicao]??3; vb = ord[b.posicao]??3; }
+                else if(col === 'cargo') { va = (a.cargo||'').toLowerCase(); vb = (b.cargo||'').toLowerCase(); }
+                else { va = 0; vb = 0; }
+                if(va < vb) return -1 * dir;
+                if(va > vb) return 1 * dir;
+                return 0;
+            };
+
+            const allAtivos = window._state.members.filter(m => !['1_mes','2_meses','3_meses','sem_pontos'].includes(m.pts));
+            const allReb    = window._state.members.filter(m => ['1_mes','2_meses','3_meses','sem_pontos'].includes(m.pts));
+
+            // update position counters
+            const setCount = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+            setCount('mf-count-todos',     allAtivos.length);
+            setCount('mf-count-comum',     allAtivos.filter(m=>m.posicao==='comum').length);
+            setCount('mf-count-subgestao', allAtivos.filter(m=>m.posicao==='subgestao').length);
+            setCount('mf-count-gestao',    allAtivos.filter(m=>m.posicao==='gestao').length);
+
+            // apply text search + position filter to ativos
+            let nor = allAtivos.filter(m => {
+                const n = (m.m||'').toLowerCase(), id = (m.id||'').toLowerCase();
+                const matchText = !t || n.includes(t) || id.includes(t);
+                const matchPos  = posFilter === 'todos' || m.posicao === posFilter;
+                return matchText && matchPos;
+            }).sort(sortFn);
+
+            // rebocamento: only text search, no position filter
+            let reb = allReb.filter(m => {
+                const n = (m.m||'').toLowerCase(), id = (m.id||'').toLowerCase();
+                return !t || n.includes(t) || id.includes(t);
+            }).sort(sortFn);
+
+            // inline counter
+            const counter = document.getElementById('membros-counter');
+            if(counter) counter.innerText = nor.length === allAtivos.length ? `${nor.length} membros` : `${nor.length} / ${allAtivos.length}`;
+
+            document.getElementById('count-ativos').innerText   = allAtivos.length;
+            document.getElementById('count-rebocados').innerText = allReb.length + window._state.naoVerificados.length;
+            document.getElementById('count-total').innerText    = window._state.members.length + window._state.naoVerificados.length;
+
+            const isGestaoMaster = ['lider_geral','lider','sublider','gerente'].includes(window.currentUserRole);
 
             const des = (m, isR) => {
                 const s = (m.pts === 'sim' || m.pts === true || m.pts === 'true') ? 'dot-green' : (['1_semana','2_semanas','3_semanas'].includes(m.pts) ? 'dot-yellow' : 'dot-red');
-                const cCor = window.cargoColors[m.cargo] || "#9ca3af"; 
+                const cCor = window.cargoColors[m.cargo] || "#9ca3af";
                 const btnEdit = isGestaoMaster ? `<button class="btn-acao outline-primary" onclick="window.editMember('${m._id}')"><i class="ph-bold ph-pencil-simple"></i></button><button class="btn-acao outline-danger" onclick="window.openExcluirModal('${m._id}', '${isR?'REBOCADO':'REMOVIDO'}')"><i class="ph-bold ph-trash"></i></button>` : '';
-
                 return `<tr>
                     <td><div style="display:flex; justify-content:center;"><select class="status-dot ${s}" onchange="window.mudarStatusRapido('${m._id}', this.value)" ${!isGestaoMaster?'disabled':''}>
                         <option value="sim" ${m.pts==='sim'?'selected':''}>Ativo</option>
@@ -3704,7 +3905,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                 </tr>`;
             };
 
-            tbM.innerHTML = nor.length ? nor.map(m => des(m, false)).join('') : '<tr><td colspan="8" class="empty-state">Nenhum membro ativo.</td></tr>';
+            tbM.innerHTML = nor.length ? nor.map(m => des(m, false)).join('') : '<tr><td colspan="8" class="empty-state">Nenhum membro encontrado.</td></tr>';
             tbR.innerHTML = reb.length ? reb.map(m => des(m, true)).join('') : '<tr><td colspan="8" class="empty-state">Nenhum rebocamento pendente.</td></tr>';
         } catch(e){ console.error("[PRZ Error]", e); }
     };
@@ -3851,23 +4052,31 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         }
     };
 
+    window._ausenciasFilter = 'todos';
+    window.setAusenciasFilter = (filter, btn) => {
+        window._ausenciasFilter = filter;
+        document.querySelectorAll('.aus-status-btn').forEach(b => { b.style.background='transparent'; b.style.color='var(--text)'; b.style.borderColor='var(--border)'; });
+        btn.style.background='rgba(251,191,36,0.15)'; btn.style.color='var(--warning)'; btn.style.borderColor='rgba(251,191,36,0.4)';
+        window.renderAusencias();
+    };
     window.renderAusencias = () => {
         const tb = document.getElementById('tbody-ausencias'); if(!tb) return;
-        const o = [...window._state.ausencias].sort((a,b) => new Date(b.dataRegisto) - new Date(a.dataRegisto));
-        if(o.length === 0) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">Sem ausências registadas.</td></tr>'; return; }
-        
+        const search = (document.getElementById('ausencias-search')?.value || '').toLowerCase();
+        const statusFilter = window._ausenciasFilter || 'todos';
+        let o = [...window._state.ausencias].sort((a,b) => new Date(b.dataRegisto) - new Date(a.dataRegisto));
+        if(statusFilter !== 'todos') o = o.filter(a => (a.status||'Pendente') === statusFilter);
+        if(search) o = o.filter(a => (a.nomeMembro||'').toLowerCase().includes(search) || (a.motivo||'').toLowerCase().includes(search));
+        const counter = document.getElementById('ausencias-counter'); if(counter) counter.innerText = `${o.length} ausências`;
+        if(o.length === 0) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">Sem ausências encontradas.</td></tr>'; return; }
         const isGestaoMaster = ['lider_geral', 'lider', 'sublider', 'gerente'].includes(window.currentUserRole);
-
         tb.innerHTML = o.map(a => {
             let stText = a.status || 'Pendente';
             let stColor = 'b-gray'; let stIcon = 'ph-clock';
             if(stText === 'Validada') { stColor = 'b-green'; stIcon = 'ph-check-circle'; }
             if(stText === 'Recusada') { stColor = 'b-red'; stIcon = 'ph-x-circle'; }
-
             const btnValidar = (isGestaoMaster && stText === 'Pendente') ? `<button class="btn-acao outline-success" onclick="window.openConfirmarAusenciaModal('${a._id}', 'Validada')" title="Validar"><i class="ph-bold ph-check"></i></button>` : '';
             const btnRecusar = (isGestaoMaster && stText === 'Pendente') ? `<button class="btn-acao outline-danger" onclick="window.openConfirmarAusenciaModal('${a._id}', 'Recusada')" title="Recusar"><i class="ph-bold ph-x"></i></button>` : '';
             const btnDel = isGestaoMaster ? `<button class="btn-acao outline-danger" onclick="window.apagarAusencia('${a._id}')" title="Apagar"><i class="ph-bold ph-trash"></i></button>` : '';
-
             return `<tr>
                 <td><b style="font-family:'Orbitron'; color:var(--white);">${escapeHTML(a.nomeMembro)}</b></td>
                 <td><span class="badge b-yellow">${escapeHTML(a.ocasiao)}</span></td>
@@ -4157,10 +4366,13 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
     window.renderRelatorios = () => { 
         try {
-            const c = document.getElementById('div-relatorios-list'); if(!c) return; 
-            const o = [...window._state.movs].sort((a,b) => ((b.data||'')+'T'+(b.horario||'')).localeCompare((a.data||'')+'T'+(a.horario||''))); 
-            if(o.length===0) { c.innerHTML='<div class="empty-state">Vazio.</div>'; return; } 
-            
+            const c = document.getElementById('div-relatorios-list'); if(!c) return;
+            const search = (document.getElementById('rel-search')?.value || '').toLowerCase();
+            const tipoFilter = document.getElementById('rel-filter-tipo')?.value || '';
+            let o = [...window._state.movs].sort((a,b) => ((b.data||'')+'T'+(b.horario||'')).localeCompare((a.data||'')+'T'+(a.horario||'')));
+            if(tipoFilter) o = o.filter(m => m.tipo === tipoFilter);
+            if(search) o = o.filter(m => (m.resp||'').toLowerCase().includes(search) || (m.aux||'').toLowerCase().includes(search));
+            if(o.length===0) { c.innerHTML='<div class="empty-state">Nenhum resultado.</div>'; return; }
             const agrupado = {}; o.forEach(m => { const dataChave = m.data || 'N/A'; if(!agrupado[dataChave]) agrupado[dataChave] = []; agrupado[dataChave].push(m); });
             let h = '';
             for(const [k, movs] of Object.entries(agrupado)) {
@@ -5126,21 +5338,30 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
     window.renderFuncoes = () => {
         const el = document.getElementById('funcoes-grid'); if(!el) return;
-        const list = [...window._state.funcoes];
-        if(list.length===0){ el.innerHTML='<div class="empty-state" style="grid-column:1/-1;padding:60px;">Nenhuma função atribuída.</div>'; return; }
+        const search = (document.getElementById('funcoes-search')?.value || '').toLowerCase();
+        const hierFilter = document.getElementById('funcoes-filter-hierarquia')?.value || '';
+        const hierarquia = ['Líder Geral','Líder','Sub-Líder','Gerente','Supervisor'];
 
-        // Group by member
+        // Group by member first
         const byMembro = {};
-        list.forEach(r => {
+        window._state.funcoes.forEach(r => {
             if(!byMembro[r.membroId]) byMembro[r.membroId] = { nome:r.membroNome, discordId:r.discordId, funcoes:[] };
             byMembro[r.membroId].funcoes.push(r);
         });
 
-        el.innerHTML = Object.values(byMembro).map(m => {
-            const hierarquia = ['Líder Geral','Líder','Sub-Líder','Gerente','Supervisor'];
+        let entries = Object.values(byMembro);
+
+        // filter by hierarquia
+        if(hierFilter) entries = entries.filter(m => m.funcoes.some(f => f.funcao === hierFilter || f.hierarquia === hierFilter));
+
+        // filter by search
+        if(search) entries = entries.filter(m => (m.nome||'').toLowerCase().includes(search) || m.funcoes.some(f => (f.funcao||'').toLowerCase().includes(search)));
+
+        if(!entries.length){ el.innerHTML='<div class="empty-state" style="grid-column:1/-1;padding:60px;">Nenhuma função encontrada.</div>'; return; }
+
+        el.innerHTML = entries.map(m => {
             const mainFuncao = m.funcoes.find(f => hierarquia.includes(f.funcao)) || m.funcoes[0];
             const mainClr = FUNCAO_CLR[mainFuncao?.funcao] || '#818cf8';
-
             const tagsHtml = m.funcoes.map(f => {
                 const clr = FUNCAO_CLR[f.funcao] || '#818cf8';
                 const icon = FUNCAO_ICON[f.funcao] || 'ph-identification-badge';
@@ -5150,7 +5371,6 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                     <span onclick="window.apagarFuncao('${f._id}')" style="margin-left:2px;opacity:0.5;cursor:pointer;font-size:13px;line-height:1;padding:0 1px;border-radius:3px;" onmouseover="this.style.opacity=1;this.style.background='${clr}25'" onmouseout="this.style.opacity=0.5;this.style.background='transparent'">×</span>
                 </div>`;
             }).join('');
-
             return `<div class="funcao-card" style="border-top:3px solid ${mainClr};">
                 <div class="funcao-card-header">
                     <div style="width:40px;height:40px;border-radius:50%;background:${mainClr}15;border:1px solid ${mainClr}35;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -5170,9 +5390,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                     </div>
                 </div>
                 <div class="funcao-card-body">
-                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                        ${tagsHtml}
-                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">${tagsHtml}</div>
                 </div>
             </div>`;
         }).join('');
@@ -5528,14 +5746,16 @@ ${r.motivo}`;
     };
     window.renderAdv = () => {
         const el = document.getElementById('adv-list'); if(!el) return;
-        const list = [...window._state.adv].sort((a,b)=>b.data.localeCompare(a.data));
+        const search = (document.getElementById('adv-search')?.value || '').toLowerCase();
+        let list = [...window._state.adv].sort((a,b)=>b.data.localeCompare(a.data));
         const c1 = list.filter(x=>x.numero===1).length;
         const c2 = list.filter(x=>x.numero===2).length;
         const c3 = list.filter(x=>x.numero===3).length;
         document.getElementById('adv-count-1').innerText = c1;
         document.getElementById('adv-count-2').innerText = c2;
         document.getElementById('adv-count-3').innerText = c3;
-        if(list.length===0){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhuma advertência registada.</div>'; return; }
+        if(search) list = list.filter(r => (r.membroNome||'').toLowerCase().includes(search) || (r.discordId||'').toLowerCase().includes(search) || (r.motivo||'').toLowerCase().includes(search));
+        if(list.length===0){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhuma advertência encontrada.</div>'; return; }
         const numClr = {1:'adv1',2:'adv2',3:'adv3'};
         const numBdr = {1:'var(--warning)',2:'#f97316',3:'var(--danger)'};
         el.innerHTML = list.map(r=>`
@@ -5584,29 +5804,58 @@ ${r.motivo}`;
             try { await deleteDoc(doc(db,'gestao_autorizacoes',id)); window.showToast('Removido.','success'); }
             catch(e){ console.error('[PRZ]',e); window.showToast('Erro.','error'); }
     };
+    window.copiarAutorizacao = async (id) => {
+        const r = window._state.autorizacoes.find(x=>x._id===id); if(!r) return;
+        const nivelEmoji = { 'Coroa':'👑', '3 Estrelas':'⭐⭐⭐', '2 Estrelas':'⭐⭐' };
+        const emoji = nivelEmoji[r.tipo] || '⭐⭐';
+        const txt = `${emoji} **AUTORIZAÇÃO — ${(r.tipo||'').toUpperCase()}**\nMembro: ${r.membroNome} | ${r.discordId||'—'}${r.obs ? '\nObs: '+r.obs : ''}\nData: ${labelData(r.data)}`;
+        try { await navigator.clipboard.writeText(txt); window.showToast('Copiado!','success'); }
+        catch(e){ window.showToast('Erro ao copiar.','error'); }
+    };
+    window.marcarAutorizado = async (id) => {
+        try {
+            await setDoc(doc(db,'gestao_autorizacoes',id), { autorizado: true, dataAutorizacao: todayStr() }, { merge:true });
+            window.showToast('Marcado como autorizado! ✅','success');
+        } catch(e){ console.error('[PRZ]',e); window.showToast('Erro.','error'); }
+    };
+
     window.renderAutorizacoes = () => {
-        const el = document.getElementById('autorizacoes-list'); if(!el) return;
-        // Sort: Coroa first, then 3 Estrelas, then 2 Estrelas, then by date desc
+        const elPend = document.getElementById('autorizacoes-list'); if(!elPend) return;
+        const elOk   = document.getElementById('autorizacoes-list-ok');
+        const search = (document.getElementById('autorizacoes-search')?.value || '').toLowerCase();
         const order = {'Coroa':0,'3 Estrelas':1,'2 Estrelas':2};
-        const list = [...window._state.autorizacoes].sort((a,b) => {
+        let list = [...window._state.autorizacoes].sort((a,b) => {
             const oa = order[a.tipo]??9, ob = order[b.tipo]??9;
             if(oa !== ob) return oa - ob;
             return b.data.localeCompare(a.data);
         });
-        document.getElementById('autorizacoes-count').innerText = `${list.length} total`;
-        document.getElementById('autorizacoes-count-2').innerText = list.filter(x=>x.tipo==='2 Estrelas').length;
-        document.getElementById('autorizacoes-count-3').innerText = list.filter(x=>x.tipo==='3 Estrelas').length;
+
+        // split pendentes vs autorizados
+        const pendentes   = list.filter(r => !r.autorizado);
+        const autorizados = list.filter(r => r.autorizado);
+
+        // update counters (use total list for star counts)
+        document.getElementById('autorizacoes-count').innerText   = pendentes.length;
+        document.getElementById('autorizacoes-count-ok').innerText = autorizados.length;
+        document.getElementById('autorizacoes-count-2').innerText  = list.filter(x=>x.tipo==='2 Estrelas').length;
+        document.getElementById('autorizacoes-count-3').innerText  = list.filter(x=>x.tipo==='3 Estrelas').length;
         document.getElementById('autorizacoes-count-coroa').innerText = list.filter(x=>x.tipo==='Coroa').length;
-        if(list.length===0){ el.innerHTML='<div class="empty-state" style="padding:40px;">Nenhuma autorização registada.</div>'; return; }
 
         const nivelConfig = {
-            'Coroa':     { icon:'<i class="ph-fill ph-crown-simple" style="font-size:20px;"></i>', label:'Coroa',     cor:'var(--purple)',  bg:'rgba(168,85,247,0.12)',  borda:'rgba(168,85,247,0.35)' },
-            '3 Estrelas':{ icon:'<i class="ph-fill ph-star" style="font-size:15px;"></i><i class="ph-fill ph-star" style="font-size:15px;"></i><i class="ph-fill ph-star" style="font-size:15px;"></i>', label:'3 Estrelas', cor:'var(--accent)',  bg:'rgba(14,165,233,0.10)',  borda:'rgba(14,165,233,0.30)' },
-            '2 Estrelas':{ icon:'<i class="ph-fill ph-star" style="font-size:15px;"></i><i class="ph-fill ph-star" style="font-size:15px;"></i>', label:'2 Estrelas', cor:'var(--warning)', bg:'rgba(245,158,11,0.10)', borda:'rgba(245,158,11,0.30)' },
+            'Coroa':     { icon:'<i class="ph-fill ph-crown-simple" style="font-size:20px;"></i>', cor:'var(--purple)',  bg:'rgba(168,85,247,0.12)',  borda:'rgba(168,85,247,0.35)' },
+            '3 Estrelas':{ icon:'<i class="ph-fill ph-star" style="font-size:15px;"></i><i class="ph-fill ph-star" style="font-size:15px;"></i><i class="ph-fill ph-star" style="font-size:15px;"></i>', cor:'var(--accent)',  bg:'rgba(14,165,233,0.10)',  borda:'rgba(14,165,233,0.30)' },
+            '2 Estrelas':{ icon:'<i class="ph-fill ph-star" style="font-size:15px;"></i><i class="ph-fill ph-star" style="font-size:15px;"></i>', cor:'var(--warning)', bg:'rgba(245,158,11,0.10)', borda:'rgba(245,158,11,0.30)' },
         };
 
-        el.innerHTML = list.map(r=>{
+        const buildCard = (r, isOk) => {
             const cfg = nivelConfig[r.tipo] || nivelConfig['2 Estrelas'];
+            const dateLine = isOk && r.dataAutorizacao
+                ? `<div style="font-size:11px;color:var(--success);margin-top:4px;font-family:'Share Tech Mono';"><i class="ph-fill ph-check-circle"></i> Autorizado em ${labelData(r.dataAutorizacao)}</div>`
+                : `<div style="font-size:11px;color:#52525b;margin-top:5px;font-family:'Share Tech Mono';">${labelData(r.data)}</div>`;
+            const acoes = isOk
+                ? `<button class="btn-acao outline-danger" style="padding:6px 8px;" onclick="window.apagarAutorizacao('${r._id}')"><i class="ph-bold ph-trash"></i></button>`
+                : `<button class="btn-acao" style="padding:6px 10px;font-size:11px;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.4);color:var(--success);" onclick="window.marcarAutorizado('${r._id}')"><i class="ph-bold ph-check-fat"></i> Autorizado</button>
+                   <button class="btn-acao outline-danger" style="padding:6px 8px;" onclick="window.apagarAutorizacao('${r._id}')"><i class="ph-bold ph-trash"></i></button>`;
             return `
             <div class="autorizacao-card" style="border-left-color:${cfg.cor};">
                 <div style="width:48px;height:48px;border-radius:10px;background:${cfg.bg};border:1px solid ${cfg.borda};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">
@@ -5617,13 +5866,22 @@ ${r.motivo}`;
                     <div style="font-family:'Share Tech Mono';font-size:11px;color:var(--accent);margin-bottom:5px;">${escapeHTML(r.discordId||'—')}</div>
                     <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-size:11px;font-family:'Orbitron';font-weight:900;letter-spacing:0.5px;background:${cfg.bg};color:${cfg.cor};border:1px solid ${cfg.borda};">${cfg.icon} ${escapeHTML(r.tipo)}</span>
                     ${r.obs?`<div style="font-size:12px;color:var(--text);margin-top:6px;">${escapeHTML(r.obs)}</div>`:''}
-                    <div style="font-size:11px;color:#52525b;margin-top:5px;font-family:'Share Tech Mono';">${labelData(r.data)}</div>
+                    ${dateLine}
                 </div>
-                <div style="display:flex;gap:6px;">
-                    <button class="btn-acao outline-danger" style="padding:6px 8px;" onclick="window.apagarAutorizacao('${r._id}')"><i class="ph-bold ph-trash"></i></button>
-                </div>
+                <div style="display:flex;flex-direction:column;gap:5px;">${acoes}</div>
             </div>`;
-        }).join('');
+        };
+
+        // apply search
+        const applySearch = (arr) => search ? arr.filter(r => (r.membroNome||'').toLowerCase().includes(search) || (r.discordId||'').toLowerCase().includes(search)) : arr;
+
+        const filtPend = applySearch(pendentes);
+        elPend.innerHTML = filtPend.length ? filtPend.map(r => buildCard(r, false)).join('') : '<div class="empty-state" style="padding:40px;">Nenhum candidato pendente.</div>';
+
+        if(elOk) {
+            const filtOk = applySearch(autorizados);
+            elOk.innerHTML = filtOk.length ? filtOk.map(r => buildCard(r, true)).join('') : '<div class="empty-state" style="padding:40px;">Nenhuma autorização confirmada.</div>';
+        }
     };
 
     // ─── ATIVIDADE ───
@@ -6064,8 +6322,11 @@ ${r.motivo}`;
 
     window.renderLevelUps = () => {
         const el = document.getElementById('levelup-list'); if(!el) return;
-        const list = [...window._state.levelups].sort((a,b)=>b.criadoEm.localeCompare(a.criadoEm));
-        if(list.length===0){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhum Level UP registado. Clique em "Gerar LVL UP" para começar.</div>'; return; }
+        const search = (document.getElementById('levelup-search')?.value || '').toLowerCase();
+        let list = [...window._state.levelups].sort((a,b)=>b.criadoEm.localeCompare(a.criadoEm));
+        if(search) list = list.filter(r => (r.membroNome||'').toLowerCase().includes(search) || (r.discordId||'').toLowerCase().includes(search));
+        const counter = document.getElementById('levelup-counter'); if(counter) counter.innerText = `${window._state.levelups.length} registos`;
+        if(list.length===0){ el.innerHTML='<div class="empty-state" style="padding:60px;">' + (search ? 'Nenhum resultado encontrado.' : 'Nenhum Level UP registado. Clique em "Gerar LVL UP" para começar.') + '</div>'; return; }
         el.innerHTML = list.map(r=>`
             <div class="lvlup-card" style="border-left-color:${r.cargoCor||'var(--success)'};">
                 <div style="width:46px;height:46px;border-radius:10px;background:${r.cargoCor||'var(--success)'}20;border:1px solid ${r.cargoCor||'var(--success)'}40;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;color:${r.cargoCor||'var(--success)'};">
@@ -6394,7 +6655,9 @@ ${r.motivo}`;
     const probStatusCor   = { aberto:'var(--danger)', em_andamento:'var(--warning)', resolvido:'var(--success)' };
 
 
-    // ─── TABS INTERNAS — Informações da Semana ───
+    // ─── TABS INTERNAS — Registro Semanal ───
+    window._probFilter = 'todos';
+
     window.switchInnerTab = (tab) => {
         const tabs    = ['info', 'problemas', 'ocorrencias'];
         const colors  = { info: 'var(--accent)', problemas: 'var(--danger)', ocorrencias: 'var(--purple)' };
@@ -6410,6 +6673,29 @@ ${r.motivo}`;
         });
     };
 
+    window.updateTabCounts = () => {
+        const ci = document.getElementById('tab-count-info');
+        const cp = document.getElementById('tab-count-problemas');
+        const co = document.getElementById('tab-count-ocorrencias');
+        if(ci) ci.innerText = (window._state.infoSemana||[]).length;
+        const abertos = (window._state.problemas||[]).filter(p=>p.status==='aberto').length;
+        if(cp) { cp.innerText = (window._state.problemas||[]).length + (abertos ? ` (${abertos} aberto${abertos>1?'s':''})` : ''); }
+        if(co) co.innerText = (window._state.ocorrencias||[]).length;
+    };
+
+    window.setProbFilter = (filter, btn) => {
+        window._probFilter = filter;
+        document.querySelectorAll('.prob-filter-btn').forEach(b => {
+            b.style.background = 'transparent';
+            b.style.color = 'var(--text)';
+            b.style.borderColor = 'var(--border)';
+        });
+        btn.style.background = 'rgba(0,220,255,0.15)';
+        btn.style.color = 'var(--accent)';
+        btn.style.borderColor = 'rgba(0,220,255,0.4)';
+        window.renderProblemas();
+    };
+
     // ─── INFORMAÇÕES DA SEMANA ───
     window.openInfoSemanaModal = (id) => {
         const r = id ? window._state.infoSemana.find(x=>x._id===id) : null;
@@ -6423,19 +6709,17 @@ ${r.motivo}`;
         const btn = document.getElementById('btn-salvar-is');
         btn.disabled = true; btn.innerHTML = 'A GUARDAR...';
         const id  = document.getElementById('is-docid').value;
-        const d   = {
-            data:      document.getElementById('is-data').value,
-            positivos: document.getElementById('is-positivos').value.trim(),
-            negativos: document.getElementById('is-negativos').value.trim(),
-            criadoEm:  new Date().toISOString()
-        };
+        const pos = document.getElementById('is-positivos').value.trim();
+        const neg = document.getElementById('is-negativos').value.trim();
+        const d   = { data: document.getElementById('is-data').value, positivos: pos, negativos: neg, criadoEm: new Date().toISOString() };
         if(!d.data) { window.showToast('Selecione a data!','error'); btn.disabled=false; btn.innerHTML='GUARDAR'; return; }
+        if(!pos && !neg) { window.showToast('Preencha pelo menos um campo!','error'); btn.disabled=false; btn.innerHTML='GUARDAR'; return; }
         try {
             if(id) await setDoc(doc(db,'area_info_semana',id), d, {merge:true});
             else   await setDoc(doc(collection(db,'area_info_semana')), d);
             window.closeModal('modal-info-semana');
-            await window.logHistorico('INFO SEMANA', 'Sistema', '—', `Info semana registada: ${d.data||'—'}`);
-            window.showToast('Informações guardadas!','success');
+            await window.logHistorico('REGISTRO SEMANAL', 'Sistema', '—', `Registro semanal: ${d.data||'—'}`);
+            window.showToast('Registo guardado!','success');
         } catch(e){ console.error('[PRZ]',e); window.showToast('Erro ao guardar.','error'); }
         finally { btn.disabled=false; btn.innerHTML='GUARDAR'; }
     };
@@ -6447,7 +6731,8 @@ ${r.motivo}`;
     window.renderInfoSemana = () => {
         const el = document.getElementById('info-semana-list'); if(!el) return;
         const list = [...window._state.infoSemana].sort((a,b)=>b.data.localeCompare(a.data));
-        if(!list.length){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhuma informação registada.</div>'; return; }
+        window.updateTabCounts();
+        if(!list.length){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhum registo ainda.</div>'; return; }
         el.innerHTML = list.map(r => `
         <div class="card" style="margin-bottom:16px; border-left:4px solid var(--accent); padding:20px 22px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
@@ -6498,6 +6783,7 @@ ${r.motivo}`;
             if(id) await setDoc(doc(db,'area_problemas',id), d, {merge:true});
             else   await setDoc(doc(collection(db,'area_problemas')), d);
             window.closeModal('modal-problema');
+            await window.logHistorico('PROBLEMA', 'Sistema', '—', `Problema registado: ${d.status} — ${d.descricao.substring(0,40)}`);
             window.showToast('Problema guardado!','success');
         } catch(e){ console.error('[PRZ]',e); window.showToast('Erro ao guardar.','error'); }
         finally { btn.disabled=false; btn.innerHTML='GUARDAR'; }
@@ -6509,12 +6795,14 @@ ${r.motivo}`;
     };
     window.renderProblemas = () => {
         const el = document.getElementById('problemas-list'); if(!el) return;
-        const list = [...window._state.problemas].sort((a,b)=> {
+        window.updateTabCounts();
+        let list = [...window._state.problemas].sort((a,b)=> {
             const ord = {aberto:0, em_andamento:1, resolvido:2};
             if((ord[a.status]??0) !== (ord[b.status]??0)) return (ord[a.status]??0)-(ord[b.status]??0);
             return b.data.localeCompare(a.data);
         });
-        if(!list.length){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhum problema registado.</div>'; return; }
+        if(window._probFilter !== 'todos') list = list.filter(p => p.status === window._probFilter);
+        if(!list.length){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhum problema encontrado.</div>'; return; }
         el.innerHTML = list.map(r => {
             const cor = probStatusCor[r.status] || 'var(--text)';
             const lbl = probStatusLabel[r.status] || r.status;
@@ -6583,6 +6871,7 @@ ${r.motivo}`;
             if(id) await setDoc(doc(db,'area_ocorrencias',id), d, {merge:true});
             else   await setDoc(doc(collection(db,'area_ocorrencias')), d);
             window.closeModal('modal-ocorrencia');
+            await window.logHistorico('OCORRÊNCIA', d.membroNome||'—', d.discordId||'—', `Medida: ${medidaLabel[d.medida]||d.medida}`);
             window.showToast('Ocorrência guardada!','success');
         } catch(e){ console.error('[PRZ]',e); window.showToast('Erro ao guardar.','error'); }
         finally { btn.disabled=false; btn.innerHTML='GUARDAR'; }
@@ -6594,8 +6883,11 @@ ${r.motivo}`;
     };
     window.renderOcorrencias = () => {
         const el = document.getElementById('ocorrencias-list'); if(!el) return;
-        const list = [...window._state.ocorrencias].sort((a,b)=>b.data.localeCompare(a.data));
-        if(!list.length){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhuma ocorrência registada.</div>'; return; }
+        window.updateTabCounts();
+        const search = (document.getElementById('ocor-search')?.value || '').toLowerCase();
+        let list = [...window._state.ocorrencias].sort((a,b)=>b.data.localeCompare(a.data));
+        if(search) list = list.filter(r => (r.membroNome||'').toLowerCase().includes(search) || (r.discordId||'').toLowerCase().includes(search));
+        if(!list.length){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhuma ocorrência encontrada.</div>'; return; }
         el.innerHTML = list.map(r => `
         <div class="card" style="margin-bottom:14px; border-left:4px solid var(--purple); padding:20px 22px;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
@@ -6664,8 +6956,13 @@ ${r.motivo}`;
     };
     window.renderFeedbacks = () => {
         const el = document.getElementById('feedbacks-list'); if(!el) return;
-        const list = [...window._state.feedbacks].sort((a,b)=>b.data.localeCompare(a.data));
-        if(!list.length){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhum feedback registado.</div>'; return; }
+        const search = (document.getElementById('feedbacks-search')?.value || '').toLowerCase();
+        const tipoFilter = document.getElementById('feedbacks-filter-tipo')?.value || '';
+        let list = [...window._state.feedbacks].sort((a,b)=>b.data.localeCompare(a.data));
+        if(tipoFilter) list = list.filter(r => r.tipo === tipoFilter);
+        if(search) list = list.filter(r => (r.membroNome||'').toLowerCase().includes(search) || (r.texto||'').toLowerCase().includes(search) || (r.discordId||'').toLowerCase().includes(search));
+        const counter = document.getElementById('feedbacks-counter'); if(counter) counter.innerText = `${list.length} feedbacks`;
+        if(!list.length){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhum feedback encontrado.</div>'; return; }
         el.innerHTML = list.map(r => {
             const cor = fbTipoCor[r.tipo] || 'var(--accent)';
             const lbl = fbTipoLabel[r.tipo] || r.tipo;
@@ -6695,22 +6992,53 @@ ${r.motivo}`;
     window._state.sugestoes = [];
     window._sugFilter = 'todas';
 
-    const sugCatLabel = { mov:'🎮 MOV', atividade:'⚡ Atividade', campeonato:'🏆 Campeonato', gamenews:'📰 Game News', outro:'📋 Outro' };
-    const sugStatusLabel = { pendente:'🟡 Pendente', aprovada:'✅ Aprovada', recusada:'❌ Recusada', implementada:'🚀 Implementada', usada:'🎯 Usada' };
-    const sugStatusCor   = { pendente:'#f59e0b', aprovada:'var(--success)', recusada:'var(--danger)', implementada:'var(--accent)', usada:'#34d399' };
+    const sugCatLabel = { mov:'🎮 MOV', atividade:'⚡ Atividade', campeonato:'🏆 Campeonato', gamenews:'📰 Game News', ideias:'💡 Melhorias / Ideias', outro:'📋 Outro' };
+    const sugStatusLabel = { pendente:'🟡 Pendente', aprovada:'🟡 Pendente', implementada:'🎯 Usada', usada:'🎯 Usada', recusada:'❌ Recusada' };
+    const sugStatusCor   = { pendente:'#f59e0b', aprovada:'#f59e0b', implementada:'#34d399', usada:'#34d399', recusada:'var(--danger)' };
 
-    window.setSugFilter = (filter, btn) => {
+    // MOV types — order fixed
+    const MOV_TIPOS = ['Temática','Quiz','Jogatina','Cine'];
+
+    window.setSugFilter = (filter) => {
         window._sugFilter = filter;
-        document.querySelectorAll('.sug-filter-btn').forEach(b => {
-            b.style.background = 'transparent';
-            b.style.color = b.id === 'sug-filter-usadas' ? '#34d399' : 'var(--text)';
-            b.style.borderColor = b.id === 'sug-filter-usadas' ? 'rgba(52,211,153,0.3)' : 'var(--border)';
-        });
-        const isUsadas = filter === 'usadas';
-        btn.style.background = isUsadas ? 'rgba(52,211,153,0.15)' : 'rgba(245,158,11,0.15)';
-        btn.style.color = isUsadas ? '#34d399' : '#f59e0b';
-        btn.style.borderColor = isUsadas ? 'rgba(52,211,153,0.4)' : 'rgba(245,158,11,0.4)';
+        window.renderSugFiltros();
         window.renderSugestoes();
+    };
+
+    window.renderSugFiltros = () => {
+        const wrap = document.getElementById('sug-filtros-wrap'); if(!wrap) return;
+        const all = window._state.sugestoes || [];
+
+        // build filter definitions dynamically
+        const filters = [
+            { key:'todas',      label:'TODAS',           cor:'#f59e0b', corBg:'rgba(245,158,11,0.15)', corBorder:'rgba(245,158,11,0.4)', count: all.filter(s=>s.status!=='usada').length },
+            ...MOV_TIPOS.map(t => ({
+                key: 'mov__'+t,
+                label: '🎮 '+t,
+                cor:'#f59e0b', corBg:'rgba(245,158,11,0.15)', corBorder:'rgba(245,158,11,0.4)',
+                count: all.filter(s=>s.categoria==='mov' && s.movTipo===t && s.status!=='usada').length
+            })),
+            { key:'atividade',  label:'⚡ Atividade',          cor:'#f59e0b', corBg:'rgba(245,158,11,0.15)', corBorder:'rgba(245,158,11,0.4)', count: all.filter(s=>s.categoria==='atividade' && s.status!=='usada').length },
+            { key:'campeonato', label:'🏆 Campeonato',          cor:'#f59e0b', corBg:'rgba(245,158,11,0.15)', corBorder:'rgba(245,158,11,0.4)', count: all.filter(s=>s.categoria==='campeonato' && s.status!=='usada').length },
+            { key:'gamenews',   label:'📰 Game News',           cor:'#f59e0b', corBg:'rgba(245,158,11,0.15)', corBorder:'rgba(245,158,11,0.4)', count: all.filter(s=>s.categoria==='gamenews' && s.status!=='usada').length },
+            { key:'ideias',     label:'💡 Melhorias / Ideias',  cor:'#f59e0b', corBg:'rgba(245,158,11,0.15)', corBorder:'rgba(245,158,11,0.4)', count: all.filter(s=>s.categoria==='ideias' && s.status!=='usada').length },
+            { key:'outro',      label:'📋 Outros',              cor:'#f59e0b', corBg:'rgba(245,158,11,0.15)', corBorder:'rgba(245,158,11,0.4)', count: all.filter(s=>s.categoria==='outro' && s.status!=='usada').length },
+            { key:'usadas',     label:'🎯 Já Usadas',    cor:'#34d399', corBg:'rgba(52,211,153,0.15)', corBorder:'rgba(52,211,153,0.4)', count: all.filter(s=>s.status==='usada').length },
+        ];
+
+        const cur = window._sugFilter || 'todas';
+        wrap.innerHTML = filters.map(f => {
+            const isActive = f.key === cur;
+            const bg      = isActive ? f.corBg     : 'transparent';
+            const color   = isActive ? f.cor        : (f.key==='usadas' ? '#34d399' : 'var(--text)');
+            const border  = isActive ? f.corBorder  : (f.key==='usadas' ? 'rgba(52,211,153,0.3)' : 'var(--border)');
+            return `<button class="sug-filter-btn" onclick="window.setSugFilter('${f.key}')"
+                style="padding:6px 14px; border-radius:8px; font-family:'Orbitron'; font-size:10px; font-weight:900; cursor:pointer;
+                       border:1px solid ${border}; background:${bg}; color:${color}; transition:0.2s; display:flex; align-items:center; gap:6px;">
+                ${f.label}
+                <span style="background:rgba(0,0,0,0.3); border-radius:10px; padding:1px 7px; font-size:9px;">${f.count}</span>
+            </button>`;
+        }).join('');
     };
 
     window.onSugCategoriaChange = () => {
@@ -6774,6 +7102,15 @@ ${r.motivo}`;
             catch(e){ console.error('[PRZ]',e); }
     };
 
+    window.toggleSugDestaque = async (id) => {
+        const r = window._state.sugestoes.find(x=>x._id===id); if(!r) return;
+        const novo = !r.destaque;
+        try {
+            await setDoc(doc(db,'area_sugestoes',id), { destaque: novo }, { merge:true });
+            window.showToast(novo ? '📌 Destacado no dashboard!' : 'Removido do dashboard.', 'success');
+        } catch(e){ console.error('[PRZ]',e); window.showToast('Erro.','error'); }
+    };
+
     window.marcarUsada = async (id) => {
         try {
             await setDoc(doc(db,'area_sugestoes',id), { status:'usada' }, { merge:true });
@@ -6783,23 +7120,42 @@ ${r.motivo}`;
 
         window.renderSugestoes = () => {
         const el = document.getElementById('sugestoes-list'); if(!el) return;
+        const search = (document.getElementById('sug-search')?.value || '').toLowerCase().trim();
+        const cur = window._sugFilter || 'todas';
+
         let list = [...window._state.sugestoes].sort((a,b) => {
-            const ord = {pendente:0, aprovada:1, implementada:2, recusada:3};
+            const ord = {pendente:0, aprovada:0, implementada:1, usada:1, recusada:2};
             if((ord[a.status]??0) !== (ord[b.status]??0)) return (ord[a.status]??0)-(ord[b.status]??0);
-            return b.criadoEm.localeCompare(a.criadoEm);
+            return (b.criadoEm||'').localeCompare(a.criadoEm||'');
         });
-        if(window._sugFilter === 'usadas') {
+
+        // filter by tab
+        if(cur === 'usadas') {
             list = list.filter(s => s.status === 'usada');
-        } else if(window._sugFilter !== 'todas') {
-            list = list.filter(s => s.categoria === window._sugFilter && s.status !== 'usada');
+        } else if(cur.startsWith('mov__')) {
+            const tipo = cur.replace('mov__','');
+            list = list.filter(s => s.categoria === 'mov' && s.movTipo === tipo && s.status !== 'usada');
+        } else if(cur !== 'todas') {
+            list = list.filter(s => s.categoria === cur && s.status !== 'usada');
         } else {
             list = list.filter(s => s.status !== 'usada');
         }
+
+        // search
+        if(search) {
+            list = list.filter(s =>
+                (s.descricao||'').toLowerCase().includes(search) ||
+                (s.titulo||'').toLowerCase().includes(search) ||
+                (s.autorNome||'').toLowerCase().includes(search) ||
+                (s.movTipo||'').toLowerCase().includes(search)
+            );
+        }
+
         if(!list.length){ el.innerHTML='<div class="empty-state" style="padding:60px;">Nenhuma sugestão encontrada.</div>'; return; }
         el.innerHTML = list.map(r => {
             const cor  = sugStatusCor[r.status]   || '#f59e0b';
             const slbl = sugStatusLabel[r.status]  || r.status;
-            const clbl = sugCatLabel[r.categoria]  || r.categoria;
+            const clbl = r.categoria === 'mov' ? `🎮 ${r.movTipo || 'MOV'}` : (sugCatLabel[r.categoria] || r.categoria);
             const titulo = r.categoria === 'mov'
                 ? `${r.movTipo || 'MOV'}`
                 : (r.titulo || clbl);
@@ -6811,12 +7167,13 @@ ${r.motivo}`;
                         <span style="font-family:'Orbitron'; font-size:13px; font-weight:900; color:var(--white);">${escapeHTML(titulo)}</span>
                         <span style="font-family:'Orbitron'; font-size:9px; font-weight:900; padding:2px 8px; border-radius:10px; background:rgba(245,158,11,0.12); color:#f59e0b; border:1px solid rgba(245,158,11,0.3);">${clbl}</span>
                         <span style="font-family:'Orbitron'; font-size:9px; font-weight:900; padding:2px 8px; border-radius:10px; color:${cor}; background:${cor}18; border:1px solid ${cor}40;">${slbl}</span>
+                        ${r.destaque ? `<span style="font-size:10px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.35); color:#f59e0b; padding:2px 8px; border-radius:10px; font-family:'Orbitron'; font-weight:900;">📌 DASHBOARD</span>` : ''}
                     </div>
-
                     <div style="font-size:11px; color:var(--text); font-family:'Share Tech Mono';">${labelData(r.data)} &nbsp;•&nbsp; Por: ${escapeHTML(r.autorNome||'—')}</div>
                 </div>
                 <div style="display:flex; gap:6px; flex-shrink:0;">
-                    ${!['usada','recusada'].includes(r.status) ? `<button class="btn-acao" style="padding:6px 10px; font-size:11px; background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.4); color:#34d399;" onclick="window.marcarUsada('${r._id}')" title="Marcar como usada"><i class="ph-bold ph-check-fat"></i> Usada</button>` : ''}
+                    ${r.status !== 'usada' && r.status !== 'recusada' ? `<button class="btn-acao" style="padding:6px 10px; font-size:11px; background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.4); color:#34d399;" onclick="window.marcarUsada('${r._id}')" title="Marcar como usada"><i class="ph-bold ph-check-fat"></i> Usada</button>` : ''}
+                    <button class="btn-acao" style="padding:6px 10px; font-size:11px; ${r.destaque ? 'background:rgba(245,158,11,0.2); border:1px solid rgba(245,158,11,0.5); color:#f59e0b;' : 'background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--text);'}" onclick="window.toggleSugDestaque('${r._id}')" title="${r.destaque ? 'Remover do dashboard' : 'Destacar no dashboard'}"><i class="ph-${r.destaque ? 'fill' : 'bold'} ph-push-pin"></i></button>
                     <button class="btn-acao outline-primary" style="padding:6px 10px; font-size:11px;" onclick="window.openSugestaoModal('${r._id}')"><i class="ph-bold ph-pencil"></i></button>
                     <button class="btn-acao outline-danger"  style="padding:6px 10px; font-size:11px;" onclick="window.apagarSugestao('${r._id}')"><i class="ph-bold ph-trash"></i></button>
                 </div>
@@ -6837,7 +7194,7 @@ ${r.motivo}`;
         unsubProblemas   = onSnapshot(collection(db,'area_problemas'),    s=>{ window._state.problemas   = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderProblemas(); window.renderDashInfoSemana(); });
         unsubOcorrencias = onSnapshot(collection(db,'area_ocorrencias'),  s=>{ window._state.ocorrencias = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderOcorrencias(); window.renderDashInfoSemana(); });
         unsubFeedbacks   = onSnapshot(collection(db,'area_feedbacks'),    s=>{ window._state.feedbacks   = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderFeedbacks(); window.renderDashFeedbacks && window.renderDashFeedbacks(); });
-        unsubSugestoes   = onSnapshot(collection(db,'area_sugestoes'),    s=>{ window._state.sugestoes   = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderSugestoes(); window.renderDashSugMovs(); });
+        unsubSugestoes   = onSnapshot(collection(db,'area_sugestoes'),    s=>{ window._state.sugestoes   = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderSugFiltros(); window.renderSugestoes(); window.renderDashSugMovs(); });
     };
 
 
@@ -6845,13 +7202,11 @@ ${r.motivo}`;
     window.renderDashSugMovs = () => {
         const el = document.getElementById('dash-sug-movs'); if(!el) return;
 
-        // Todas as sugestões de MOV ativas (não recusadas, não usadas)
         const sugsAtivas = (window._state.sugestoes||[])
-            .filter(s => s.categoria === 'mov' && !['recusada','usada'].includes(s.status));
+            .filter(s => s.categoria === 'mov' && !['recusada','usada'].includes(s.status) && s.destaque);
 
-        if(!sugsAtivas.length) { el.innerHTML = ''; return; }
+        if(!sugsAtivas.length) { el.innerHTML = '<div style="font-size:12px; color:var(--text); font-family:\'Rajdhani\'; text-align:center; padding:10px 0; opacity:0.5;">Nenhuma sugestão destacada</div>'; return; }
 
-        // Agrupar por tipo de MOV
         const grupos = {};
         sugsAtivas.forEach(s => {
             const tipo = s.movTipo || 'Geral';
@@ -6859,31 +7214,32 @@ ${r.motivo}`;
             grupos[tipo].push(s);
         });
 
-        // Para cada grupo, verificar se há MOV agendada desse tipo (não finalizada)
         const hoje = todayStr();
         const movsAgendadas = (window._state.movs||[]).filter(m => !m.finalizada && m.data >= hoje);
 
         el.innerHTML = Object.entries(grupos).map(([tipo, sugs]) => {
-            // MOV agendada mais próxima desse tipo
             const movRef = movsAgendadas
                 .filter(m => m.tipo === tipo)
                 .sort((a,b) => ((a.data||'')+'T'+(a.horario||'')).localeCompare((b.data||'')+'T'+(b.horario||'')))[0];
 
             const movInfo = movRef
-                ? `<span style="font-family:'Share Tech Mono'; font-size:9px; color:#f59e0b;">${movRef.horario||'--:--'} · ${movRef.data===hoje?'Hoje':movRef.data.split('-').reverse().join('/')}</span>`
-                : `<span style="font-family:'Share Tech Mono'; font-size:9px; color:var(--text);">sem MOV agendada</span>`;
+                ? `<span style="font-family:'Share Tech Mono'; font-size:10px; color:var(--success);">📅 ${movRef.data===hoje?'Hoje':movRef.data.split('-').reverse().join('/')} · ${movRef.horario||'--:--'}</span>`
+                : `<span style="font-family:'Share Tech Mono'; font-size:10px; color:var(--text); opacity:0.5;">Sem MOV agendada</span>`;
 
             return `
-            <div style="border:1px solid rgba(245,158,11,0.15); border-radius:6px; margin-bottom:5px; overflow:hidden;">
-                <div style="display:flex; align-items:center; gap:5px; padding:4px 8px; background:rgba(245,158,11,0.06);">
-                    <span style="font-size:9px; font-family:'Orbitron'; font-weight:900; color:#f59e0b;">\uD83D\uDCA1 ${escapeHTML(tipo)}</span>
-                    ${movInfo}
-                    <span style="font-size:8px; color:var(--text); margin-left:auto; font-family:'Share Tech Mono';">${sugs.length}x</span>
+            <div style="border:1px solid rgba(245,158,11,0.2); border-radius:8px; margin-bottom:8px; overflow:hidden;">
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:rgba(245,158,11,0.08); border-bottom:1px solid rgba(245,158,11,0.12);">
+                    <span style="font-size:11px; font-family:'Orbitron'; font-weight:900; color:#f59e0b;">🎮 ${escapeHTML(tipo)}</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        ${movInfo}
+                        <span style="font-size:10px; color:#f59e0b; font-family:'Share Tech Mono'; background:rgba(245,158,11,0.15); border-radius:10px; padding:1px 7px;">${sugs.length}</span>
+                    </div>
                 </div>
-                <div style="padding:3px 8px 5px; display:flex; flex-direction:column; gap:2px;">
-                    ${sugs.map(s => `<div style="display:flex; align-items:center; gap:5px;">
-                        <span style="width:4px; height:4px; border-radius:50%; background:#f59e0b; flex-shrink:0;"></span>
-                        <span style="font-size:10px; color:rgba(255,255,255,0.7); font-family:'Rajdhani'; font-weight:600; line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHTML(s.descricao)}</span>
+                <div style="padding:6px 10px; display:flex; flex-direction:column; gap:5px;">
+                    ${sugs.map(s => `
+                    <div style="display:flex; align-items:flex-start; gap:6px;">
+                        <span style="width:5px; height:5px; border-radius:50%; background:#f59e0b; flex-shrink:0; margin-top:5px;"></span>
+                        <span style="font-size:12px; color:rgba(255,255,255,0.85); font-family:'Rajdhani'; font-weight:600; line-height:1.4;">${escapeHTML(s.descricao)}</span>
                     </div>`).join('')}
                 </div>
             </div>`;
