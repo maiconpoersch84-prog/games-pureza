@@ -4316,7 +4316,10 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
     window.setUserStatus = async (status) => {
         window._userStatus = status;
+        // Atualizar imediatamente no mapa local
+        if(window.currentUserName) window._allUserStatus[window.currentUserName] = status;
         window.applyStatusUI(status);
+        window.renderChatMessages && window.renderChatMessages();
         document.getElementById('status-menu').style.display = 'none';
         // Salvar no Firestore no documento do portal_user
         try {
@@ -4354,12 +4357,15 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     window.startListenStatus = () => {
         if(unsubStatus) unsubStatus();
         unsubStatus = onSnapshot(collection(db,'portal_users'), snap => {
-            window._allUserStatus = {};
+            if(!window._allUserStatus) window._allUserStatus = {};
             snap.docs.forEach(d => {
                 const data = d.data();
                 window._allUserStatus[data.nome] = data.status || 'online';
             });
+            // Garantir que o próprio user (Shinos) está sempre no mapa
+            if(window.currentUserName) window._allUserStatus[window.currentUserName] = window._userStatus || 'online';
             window.renderAdminUsers && window.renderAdminUsers();
+            window.renderChatMessages && window.renderChatMessages();
         });
     };
 
