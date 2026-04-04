@@ -129,8 +129,34 @@
 
     /* ÁREA PRINCIPAL E TABELAS */
     main { flex: 1; height: 100%; padding: 30px 36px; overflow-y: auto; position: relative; }
-    .page { display: none; animation: fadeIn 0.4s forwards; opacity: 0; }
-    .page.active { display: block; }
+
+    /* BARRA DE AVISOS TOPO */
+    #aviso-ticker-bar { display:none; position:fixed; top:40px; left:260px; right:0; height:28px; background:rgba(251,191,36,0.04); border-bottom:1px solid rgba(251,191,36,0.12); z-index:799; overflow:hidden; }
+    .aviso-ticker-label { font-family:'Orbitron'; font-size:8px; font-weight:900; letter-spacing:1px; padding:0 14px; white-space:nowrap; flex-shrink:0; height:100%; display:flex; align-items:center; border-right:1px solid rgba(251,191,36,0.15); }
+    .aviso-ticker-track { flex:1; overflow:hidden; position:relative; height:100%; }
+    .aviso-ticker-content { display:inline-flex; align-items:center; gap:60px; white-space:nowrap; position:absolute; top:50%; transform:translateY(-50%); animation:aviso-scroll 60s linear infinite; }
+    .aviso-ticker-content:hover { animation-play-state:paused; cursor:default; }
+    @keyframes aviso-scroll { 0%{left:100%} 100%{left:-200%} }
+    .aviso-ticker-sep { color:rgba(251,191,36,0.2); font-size:10px; }
+    #mov-live-bar { display:none; position:fixed; top:0; left:260px; right:0; z-index:800; padding:0 36px; background:#060609; border-bottom:1px solid rgba(255,255,255,0.06); }
+    .mov-live-inner { display:flex; align-items:center; gap:0; height:40px; }
+    .mov-live-slot { display:flex; align-items:center; gap:10px; padding:0 16px; height:100%; flex:1; }
+    .mov-live-slot.ao-vivo { border-right:1px solid rgba(255,255,255,0.06); }
+    .mov-live-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .mov-live-dot.live { background:#f87171; box-shadow:0 0 8px rgba(248,113,113,0.8); animation:live-pulse 1.2s ease-in-out infinite; }
+    .mov-live-dot.next { background:var(--accent); box-shadow:0 0 6px var(--accent-glow); }
+    @keyframes live-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.4);opacity:0.6} }
+    .mov-live-tag { font-family:'Orbitron'; font-size:8px; font-weight:900; letter-spacing:1px; padding:2px 7px; border-radius:3px; flex-shrink:0; }
+    .mov-live-tag.live { background:rgba(248,113,113,0.15); color:#f87171; border:1px solid rgba(248,113,113,0.3); }
+    .mov-live-tag.next { background:rgba(0,220,255,0.08); color:var(--accent); border:1px solid rgba(0,220,255,0.2); }
+    .mov-live-tipo { font-family:'Orbitron'; font-size:11px; font-weight:900; color:var(--white); letter-spacing:1px; }
+    .mov-live-info { font-family:'Share Tech Mono'; font-size:10px; color:var(--text); }
+    /* Ticker animado */
+    .mov-live-ticker { overflow:hidden; flex:1; }
+    .mov-live-ticker-inner { display:inline-flex; gap:8px; white-space:nowrap; align-items:center; font-family:'Share Tech Mono'; font-size:10px; color:var(--text); }
+    .page { display: none; opacity: 0; }
+    .page.active { display: block; animation: pageIn 0.28s ease forwards; }
+    @keyframes pageIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
     .card { background: var(--panel); border: 1px solid rgba(255,255,255,0.06); padding: 22px; margin-bottom: 20px; border-radius: 12px; backdrop-filter: blur(12px); }
@@ -488,6 +514,31 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         <button onclick="window.doLogout()" class="btn-logout"><i class="ph-bold ph-power"></i> DESCONECTAR</button>
     </aside>
 <main>
+        <div id="mov-live-bar">
+            <div class="mov-live-inner">
+                <div id="mov-slot-live" class="mov-live-slot ao-vivo" style="display:none;">
+                    <div class="mov-live-dot live"></div>
+                    <span class="mov-live-tag live">AO VIVO</span>
+                    <span id="mov-live-tipo" class="mov-live-tipo"></span>
+                    <span id="mov-live-info" class="mov-live-info"></span>
+                </div>
+                <div id="mov-slot-next" class="mov-live-slot" style="display:none;">
+                    <div class="mov-live-dot next"></div>
+                    <span class="mov-live-tag next">PRÓXIMA</span>
+                    <div class="mov-live-ticker">
+                        <div class="mov-live-ticker-inner" id="mov-next-ticker"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="aviso-ticker-bar">
+            <div class="aviso-ticker-label" id="aviso-ticker-label" style="color:var(--warning);">
+                <i class="ph-fill ph-bell-ringing" style="margin-right:5px;font-size:10px;"></i> AVISOS
+            </div>
+            <div class="aviso-ticker-track">
+                <div class="aviso-ticker-content" id="aviso-ticker-content"></div>
+            </div>
+        </div>
         <div id="aviso-reset-semanal" style="display:none; background:rgba(244,63,94,0.1); border:1px solid var(--danger); padding:20px 25px; border-radius:12px; margin-bottom:30px; justify-content:space-between; align-items:center; box-shadow:0 10px 30px rgba(244,63,94,0.15);">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <i class="ph-fill ph-warning" style="font-size: 28px; color: var(--danger);"></i>
@@ -505,7 +556,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
             <div style="display:none;">
                 <div id="dash-panel-avisos" class="dash-panel" style="border-color:rgba(251,191,36,0.25);"><div class="dash-panel-hdr" style="color:var(--warning);"><i class="ph-fill ph-bell-ringing"></i> AVISOS RECENTES</div><div id="dash-avisos-recentes" style="display:flex;flex-direction:column;gap:8px;"></div></div>
                 <div id="dash-panel-alertas" class="dash-panel" style="border-color:rgba(248,113,113,0.25);"><div class="dash-panel-hdr" style="color:var(--danger);"><i class="ph-fill ph-warning-octagon"></i> ALERTAS &amp; PENDÊNCIAS</div><div id="dash-alertas" style="display:flex;flex-wrap:wrap;gap:8px;"></div></div>
-                <div id="dash-panel-movs" class="dash-panel" style="border-color:rgba(0,220,255,0.2);flex:1.4;"><div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-calendar-check"></i> MOVs DE HOJE</div><div id="dash-movs-hoje"></div></div>
+                <div id="dash-panel-movs" class="dash-panel" style="border-color:rgba(0,220,255,0.2);flex:1.4;"><div class="dash-panel-hdr" style="color:var(--accent);display:flex;justify-content:space-between;align-items:center;"><span><i class="ph-fill ph-calendar-check"></i> MOVs DE HOJE</span><span id="dash-proxima-mov" style="font-size:10px;font-family:'Share Tech Mono';color:var(--text);font-weight:400;"></span></div><div id="dash-movs-hoje"></div></div>
                 <div id="dash-panel-gn" class="dash-panel" style="border-color:rgba(251,191,36,0.2);"><div class="dash-panel-hdr" style="color:var(--gn-color);"><i class="ph-fill ph-article"></i> GAME NEWS</div><div id="dash-gamenews"></div></div>
                 <div id="dash-panel-sug" class="dash-panel" style="border-color:rgba(245,158,11,0.2);"><div class="dash-panel-hdr" style="color:#f59e0b;"><i class="ph-fill ph-lightbulb"></i> SUGESTÕES</div><div id="dash-sug-movs"></div></div>
                 <div id="dash-panel-rpp" class="dash-panel" style="border-color:rgba(251,191,36,0.2);"><div class="dash-panel-hdr" style="color:var(--warning);"><i class="ph-fill ph-shield-warning"></i> RPP</div><div id="dash-rpp"></div></div>
@@ -516,10 +567,12 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                 <div id="dash-panel-subareas" class="dash-panel" style="border-color:rgba(244,114,182,0.2);"><div class="dash-panel-hdr" style="color:#f472b6;"><i class="ph-fill ph-chart-bar"></i> RENDIMENTO SUB ÁREAS</div><div id="dash-subareas"></div></div>
                 <div id="dash-panel-feedbacks" class="dash-panel" style="border-color:rgba(167,139,250,0.2);"><div class="dash-panel-hdr" style="color:var(--purple);"><i class="ph-fill ph-chat-centered-text"></i> FEEDBACKS</div><div id="dash-feedbacks"></div></div>
                 <div id="dash-panel-trocaconta" class="dash-panel" style="border-color:rgba(0,220,255,0.2);"><div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-arrows-clockwise"></i> TROCA DE CONTA</div><div id="dash-troca-conta"></div></div>
+                <div id="dash-panel-grafico" class="dash-panel" style="border-color:rgba(0,220,255,0.15);"><div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-chart-bar"></i> ATIVIDADE SEMANAL</div><div id="dash-grafico-semanal"></div></div>
             </div>
 
             <!-- Container dinâmico -->
-            <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <div id="dash-reset-info" style="font-size:11px;font-family:'Share Tech Mono';color:var(--text);display:flex;align-items:center;gap:8px;"></div>
                 <button id="btn-config-dash" onclick="window.openConfigDash()" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--text);padding:7px 14px;border-radius:8px;font-family:'Orbitron';font-size:10px;font-weight:900;cursor:pointer;letter-spacing:1px;transition:0.2s;" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--text)'"><i class="ph-bold ph-layout"></i> CONFIGURAR</button>
             </div>
             <div id="dash-layout-container"></div>
@@ -1580,7 +1633,6 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
     <div id="feedbacks-list"></div>
 </div>
 
-    </main>
 </div>
 
 
@@ -2548,8 +2600,30 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             case 'upamentos': collectionName = 'upamentos'; list = window._state.upamentos; break;
         }
         try {
+            // Guardar snapshot semanal antes de apagar MOVs
+            if(tipo === 'movs') {
+                const hoje = todayStr();
+                const semana = hoje.substring(0,7); // YYYY-MM
+                const participacoes = {};
+                window._state.movs.forEach(m => {
+                    (m.participantes||[]).forEach(p => {
+                        if(p.status !== '❌ FALTOU') {
+                            if(!participacoes[p.idDiscord]) participacoes[p.idDiscord] = { nome: p.nome, id: p.idDiscord, count: 0 };
+                            participacoes[p.idDiscord].count++;
+                        }
+                    });
+                });
+                const snapshot = {
+                    semana: hoje,
+                    totalMovs: window._state.movs.length,
+                    totalParticipacoes: Object.values(participacoes).reduce((a,v)=>a+v.count,0),
+                    totalMembros: Object.keys(participacoes).length,
+                    ranking: Object.values(participacoes).sort((a,b)=>b.count-a.count).slice(0,20),
+                    criadoEm: new Date().toISOString()
+                };
+                await setDoc(doc(collection(db,'gestao_historico_semanal')), snapshot).catch(()=>{});
+            }
             for (let item of list) { b.delete(doc(db, collectionName, item._id)); }
-            // Upamentos resetam semanalmente junto com as MOVs
             if(tipo === 'movs') {
                 window._state.upamentos.forEach(u => b.delete(doc(db, 'upamentos', u._id)));
                 window._state.atividade.forEach(a => b.delete(doc(db, 'gestao_atividade', a._id)));
@@ -2558,9 +2632,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             window.closeModal('modal-limpeza');
             window.showToast("Limpeza semanal concluída!", "success");
             if(tipo === 'movs') { document.getElementById('aviso-reset-semanal').style.display = 'none'; window._avisoResetDado = false;
-                // Apagar destaques da semana
                 (window._state.destaques||[]).forEach(d => deleteDoc(doc(db,'gestao_destaques',d._id)).catch(()=>{}));
-                // Atualizar status por semanas sem pontuar (roda ANTES de apagar atividade)
                 setTimeout(() => window.atualizarStatusPorSemanas && window.atualizarStatusPorSemanas(), 1000);
             }
         } catch(e) { window.showToast("Erro ao limpar dados.", "error"); }
@@ -2654,16 +2726,38 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         const el = document.getElementById('dash-movs-hoje'); if(!el) return;
         const hoje = todayStr();
         const movs = [...(window._state.movs||[])].filter(m => m.data === hoje).sort((a,b) => (a.horario||'').localeCompare(b.horario||''));
+
+        // Próxima MOV indicator no header
+        const proxEl = document.getElementById('dash-proxima-mov');
+        if(proxEl) {
+            const agoraMs = getBrTime().getTime();
+            const futuras = (window._state.movs||[]).filter(m => {
+                if(m.finalizada) return false;
+                if(!m.data || !m.horario) return false;
+                const movMs = new Date(`${m.data}T${m.horario}:00`).getTime();
+                return movMs > agoraMs;
+            }).sort((a,b) => ((a.data||'')+'T'+(a.horario||'')).localeCompare((b.data||'')+'T'+(b.horario||'')));
+            if(futuras.length) {
+                const prox = futuras[0];
+                const label = prox.data === hoje ? `hoje · ${prox.horario}` : `${prox.data.split('-').reverse().join('/')} · ${prox.horario}`;
+                proxEl.innerHTML = `<i class="ph-fill ph-clock-countdown" style="color:var(--accent);"></i> próx: ${escapeHTML(prox.tipo)} ${label}`;
+            } else { proxEl.innerHTML = ''; }
+        }
+
         if(!movs.length) { el.innerHTML = '<span class="dash-empty">Nenhuma MOV hoje.</span>'; return; }
         const agoraMin = getBrTime().getHours()*60 + getBrTime().getMinutes();
-        const proxIdx = movs.findIndex(m => { if(m.finalizada) return false; const [hh,mm]=(m.horario||'00:00').split(':').map(Number); return (hh*60+mm)>=agoraMin; });
+        const proxIdx = movs.findIndex(m => {
+            if(m.finalizada) return false;
+            const [hh,mm]=(m.horario||'00:00').split(':').map(Number);
+            return (hh*60+mm) > agoraMin;
+        });
         el.innerHTML = movs.map((m,i) => {
             const [hh,mm]=(m.horario||'00:00').split(':').map(Number);
             const isProxima = i===proxIdx;
             let badge = '';
             if(m.finalizada) badge = `<span style="font-size:9px;font-family:'Share Tech Mono';color:var(--success);background:rgba(52,211,153,0.12);padding:1px 6px;border-radius:4px;">finalizada</span>`;
             else if(isProxima) badge = `<span style="font-size:9px;font-family:'Share Tech Mono';color:var(--accent);background:rgba(0,220,255,0.12);padding:1px 6px;border-radius:4px;">próxima</span>`;
-            const resp = m.resp ? `<div style="font-size:11px;color:var(--text);font-family:'Rajdhani';font-weight:600;padding-left:44px;margin-top:1px;">\uD83D\uDC64 ${escapeHTML(m.resp)}${m.aux?` · <span style="opacity:0.7">${escapeHTML(m.aux)}</span>`:''}</div>` : '';
+            const resp = m.resp ? `<div style="font-size:11px;color:var(--text);font-family:'Rajdhani';font-weight:600;padding-left:44px;margin-top:1px;">👤 ${escapeHTML(m.resp)}${m.aux?` · <span style="opacity:0.7">${escapeHTML(m.aux)}</span>`:''}</div>` : '';
             return `<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
                 <div style="display:flex;align-items:center;gap:7px;">
                     <span style="font-family:'Share Tech Mono';font-size:12px;color:${m.finalizada?'rgba(255,255,255,0.3)':'var(--accent)'};min-width:44px;">${escapeHTML(m.horario||'--:--')}</span>
@@ -2671,6 +2765,84 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                     ${badge}
                 </div>${resp}</div>`;
         }).join('');
+    };
+
+    window.renderDashResetInfo = () => {
+        const el = document.getElementById('dash-reset-info'); if(!el) return;
+        const br = getBrTime();
+        const dow = br.getDay(); // 0=dom
+        const diasParaDom = dow === 0 ? 7 : 7 - dow;
+        const cor = diasParaDom <= 1 ? 'var(--danger)' : diasParaDom <= 3 ? 'var(--warning)' : 'var(--text)';
+        const total = (window._state.movs||[]).length;
+        el.innerHTML = `<i class="ph-fill ph-clock-counter-clockwise" style="color:${cor};"></i> <span style="color:${cor};">Reset em ${diasParaDom} dia${diasParaDom!==1?'s':''}</span> <span style="opacity:0.3;margin:0 4px;">·</span> <span>${total} MOV${total!==1?'s':''} esta semana</span>`;
+        window.renderMovLiveBar && window.renderMovLiveBar();
+    };
+
+    window.renderMovLiveBar = () => {
+        const bar      = document.getElementById('mov-live-bar');
+        const slotLive = document.getElementById('mov-slot-live');
+        const slotNext = document.getElementById('mov-slot-next');
+        if(!bar || !slotLive || !slotNext) return;
+        const agora   = getBrTime();
+        const hoje    = todayStr();
+        const agoraMs = agora.getTime();
+        // MOV em andamento
+        const emAndamento = (window._state.movs||[]).find(m => {
+            if(!m.data || !m.horario || m.data !== hoje || m.finalizada) return false;
+            const inicioMs = new Date(`${m.data}T${m.horario}:00`).getTime();
+            const durMs = (m.tipo==='Cine'?90:60)*60000;
+            return agoraMs >= inicioMs && agoraMs < inicioMs + durMs;
+        });
+        // Próxima MOV futura
+        const proxima = (window._state.movs||[]).filter(m => {
+            if(!m.data || !m.horario || m.finalizada) return false;
+            return new Date(`${m.data}T${m.horario}:00`).getTime() > agoraMs;
+        }).sort((a,b) => ((a.data||'')+'T'+(a.horario||'')).localeCompare((b.data||'')+'T'+(b.horario||'')))[0];
+        // Slot AO VIVO
+        if(emAndamento) {
+            document.getElementById('mov-live-tipo').textContent = emAndamento.tipo;
+            document.getElementById('mov-live-info').textContent = `${emAndamento.horario} · ${emAndamento.resp||''}${emAndamento.aux?' · '+emAndamento.aux:''}`;
+            slotLive.style.display = 'flex';
+        } else { slotLive.style.display = 'none'; }
+        // Slot PRÓXIMA (ticker)
+        if(proxima) {
+            const dataLabel = proxima.data === hoje ? `hoje ${proxima.horario}` : `${proxima.data.split('-').reverse().join('/')} · ${proxima.horario}`;
+            const txt = `${proxima.tipo}  ·  ${dataLabel}  ·  ${proxima.resp||''}${proxima.aux?' · '+proxima.aux:''}`;
+            const ticker = document.getElementById('mov-next-ticker');
+            if(ticker) { ticker.innerHTML = `<span style="color:var(--white);font-family:'Orbitron';font-size:10px;font-weight:900;">${escapeHTML(proxima.tipo)}</span><span style="opacity:0.3;">·</span><span>${escapeHTML(dataLabel)}</span><span style="opacity:0.3;">·</span><span style="color:rgba(255,255,255,0.6);">${escapeHTML(proxima.resp||'')}${proxima.aux?' · '+escapeHTML(proxima.aux):''}</span>`; }
+            slotNext.style.display = 'flex';
+        } else { slotNext.style.display = 'none'; }
+        bar.style.display = (emAndamento || proxima) ? 'block' : 'none';
+        // Ajustar padding-top do main
+        const avisoBar = document.getElementById('aviso-ticker-bar');
+        const mainEl = document.querySelector('main');
+        if(mainEl) {
+            const movH = (emAndamento || proxima) ? 40 : 0;
+            const avisoH = avisoBar && avisoBar.style.display !== 'none' ? 28 : 0;
+            mainEl.style.paddingTop = (30 + movH + avisoH) + 'px';
+        }
+    };
+
+    window.renderDashGraficoSemanal = async () => {
+        const el = document.getElementById('dash-grafico-semanal'); if(!el) return;
+        try {
+            const snap = await getDocs(collection(db,'gestao_historico_semanal'));
+            const semanas = snap.docs.map(d=>d.data()).sort((a,b)=>a.semana.localeCompare(b.semana)).slice(-5);
+            if(!semanas.length) { el.innerHTML = '<span class="dash-empty" style="font-size:11px;">Sem histórico ainda.</span>'; return; }
+            const max = Math.max(...semanas.map(s=>s.totalParticipacoes), 1);
+            const barW = Math.floor(100/semanas.length);
+            el.innerHTML = `<div style="display:flex;align-items:flex-end;gap:4px;height:60px;padding:0 4px;">
+                ${semanas.map(s => {
+                    const pct = Math.max(8, Math.round((s.totalParticipacoes/max)*100));
+                    const data = (s.semana||'').split('-').reverse().join('/');
+                    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;" title="${data}: ${s.totalParticipacoes} participações, ${s.totalMovs} MOVs">
+                        <span style="font-size:9px;font-family:'Share Tech Mono';color:var(--accent);">${s.totalParticipacoes}</span>
+                        <div style="width:100%;height:${pct}%;background:rgba(0,220,255,0.25);border-radius:3px 3px 0 0;border-top:2px solid var(--accent);min-height:4px;"></div>
+                        <span style="font-size:8px;font-family:'Share Tech Mono';color:var(--text);white-space:nowrap;">${data.substring(0,5)}</span>
+                    </div>`;
+                }).join('')}
+            </div>`;
+        } catch(e){ el.innerHTML = '<span class="dash-empty" style="font-size:11px;">Erro ao carregar.</span>'; }
     };
 
     window.renderDashGameNews = () => {
@@ -3436,6 +3608,32 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         catch(e){ console.error('[PRZ]',e); }
     };
 
+    window.renderAvisoTickerBar = () => {
+        const bar     = document.getElementById('aviso-ticker-bar');
+        const content = document.getElementById('aviso-ticker-content');
+        const label   = document.getElementById('aviso-ticker-label');
+        if(!bar || !content) return;
+        const list = [...(window._state.avisos||[])].sort((a,b)=>(b.criadoEm||'').localeCompare(a.criadoEm||''));
+        if(!list.length) { bar.style.display='none'; return; }
+        const tipoCor = { geral:'var(--accent)', urgente:'var(--danger)', reuniao:'#818cf8', mudanca:'var(--warning)', comunicado:'var(--success)', evento:'#f472b6' };
+        const mais = list[0];
+        const cor = tipoCor[mais.tipo] || 'var(--warning)';
+        if(label) label.style.color = cor;
+        // Montar conteúdo com todos os avisos
+        content.innerHTML = list.map(a => {
+            const c = tipoCor[a.tipo] || 'var(--warning)';
+            return `<span style="color:${c};font-family:'Orbitron';font-size:9px;font-weight:900;letter-spacing:1px;">${escapeHTML(a.tipo?.toUpperCase()||'AVISO')}</span><span style="color:rgba(255,255,255,0.85);font-family:'Rajdhani';font-size:12px;font-weight:700;margin-left:8px;">${escapeHTML(a.titulo)}</span><span style="color:rgba(255,255,255,0.4);font-family:'Rajdhani';font-size:11px;margin-left:6px;">— ${escapeHTML(a.msg?.substring(0,80))}${(a.msg?.length||0)>80?'…':''}</span><span class="aviso-ticker-sep">◆</span>`;
+        }).join('');
+        bar.style.display = 'flex';
+        // Ajustar padding-top do main
+        const movBar = document.getElementById('mov-live-bar');
+        const mainEl = document.querySelector('main');
+        if(mainEl) {
+            const movH = movBar && movBar.style.display !== 'none' ? 40 : 0;
+            mainEl.style.paddingTop = (30 + movH + 28) + 'px';
+        }
+    };
+
     window.renderAvisos = () => {
         const el = document.getElementById('avisos-dashboard'); if(!el) return;
         const list = [...(window._state.avisos||[])].sort((a,b) => (b.criadoEm||'').localeCompare(a.criadoEm||''));
@@ -3527,6 +3725,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         { id:'dash-panel-subareas',  label:'Rendimento Sub Áreas',  icon:'ph-chart-bar',          cor:'#f472b6',         size:1, visible:true  },
         { id:'dash-panel-feedbacks', label:'Feedbacks',             icon:'ph-chat-centered-text', cor:'var(--purple)',   size:1, visible:true  },
         { id:'dash-panel-trocaconta',label:'Troca de Conta',        icon:'ph-arrows-clockwise',   cor:'var(--accent)',   size:1, visible:false },
+        { id:'dash-panel-grafico',   label:'Atividade Semanal',     icon:'ph-chart-bar',          cor:'var(--accent)',   size:2, visible:true  },
     ];
 
     const DASH_PANELS_DEF_GERAL = [
@@ -3535,6 +3734,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         { id:'dash-panel-sug',       label:'Sugestões',             icon:'ph-lightbulb',          cor:'#f59e0b',         size:2, visible:true  },
         { id:'dash-panel-gn',        label:'Game News',             icon:'ph-article',            cor:'var(--gn-color)', size:2, visible:true  },
         { id:'dash-panel-entradas',  label:'Entradas / Saídas',     icon:'ph-door',               cor:'var(--success)',  size:2, visible:true  },
+        { id:'dash-panel-grafico',   label:'Atividade Semanal',     icon:'ph-chart-bar',          cor:'var(--accent)',   size:3, visible:true  },
         { id:'dash-panel-alertas',   label:'Alertas & Pendências',  icon:'ph-warning-octagon',    cor:'var(--danger)',   size:1, visible:false },
         { id:'dash-panel-rpp',       label:'RPP',                   icon:'ph-shield-warning',     cor:'var(--warning)',  size:1, visible:false },
         { id:'dash-panel-trocaup',   label:'Troca de UP',           icon:'ph-swap',               cor:'var(--purple)',   size:1, visible:false },
@@ -3754,7 +3954,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         unsubMembers = onSnapshot(collection(db, "members"), (s) => { window._state.members = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderMembers(); window.renderIndicacoes(); });
         unsubHistorico = onSnapshot(collection(db, "historico"), (s) => { window._state.historico = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderHistorico(); });
         unsubMovs = onSnapshot(collection(db, "movs"), (s) => { 
-            window._state.movs = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderMovs(); window.renderRelatorios(); window.renderCalendar(); window.renderAcolhimentos(); window.renderDashSugMovs(); window.renderDashMovsHoje(); window.renderDashSugMovs();
+            window._state.movs = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderMovs(); window.renderRelatorios(); window.renderCalendar(); window.renderAcolhimentos(); window.renderDashSugMovs(); window.renderDashMovsHoje(); window.renderDashSugMovs(); window.renderDashResetInfo && window.renderDashResetInfo(); window.renderMovLiveBar && window.renderMovLiveBar();
             if (document.getElementById('modal-relatorio').style.display === 'flex') window.renderParticipantes();
             const br = getBrTime(); if (window._state.movs.length > 0 && ((br.getDay() === 0 && br.getHours() >= 21) || (br.getDay() === 1 && br.getHours() < 12))) { document.getElementById('aviso-reset-semanal').style.display = 'flex'; } else { document.getElementById('aviso-reset-semanal').style.display = 'none'; }
         });
@@ -3764,6 +3964,11 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         window.carregarDashLayout && window.carregarDashLayout();
         window.carregarTopicosSetorial && window.carregarTopicosSetorial();
         window.renderDashAlertas && window.renderDashAlertas();
+        window.renderDashResetInfo && window.renderDashResetInfo();
+        window.renderDashGraficoSemanal && window.renderDashGraficoSemanal();
+        // Atualizar barra ao vivo a cada minuto
+        if(window._liveBarInterval) clearInterval(window._liveBarInterval);
+        window._liveBarInterval = setInterval(() => { window.renderMovLiveBar && window.renderMovLiveBar(); window.renderDashMovsHoje && window.renderDashMovsHoje(); }, 60000);
         window.startListenNotif();
         window.startListenGestao();
 
@@ -3934,12 +4139,21 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             document.getElementById('count-total').innerText    = window._state.members.length + window._state.naoVerificados.length;
 
             const isGestaoMaster = ['lider_geral','lider','sublider','gerente'].includes(window.currentUserRole);
+            const posCorBg = { gestao: 'rgba(0,220,255,0.04)', subgestao: 'rgba(167,139,250,0.04)', comum: 'transparent' };
+            const posCorBorder = { gestao: 'rgba(0,220,255,0.08)', subgestao: 'rgba(167,139,250,0.06)', comum: 'transparent' };
+            const posCorAvatar = { gestao: 'var(--accent)', subgestao: 'var(--purple)', comum: 'rgba(255,255,255,0.25)' };
 
             const des = (m, isR) => {
                 const s = (m.pts === 'sim' || m.pts === true || m.pts === 'true') ? 'dot-green' : (['1_semana','2_semanas','3_semanas'].includes(m.pts) ? 'dot-yellow' : 'dot-red');
                 const cCor = window.cargoColors[m.cargo] || "#9ca3af";
                 const btnEdit = isGestaoMaster ? `<button class="btn-acao outline-primary" onclick="window.editMember('${m._id}')"><i class="ph-bold ph-pencil-simple"></i></button><button class="btn-acao outline-danger" onclick="window.openExcluirModal('${m._id}', '${isR?'REBOCADO':'REMOVIDO'}')"><i class="ph-bold ph-trash"></i></button>` : '';
-                return `<tr>
+                const initials = (m.m||'?').trim().split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+                const avcor = posCorAvatar[m.posicao] || posCorAvatar.comum;
+                const avatar = `<div style="width:30px;height:30px;border-radius:50%;background:${avcor}22;border:1px solid ${avcor};display:inline-flex;align-items:center;justify-content:center;font-family:'Orbitron';font-size:9px;font-weight:900;color:${avcor};flex-shrink:0;margin-right:8px;">${initials}</div>`;
+                const rowBg = posCorBg[m.posicao] || 'transparent';
+                const rowBorder = posCorBorder[m.posicao] || 'transparent';
+                const idSpan = `<small style="font-family:'Share Tech Mono';color:var(--text);cursor:pointer;" onclick="window.copiarIdDiscord('${escapeHTML(m.id)}',this)" title="Clique para copiar">${escapeHTML(m.id)}</small>`;
+                return `<tr style="background:${rowBg};border-left:2px solid ${rowBorder};">
                     <td><div style="display:flex; justify-content:center;"><select class="status-dot ${s}" onchange="window.mudarStatusRapido('${m._id}', this.value)" ${!isGestaoMaster?'disabled':''}>
                         <option value="sim" ${m.pts==='sim'?'selected':''}>Ativo</option>
                         <option value="1_semana" ${m.pts==='1_semana'?'selected':''}>1 Sem OFF</option>
@@ -3950,7 +4164,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                         <option value="3_meses" ${m.pts==='3_meses'?'selected':''}>3 Meses OFF</option>
                         <option value="sem_pontos" ${m.pts==='sem_pontos'?'selected':''}>Sem Pontos</option>
                     </select></div></td>
-                    <td><b style="font-family:'Orbitron'; font-size:15px;">${escapeHTML(m.m)}</b><br><small style="font-family:'Share Tech Mono'; color:var(--text);">${escapeHTML(m.id)}</small></td>
+                    <td><div style="display:flex;align-items:center;">${avatar}<div><b style="font-family:'Orbitron'; font-size:14px;">${escapeHTML(m.m)}</b><br>${idSpan}</div></div></td>
                     <td><select class="badge-select" onchange="window.mudarPosicaoRapido('${m._id}', this.value)" ${!isGestaoMaster?'disabled':''}><option value="comum" ${m.posicao==='comum'?'selected':''}>Comum</option><option value="subgestao" ${m.posicao==='subgestao'?'selected':''}>Sub-Gestão</option><option value="gestao" ${m.posicao==='gestao'?'selected':''}>Gestão</option></select></td>
                     <td><select class="badge-select" style="text-align:center;" onchange="window.mudarUpaGamesRapido('${m._id}', this.value)" ${!isGestaoMaster?'disabled':''}><option value="sim" ${m.upaGames==='sim'?'selected':''}>Games</option><option value="nao" ${m.upaGames==='nao'?'selected':''}>Outra</option></select></td>
                     <td><select class="badge-select" onchange="window.mudarTipoUpRapido('${m._id}', this.value)" ${!isGestaoMaster?'disabled':''}><option value="" ${!m.tipoUp?'selected':''}>S/ UP</option><option value="meta" ${m.tipoUp==='meta'?'selected':''}>Meta</option><option value="merito" ${m.tipoUp==='merito'?'selected':''}>Mérito</option></select></td>
@@ -4381,6 +4595,13 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     window.saveMov = async () => { const btn = document.getElementById('btn-salvar-mov'); btn.disabled=true; btn.innerHTML="A GUARDAR..."; const id = document.getElementById('m-docid').value; const d = { tipo: document.getElementById('m-tipo').value, pontos: parseInt(document.getElementById('m-pontos').value)||0, data: document.getElementById('m-data').value, horario: document.getElementById('m-hora').value, resp: document.getElementById('m-resp').value, aux: document.getElementById('m-aux').value }; if(!d.data || !d.horario || !d.resp) { window.showToast("Preencha data, hora e responsável!", "error"); btn.disabled=false; btn.innerHTML="SALVAR MOV"; return; } if (id) { const o = window._state.movs.find(x => x._id === id); if (o) { d.participantes = o.participantes || []; d.topQuiz = o.topQuiz || { primeiro: '', segundo: '', terceiro: '' }; d.finalizada = o.finalizada || false; } } else { d.participantes = []; d.topQuiz = { primeiro: '', segundo: '', terceiro: '' }; d.finalizada = false; } try { if(id) await setDoc(doc(db, "movs", id), d, { merge: true }); else await setDoc(doc(collection(db, "movs")), d); window.closeModal('modal-mov'); window.showToast("Salvo com sucesso!", "success"); } catch(e){ console.error("[PRZ Error]", e); window.showToast("Erro ao guardar MOV.", "error"); } finally { btn.disabled=false; btn.innerHTML="SALVAR MOV"; } };
     window.apagarMov = async (id) => { if(await window.showConfirm("Apagar este agendamento de MOV?", "Apagar MOV", true)) { try{ await deleteDoc(doc(db, "movs", id)); window.showToast("Removido.", "success"); } catch(e){ console.error("[PRZ Error]", e); window.showToast("Erro ao apagar.", "error"); } } }; window.finalizarMov = async (id) => { if(await window.showConfirm("Marcar esta MOV como concluída?", "Finalizar MOV", false)) { try{ await setDoc(doc(db, "movs", id), { finalizada: true }, { merge: true }); window.showToast("MOV finalizada!", "success"); } catch(e){ console.error("[PRZ Error]", e); window.showToast("Erro ao finalizar.", "error"); } } };
     
+    window.copiarIdDiscord = async (id, el) => {
+        try {
+            await navigator.clipboard.writeText(id);
+            if(el) { const orig = el.innerHTML; el.innerHTML = '✓ copiado'; el.style.color='var(--success)'; setTimeout(()=>{ el.innerHTML=orig; el.style.color=''; },1800); }
+        } catch(e) { window.showToast('Erro ao copiar.','error'); }
+    };
+
     window.copiarCronograma = async () => {
         const movs = [...window._state.movs]
             .filter(m => !m.finalizada)
@@ -7543,6 +7764,7 @@ Registado por: ${r.registadoPor} | ${labelData(r.data)}`;
             window._state.avisos = s.docs.map(d=>({_id:d.id,...d.data()}));
             window.renderAvisos && window.renderAvisos();
             window.renderDashAvisosRecentes && window.renderDashAvisosRecentes();
+            window.renderAvisoTickerBar && window.renderAvisoTickerBar();
         });
         unsubPautas = onSnapshot(collection(db,'gestao_pautas'), s => { window._state.pautas = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderPautas(); });
         unsubAdv = onSnapshot(collection(db,'gestao_adv'), s => { window._state.adv = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAdv(); window.renderDashAlertas && window.renderDashAlertas(); });
