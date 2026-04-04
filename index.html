@@ -4535,7 +4535,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                                 <div style="font-size:12px; color:var(--text);">Aux: <span style="color:var(--white);">${m.aux?escapeHTML(m.aux):'-'}</span></div>
                             </div>
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; border-top:1px solid var(--border); padding-top:15px;">
-                                <span class="badge b-blue" style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3);"><i class="ph-bold ph-users"></i> ${cont} REGISTOS</span>
+                                <span class="badge b-blue" style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3);"><i class="ph-bold ph-users"></i> ${cont} PARTICIPANTE${cont!==1?'S':''}</span>
                                 <button class="btn-acao outline-purple" onclick="window.abrirRelatorio('${m._id}')"><i class="ph-bold ph-file-text"></i> GERAR</button>
                             </div>
                           </div>`;
