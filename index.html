@@ -5,8 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GAMES PRZ</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzA2MDYwOSIvPjxyZWN0IHg9IjQiIHk9IjExIiB3aWR0aD0iMjQiIGhlaWdodD0iMTIiIHJ4PSI2IiBmaWxsPSIjMDBkY2ZmIiBvcGFjaXR5PSIwLjE1Ii8+PHJlY3QgeD0iNCIgeT0iMTEiIHdpZHRoPSIyNCIgaGVpZ2h0PSIxMiIgcng9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwZGNmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48cmVjdCB4PSIxMyIgeT0iMTUiIHdpZHRoPSI2IiBoZWlnaHQ9IjIiIHJ4PSIxIiBmaWxsPSIjMDBkY2ZmIi8+PHJlY3QgeD0iMTUiIHk9IjEzIiB3aWR0aD0iMiIgaGVpZ2h0PSI2IiByeD0iMSIgZmlsbD0iIzAwZGNmZiIvPjxjaXJjbGUgY3g9IjIyIiBjeT0iMTUiIHI9IjEuMiIgZmlsbD0iIzAwZGNmZiIvPjxjaXJjbGUgY3g9IjI1IiBjeT0iMTciIHI9IjEuMiIgZmlsbD0iIzAwZGNmZiIvPjxjaXJjbGUgY3g9IjIyIiBjeT0iMTkiIHI9IjEuMiIgZmlsbD0iIzAwZGNmZiIvPjxjaXJjbGUgY3g9IjE5IiBjeT0iMTciIHI9IjEuMiIgZmlsbD0iIzAwZGNmZiIgb3BhY2l0eT0iMC40Ii8+PGxpbmUgeDE9IjgiIHkxPSIxMSIgeDI9IjciIHkyPSI4IiBzdHJva2U9IiMwMGRjZmYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48bGluZSB4MT0iMjQiIHkxPSIxMSIgeDI9IjI1IiB5Mj0iOCIgc3Ryb2tlPSIjMDBkY2ZmIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+<link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+
+<!-- Google Fonts — não bloqueante -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"></noscript>
+
+<!-- Phosphor Icons — subsets usados, versão fixada -->
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" media="print" onload="this.media='all'">
+<noscript>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+</noscript>
+
+<!-- Firebase preload -->
+<link rel="preload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js" as="script" crossorigin>
+<link rel="preload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js" as="script" crossorigin>
+<link rel="preload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js" as="script" crossorigin>
 
 <style>
     :root { 
@@ -26,9 +47,14 @@
 
     /* TELAS DE LOADING E LOGIN */
     #loading-screen, #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); z-index: 9999;}
-    #loading-screen { background: var(--bg); flex-direction: column; }
-    .spinner { width: 44px; height: 44px; border: 2px solid rgba(0,220,255,0.12); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; filter: drop-shadow(0 0 10px var(--accent-glow)); }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
+    #loading-screen { background: #060609; flex-direction: column; align-items: center; justify-content: center; gap: 16px; transition: opacity 0.6s ease; }
+    .ld-logo { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 900; color: #00dcff; letter-spacing: 5px; text-shadow: 0 0 24px rgba(0,220,255,0.55); animation: ld-pulse 2.5s ease-in-out infinite; }
+    .ld-sub { font-size: 10px; color: rgba(0,220,255,0.4); font-family: 'Share Tech Mono', monospace; letter-spacing: 3px; margin-top: -8px; animation: ld-pulse 2.5s ease-in-out infinite 0.3s; }
+    .ld-bar-wrap { width: 160px; height: 2px; background: rgba(0,220,255,0.08); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+    .ld-bar { height: 100%; width: 0%; background: #00dcff; border-radius: 2px; box-shadow: 0 0 10px rgba(0,220,255,0.7); animation: ld-bar 2.2s ease-in-out infinite alternate; }
+    @keyframes ld-bar { 0%{width:0%} 100%{width:90%} }
+    @keyframes ld-pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+    .spinner { display: none; }
 
     #login-screen { background: radial-gradient(circle at center, rgba(24,24,27,0.9) 0%, var(--bg) 100%); z-index: 9000; display: none; }
     .login-box { background: rgba(6,6,9,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(0,220,255,0.12); padding: 40px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 40px rgba(0,220,255,0.05); border-radius: 16px; border-top: 2px solid var(--accent); }
@@ -327,9 +353,14 @@
 </div>
 
 <div id="toast-container"></div>
-<div id="loading-screen"><div class="spinner"></div></div>
+<div id="loading-screen">
+    <div class="ld-logo">GAMES PRZ</div>
+    <div class="ld-sub">PORTAL DE GESTÃO</div>
+    <div class="ld-bar-wrap"><div class="ld-bar"></div></div>
+</div>
 <script>
-function _showLogin(){var ls=document.getElementById('loading-screen'),login=document.getElementById('login-screen'),app=document.getElementById('app-screen');if(ls)ls.style.display='none';if(login&&(!app||app.style.display==='none'||app.style.display==='')){login.style.display='flex';}}
+function _fadeLoading(cb){var ls=document.getElementById('loading-screen');if(!ls){if(cb)cb();return;}ls.style.opacity='0';setTimeout(function(){ls.style.display='none';if(cb)cb();},650);}
+function _showLogin(){var login=document.getElementById('login-screen'),app=document.getElementById('app-screen');_fadeLoading(function(){if(login&&(!app||app.style.display==='none'||app.style.display==='')){login.style.display='flex';}});}
 window._moduleLoaded=false;
 window._moduleTimeout=setTimeout(function(){if(!window._moduleLoaded)_showLogin();},5000);
 setTimeout(function(){var app=document.getElementById('app-screen');if(!app||app.style.display==='none'||app.style.display==='')_showLogin();},12000);
@@ -3683,18 +3714,19 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             } catch(e) { window.currentUserRole = 'convidado'; }
 
             window.applyRBAC();
-            document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-screen').style.display = 'flex'; 
-            startListen(); 
-            
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'flex';
+            startListen();
             autoResetInterval = setInterval(() => { 
                 const br = getBrTime(); 
                 if (br.getDay() === 0 && br.getHours() === 20 && br.getMinutes() === 55 && br.getSeconds() < 10 && !window._avisoResetDado) { window.showToast("⚠\uFE0F Limpeza às 21:00!", "error"); window._avisoResetDado = true; } 
                 if (br.getDay() === 0 && br.getHours() === 21 && br.getMinutes() === 0 && br.getSeconds() < 10) { window.forcarLimpezaSemanal(false); } 
-            }, 5000); 
+            }, 5000);
+            _fadeLoading();
         } else { 
-            document.getElementById('app-screen').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex'; 
+            document.getElementById('app-screen').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex';
+            _fadeLoading();
         } 
-        document.getElementById('loading-screen').style.display = 'none'; 
     });
 
     window.doLoginBtn = async function() { 
@@ -3705,7 +3737,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             await signInWithEmailAndPassword(auth, u.includes('@') ? u : `${u.toLowerCase()}@games.pt`, p); 
             window.showToast("Bem-vindo!", "success");
         } catch (e) { 
-            document.getElementById('loading-screen').style.display = 'none'; 
+            _fadeLoading();
             window.showToast("Credenciais incorretas ou não existe.", "error"); 
         } 
     };
