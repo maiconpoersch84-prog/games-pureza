@@ -408,7 +408,7 @@
 </style>
 
 <!-- Chat Flutuante -->
-<button id="chat-fab" onclick="window.toggleChat()" title="Chat da Gestão">
+<button id="chat-fab" onclick="window.toggleChat?.()" title="Chat da Gestão">
     <i class="ph-fill ph-chat-circle-text"></i>
     <span class="chat-unread" id="chat-unread-badge">0</span>
 </button>
@@ -421,14 +421,14 @@
             <span id="chat-online-count" style="font-size:10px;font-family:'Share Tech Mono';color:var(--success);"></span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
-            <button id="chat-clear-btn" onclick="window.resetChat(false)" title="Limpar chat" style="display:none;background:transparent;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:4px;opacity:0.6;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="ph-bold ph-trash"></i></button>
-            <button onclick="window.toggleChat()" style="background:transparent;border:none;color:var(--text);cursor:pointer;font-size:16px;padding:4px;"><i class="ph-bold ph-x"></i></button>
+            <button id="chat-clear-btn" onclick="window.resetChat?.(false)" title="Limpar chat" style="display:none;background:transparent;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:4px;opacity:0.6;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="ph-bold ph-trash"></i></button>
+            <button onclick="window.toggleChat?.()" style="background:transparent;border:none;color:var(--text);cursor:pointer;font-size:16px;padding:4px;"><i class="ph-bold ph-x"></i></button>
         </div>
     </div>
     <div id="chat-messages"></div>
     <div id="chat-input-area">
         <textarea id="chat-input" placeholder="Mensagem..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();window.sendChatMsg();}"></textarea>
-        <button id="chat-send" onclick="window.sendChatMsg()"><i class="ph-bold ph-paper-plane-tilt"></i></button>
+        <button id="chat-send" onclick="window.sendChatMsg?.()"><i class="ph-bold ph-paper-plane-tilt"></i></button>
     </div>
 </div>
 
@@ -562,7 +562,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         <div id="nav-info-user" style="padding:12px 14px; background:rgba(0,0,0,0.5); border-top:1px solid var(--border);">
             <div style="display:flex; align-items:center; gap:10px;">
                 <!-- Avatar com indicador de status clicável -->
-                <div style="position:relative; flex-shrink:0; cursor:pointer;" onclick="window.toggleStatusMenu()" title="Alterar status">
+                <div style="position:relative; flex-shrink:0; cursor:pointer;" onclick="window.toggleStatusMenu?.()" title="Alterar status">
                     <div id="nav-user-avatar" style="width:38px; height:38px; border-radius:10px; background:rgba(0,220,255,0.12); border:1px solid rgba(0,220,255,0.3); display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-size:13px; font-weight:900; color:var(--accent); overflow:hidden;">
                         <span id="nav-user-initials">?</span>
                         <img id="nav-user-avatar-img" src="" alt="" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; document.getElementById('nav-user-initials').style.display='flex';">
@@ -576,15 +576,15 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                     <div style="display:flex; align-items:center; gap:5px;">
                         <div id="nav-user-role" style="font-size:10px; font-family:'Orbitron'; font-weight:900; letter-spacing:0.5px; color:var(--accent);">CARREGANDO...</div>
                     </div>
-                    <div id="nav-user-status-label" style="font-size:10px; font-family:'Rajdhani'; font-weight:600; color:var(--text); margin-top:1px; cursor:pointer;" onclick="window.toggleStatusMenu()">🟢 Online</div>
+                    <div id="nav-user-status-label" style="font-size:10px; font-family:'Rajdhani'; font-weight:600; color:var(--text); margin-top:1px; cursor:pointer;" onclick="window.toggleStatusMenu?.()">🟢 Online</div>
                 </div>
             </div>
             <!-- Menu de status -->
             <div id="status-menu" style="display:none; margin-top:10px; background:rgba(0,0,0,0.6); border:1px solid var(--border); border-radius:10px; overflow:hidden;">
-                <div class="status-opt" data-status="online"   onclick="window.setUserStatus('online')"   style="padding:8px 12px; display:flex; align-items:center; gap:8px; cursor:pointer; transition:0.15s; font-family:'Rajdhani'; font-size:13px; font-weight:700; color:var(--white);" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span style="width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0;"></span> Online</div>
-                <div class="status-opt" data-status="ausente"  onclick="window.setUserStatus('ausente')"  style="padding:8px 12px; display:flex; align-items:center; gap:8px; cursor:pointer; transition:0.15s; font-family:'Rajdhani'; font-size:13px; font-weight:700; color:var(--white);" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;flex-shrink:0;"></span> Ausente</div>
-                <div class="status-opt" data-status="nperturbe" onclick="window.setUserStatus('nperturbe')" style="padding:8px 12px; display:flex; align-items:center; gap:8px; cursor:pointer; transition:0.15s; font-family:'Rajdhani'; font-size:13px; font-weight:700; color:var(--white);" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;flex-shrink:0;"></span> Não Perturbe</div>
-                <div class="status-opt" data-status="offline"  onclick="window.setUserStatus('offline')"  style="padding:8px 12px; display:flex; align-items:center; gap:8px; cursor:pointer; transition:0.15s; font-family:'Rajdhani'; font-size:13px; font-weight:700; color:var(--white);" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span style="width:10px;height:10px;border-radius:50%;background:#6b7280;border:1px solid rgba(255,255,255,0.2);flex-shrink:0;"></span> Offline</div>
+                <div class="status-opt" data-status="online"   onclick="window.setUserStatus?.('online')"   style="padding:8px 12px; display:flex; align-items:center; gap:8px; cursor:pointer; transition:0.15s; font-family:'Rajdhani'; font-size:13px; font-weight:700; color:var(--white);" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span style="width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0;"></span> Online</div>
+                <div class="status-opt" data-status="ausente"  onclick="window.setUserStatus?.('ausente')"  style="padding:8px 12px; display:flex; align-items:center; gap:8px; cursor:pointer; transition:0.15s; font-family:'Rajdhani'; font-size:13px; font-weight:700; color:var(--white);" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;flex-shrink:0;"></span> Ausente</div>
+                <div class="status-opt" data-status="nperturbe" onclick="window.setUserStatus?.('nperturbe')" style="padding:8px 12px; display:flex; align-items:center; gap:8px; cursor:pointer; transition:0.15s; font-family:'Rajdhani'; font-size:13px; font-weight:700; color:var(--white);" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;flex-shrink:0;"></span> Não Perturbe</div>
+                <div class="status-opt" data-status="offline"  onclick="window.setUserStatus?.('offline')"  style="padding:8px 12px; display:flex; align-items:center; gap:8px; cursor:pointer; transition:0.15s; font-family:'Rajdhani'; font-size:13px; font-weight:700; color:var(--white);" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span style="width:10px;height:10px;border-radius:50%;background:#6b7280;border:1px solid rgba(255,255,255,0.2);flex-shrink:0;"></span> Offline</div>
             </div>
         </div>
 
