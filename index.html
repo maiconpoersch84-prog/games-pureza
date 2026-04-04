@@ -133,10 +133,10 @@
     /* BARRA DE AVISOS TOPO */
     #aviso-ticker-bar { display:none; position:fixed; top:40px; left:260px; right:0; height:28px; background:rgba(251,191,36,0.04); border-bottom:1px solid rgba(251,191,36,0.12); z-index:799; overflow:hidden; }
     .aviso-ticker-label { font-family:'Orbitron'; font-size:8px; font-weight:900; letter-spacing:1px; padding:0 14px; white-space:nowrap; flex-shrink:0; height:100%; display:flex; align-items:center; border-right:1px solid rgba(251,191,36,0.15); }
-    .aviso-ticker-track { flex:1; overflow:hidden; position:relative; height:100%; }
-    .aviso-ticker-content { display:inline-flex; align-items:center; gap:60px; white-space:nowrap; position:absolute; top:50%; transform:translateY(-50%); animation:aviso-scroll 60s linear infinite; }
+    .aviso-ticker-track { flex:1; overflow:hidden; display:flex; align-items:center; height:100%; }
+    .aviso-ticker-content { display:inline-flex; align-items:center; gap:80px; white-space:nowrap; animation:aviso-scroll 35s linear infinite; will-change:transform; }
     .aviso-ticker-content:hover { animation-play-state:paused; cursor:default; }
-    @keyframes aviso-scroll { 0%{left:100%} 100%{left:-200%} }
+    @keyframes aviso-scroll { 0%{transform:translateX(100vw)} 100%{transform:translateX(-100%)} }
     .aviso-ticker-sep { color:rgba(251,191,36,0.2); font-size:10px; }
     #mov-live-bar { display:none; position:fixed; top:0; left:260px; right:0; z-index:800; padding:0 36px; background:#060609; border-bottom:1px solid rgba(255,255,255,0.06); }
     .mov-live-inner { display:flex; align-items:center; gap:0; height:40px; }
@@ -3622,7 +3622,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         // Montar conteúdo com todos os avisos
         content.innerHTML = list.map(a => {
             const c = tipoCor[a.tipo] || 'var(--warning)';
-            return `<span style="color:${c};font-family:'Orbitron';font-size:9px;font-weight:900;letter-spacing:1px;">${escapeHTML(a.tipo?.toUpperCase()||'AVISO')}</span><span style="color:rgba(255,255,255,0.85);font-family:'Rajdhani';font-size:12px;font-weight:700;margin-left:8px;">${escapeHTML(a.titulo)}</span><span style="color:rgba(255,255,255,0.4);font-family:'Rajdhani';font-size:11px;margin-left:6px;">— ${escapeHTML(a.msg?.substring(0,80))}${(a.msg?.length||0)>80?'…':''}</span><span class="aviso-ticker-sep">◆</span>`;
+            return `<span style="color:${c};font-family:'Orbitron';font-size:9px;font-weight:900;letter-spacing:1px;">${escapeHTML(a.tipo?.toUpperCase()||'AVISO')}</span><span style="color:rgba(255,255,255,0.85);font-family:'Rajdhani';font-size:12px;font-weight:700;margin-left:8px;">${escapeHTML(a.titulo)}</span><span style="color:rgba(255,255,255,0.4);font-family:'Rajdhani';font-size:11px;margin-left:6px;">— ${escapeHTML(a.msg?.substring(0,120))}${(a.msg?.length||0)>120?'…':''}</span><span class="aviso-ticker-sep" style="margin:0 20px;">◆</span>`;
         }).join('');
         bar.style.display = 'flex';
         // Ajustar padding-top do main
