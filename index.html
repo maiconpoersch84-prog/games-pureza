@@ -128,17 +128,18 @@
     .btn-logout:hover { background: rgba(244,63,94,0.1); color: var(--white); }
 
     /* ÁREA PRINCIPAL E TABELAS */
-    main { flex: 1; height: 100%; padding: 30px 36px; overflow-y: auto; position: relative; }
+    main { flex: 1; height: 100%; display:flex; flex-direction:column; overflow:hidden; }
+    #main-content { flex:1; overflow-y:auto; padding: 30px 36px; position:relative; }
 
     /* BARRA DE AVISOS TOPO */
-    #aviso-ticker-bar { display:none; position:fixed; top:40px; left:260px; right:0; height:28px; background:rgba(251,191,36,0.04); border-bottom:1px solid rgba(251,191,36,0.12); z-index:799; overflow:hidden; }
+    #aviso-ticker-bar { display:none; height:28px; background:rgba(251,191,36,0.04); border-bottom:1px solid rgba(251,191,36,0.12); z-index:799; overflow:hidden; flex-shrink:0; }
     .aviso-ticker-label { font-family:'Orbitron'; font-size:8px; font-weight:900; letter-spacing:1px; padding:0 14px; white-space:nowrap; flex-shrink:0; height:100%; display:flex; align-items:center; border-right:1px solid rgba(251,191,36,0.15); }
     .aviso-ticker-track { flex:1; overflow:hidden; display:flex; align-items:center; height:100%; }
     .aviso-ticker-content { display:inline-flex; align-items:center; gap:80px; white-space:nowrap; animation:aviso-scroll 35s linear infinite; will-change:transform; }
     .aviso-ticker-content:hover { animation-play-state:paused; cursor:default; }
     @keyframes aviso-scroll { 0%{transform:translateX(100vw)} 100%{transform:translateX(-100%)} }
     .aviso-ticker-sep { color:rgba(251,191,36,0.2); font-size:10px; }
-    #mov-live-bar { display:none; position:fixed; top:0; left:260px; right:0; z-index:800; padding:0 36px; background:#060609; border-bottom:1px solid rgba(255,255,255,0.06); }
+    #mov-live-bar { display:none; z-index:800; padding:0 36px; background:#060609; border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0; }
     .mov-live-inner { display:flex; align-items:center; gap:0; height:40px; }
     .mov-live-slot { display:flex; align-items:center; gap:10px; padding:0 16px; height:100%; flex:1; }
     .mov-live-slot.ao-vivo { border-right:1px solid rgba(255,255,255,0.06); }
@@ -539,6 +540,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                 <div class="aviso-ticker-content" id="aviso-ticker-content"></div>
             </div>
         </div>
+        <div id="main-content">
         <div id="aviso-reset-semanal" style="display:none; background:rgba(244,63,94,0.1); border:1px solid var(--danger); padding:20px 25px; border-radius:12px; margin-bottom:30px; justify-content:space-between; align-items:center; box-shadow:0 10px 30px rgba(244,63,94,0.15);">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <i class="ph-fill ph-warning" style="font-size: 28px; color: var(--danger);"></i>
@@ -1633,7 +1635,8 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
     <div id="feedbacks-list"></div>
 </div>
 
-</div>
+        </div><!-- /#main-content -->
+    </main>
 
 
 
@@ -2110,8 +2113,16 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
     <div class="modal-content small">
         <h2 style="color:var(--success); margin-bottom:25px;"><i class="ph-fill ph-trophy"></i> GERAR MENSAGEM DE LEVEL UP</h2>
         <input type="hidden" id="lu-docid">
-        <div class="form-group" style="margin-bottom:15px;"><label>MEMBRO</label>
-            <select id="lu-membro" onchange="window.onLuMembroChange()"></select>
+        <input type="hidden" id="lu-membro-id-hidden">
+        <div class="form-group" style="margin-bottom:15px;">
+            <label>MEMBRO</label>
+            <div style="position:relative;">
+                <input type="text" id="lu-membro-search" placeholder="🔍 Pesquisar membro..." autocomplete="off"
+                    oninput="window.filterLuMembros()"
+                    onfocus="document.getElementById('lu-membro-dropdown').style.display='block'"
+                    style="width:100%; background:rgba(0,0,0,0.4); border:1px solid var(--border); color:var(--white); padding:10px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:13px; font-weight:600; outline:none;">
+                <div id="lu-membro-dropdown" style="display:none; position:absolute; top:100%; left:0; right:0; background:#0d0d12; border:1px solid rgba(0,220,255,0.15); border-radius:8px; max-height:180px; overflow-y:auto; z-index:100; margin-top:2px;"></div>
+            </div>
         </div>
         <div class="form-group" style="margin-bottom:15px;"><label>ID DO DISCORD</label>
             <input type="text" id="lu-discord-id" placeholder="Ex: 1234567890123" oninput="window.updateLuPreview()">
@@ -2122,7 +2133,6 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         <div class="form-group" style="margin-bottom:15px;"><label>CARGO CONQUISTADO (AUTO)</label>
             <div id="lu-cargo-display" style="background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:8px; padding:12px 15px; font-family:'Share Tech Mono'; color:var(--success); font-size:14px;">— Insira a pontuação —</div>
         </div>
-        <!-- Preview da mensagem -->
         <div style="margin-bottom:15px;">
             <label style="font-size:10px; color:var(--text); font-family:'Orbitron'; font-weight:700; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:8px;">PRÉVIA DA MENSAGEM</label>
             <div id="lu-preview" style="background:rgba(0,0,0,0.5); border:1px solid rgba(16,185,129,0.3); border-radius:8px; padding:12px 15px; font-family:'Share Tech Mono'; font-size:13px; color:var(--white); line-height:1.8; white-space:pre-wrap; min-height:50px;">— Preencha os campos acima —</div>
@@ -2813,14 +2823,6 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             slotNext.style.display = 'flex';
         } else { slotNext.style.display = 'none'; }
         bar.style.display = (emAndamento || proxima) ? 'block' : 'none';
-        // Ajustar padding-top do main
-        const avisoBar = document.getElementById('aviso-ticker-bar');
-        const mainEl = document.querySelector('main');
-        if(mainEl) {
-            const movH = (emAndamento || proxima) ? 40 : 0;
-            const avisoH = avisoBar && avisoBar.style.display !== 'none' ? 28 : 0;
-            mainEl.style.paddingTop = (30 + movH + avisoH) + 'px';
-        }
     };
 
     window.renderDashGraficoSemanal = async () => {
@@ -3625,13 +3627,6 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             return `<span style="color:${c};font-family:'Orbitron';font-size:9px;font-weight:900;letter-spacing:1px;">${escapeHTML(a.tipo?.toUpperCase()||'AVISO')}</span><span style="color:rgba(255,255,255,0.85);font-family:'Rajdhani';font-size:12px;font-weight:700;margin-left:8px;">${escapeHTML(a.titulo)}</span><span style="color:rgba(255,255,255,0.4);font-family:'Rajdhani';font-size:11px;margin-left:6px;">— ${escapeHTML(a.msg?.substring(0,120))}${(a.msg?.length||0)>120?'…':''}</span><span class="aviso-ticker-sep" style="margin:0 20px;">◆</span>`;
         }).join('');
         bar.style.display = 'flex';
-        // Ajustar padding-top do main
-        const movBar = document.getElementById('mov-live-bar');
-        const mainEl = document.querySelector('main');
-        if(mainEl) {
-            const movH = movBar && movBar.style.display !== 'none' ? 40 : 0;
-            mainEl.style.paddingTop = (30 + movH + 28) + 'px';
-        }
     };
 
     window.renderAvisos = () => {
@@ -6606,18 +6601,51 @@ ${r.motivo}`;
         document.getElementById('lu-cargo-display').innerText = '— Insira a pontuação —';
         document.getElementById('lu-cargo-display').style.color = 'var(--text)';
         document.getElementById('lu-preview').innerText = '— Preencha os campos acima —';
-        const mbs = window._state.members.filter(m=>m.ativo && !['1_mes','2_meses','3_meses','sem_pontos'].includes(m.pts)).sort((a,b)=>(a.m||'').localeCompare(b.m||''));
-        let h = '<option value="">Selecione o membro...</option>';
-        mbs.forEach(m => h += `<option value="${m._id}" data-discord="${escapeHTML(m.id||'')}">${escapeHTML(m.m)}</option>`);
-        document.getElementById('lu-membro').innerHTML = h;
+        document.getElementById('lu-membro-search').value = '';
+        document.getElementById('lu-membro-id-hidden').value = '';
+        document.getElementById('lu-membro-dropdown').style.display = 'none';
+        window.filterLuMembros();
         document.getElementById('modal-levelup').style.display = 'flex';
+        setTimeout(() => document.getElementById('lu-membro-search').focus(), 100);
     };
-    window.onLuMembroChange = () => {
-        const sel = document.getElementById('lu-membro');
-        const opt = sel.options[sel.selectedIndex];
-        if(opt && opt.dataset.discord) document.getElementById('lu-discord-id').value = opt.dataset.discord;
+
+    window._luSelectedMembro = null;
+
+    window.filterLuMembros = () => {
+        const q = (document.getElementById('lu-membro-search').value || '').toLowerCase();
+        const drop = document.getElementById('lu-membro-dropdown');
+        const mbs = window._state.members.filter(m => m.ativo && !['1_mes','2_meses','3_meses','sem_pontos'].includes(m.pts))
+            .filter(m => !q || (m.m||'').toLowerCase().includes(q) || (m.id||'').toLowerCase().includes(q))
+            .sort((a,b) => (a.m||'').localeCompare(b.m||'')).slice(0, 30);
+        if(!mbs.length) { drop.innerHTML = '<div style="padding:10px 14px;color:var(--text);font-family:Rajdhani;font-size:13px;">Nenhum membro encontrado</div>'; drop.style.display='block'; return; }
+        drop.innerHTML = mbs.map(m => `
+            <div onclick="window.selectLuMembro('${m._id}','${escapeHTML(m.m)}','${escapeHTML(m.id||'')}')"
+                style="padding:9px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.04);transition:0.15s;"
+                onmouseover="this.style.background='rgba(0,220,255,0.06)'" onmouseout="this.style.background='transparent'">
+                <span style="font-family:'Rajdhani';font-size:13px;font-weight:700;color:var(--white);">${escapeHTML(m.m)}</span>
+                <span style="font-family:'Share Tech Mono';font-size:10px;color:var(--text);">${escapeHTML(m.id||'')}</span>
+            </div>`).join('');
+        drop.style.display = 'block';
+    };
+
+    window.selectLuMembro = (id, nome, discord) => {
+        window._luSelectedMembro = { id, nome, discord };
+        document.getElementById('lu-membro-id-hidden').value = id;
+        document.getElementById('lu-membro-search').value = nome;
+        document.getElementById('lu-discord-id').value = discord;
+        document.getElementById('lu-membro-dropdown').style.display = 'none';
         window.updateLuPreview();
     };
+
+    // Fechar dropdown ao clicar fora
+    document.addEventListener('click', e => {
+        const search = document.getElementById('lu-membro-search');
+        const drop = document.getElementById('lu-membro-dropdown');
+        if(search && drop && !search.contains(e.target) && !drop.contains(e.target)) drop.style.display = 'none';
+    });
+
+    window.onLuMembroChange = () => { window.updateLuPreview(); };
+
     window.onLuPontosChange = () => {
         const pts = parseInt(document.getElementById('lu-pontos').value)||0;
         const nivel = getCargoLvl(pts);
@@ -6626,10 +6654,9 @@ ${r.motivo}`;
         el.style.color = nivel.cor;
         window.updateLuPreview();
     };
+
     window.updateLuPreview = () => {
-        const sel = document.getElementById('lu-membro');
-        const opt = sel.options[sel.selectedIndex];
-        const nome = opt && opt.value ? opt.text : '';
+        const nome = document.getElementById('lu-membro-search').value.trim();
         const discordId = document.getElementById('lu-discord-id').value.trim();
         const pts = parseInt(document.getElementById('lu-pontos').value)||0;
         const nivel = getCargoLvl(pts);
@@ -6637,14 +6664,13 @@ ${r.motivo}`;
         if(!nome || !discordId) { prev.innerText = '— Preencha os campos acima —'; return; }
         prev.innerText = `<@${discordId}> com ${pts} pontos fica no cargo ${nivel.nome}`;
     };
+
     window.saveLevelUp = async () => {
         const btn = document.getElementById('btn-salvar-lu');
-        const sel = document.getElementById('lu-membro');
-        const opt = sel.options[sel.selectedIndex];
-        const memId = sel.value;
+        const memId = document.getElementById('lu-membro-id-hidden').value;
         const discordId = document.getElementById('lu-discord-id').value.trim();
         const pts = parseInt(document.getElementById('lu-pontos').value)||0;
-        if(!memId || !discordId) { await window.logHistorico('LEVEL UP', document.getElementById('lv-membro-nome')?.value||document.getElementById('lv-membro')?.options[document.getElementById('lv-membro')?.selectedIndex]?.text||'—', '—', `Level UP aprovado: ${document.getElementById('lv-cargo-novo')?.value||'—'}`); showToast('Preencha membro e ID Discord!','error'); return; }
+        if(!memId || !discordId) { window.showToast('Preencha membro e ID Discord!','error'); return; }
         const mem = window._state.members.find(x=>x._id===memId);
         if(!mem) return;
         const nivel = getCargoLvl(pts);
@@ -6688,7 +6714,7 @@ ${r.motivo}`;
     window.renderLevelUps = () => {
         const el = document.getElementById('levelup-list'); if(!el) return;
         const search = (document.getElementById('levelup-search')?.value || '').toLowerCase();
-        let list = [...window._state.levelups].sort((a,b)=>b.criadoEm.localeCompare(a.criadoEm));
+        let list = [...window._state.levelups].sort((a,b)=>(b.pontos||0)-(a.pontos||0));
         if(search) list = list.filter(r => (r.membroNome||'').toLowerCase().includes(search) || (r.discordId||'').toLowerCase().includes(search));
         const counter = document.getElementById('levelup-counter'); if(counter) counter.innerText = `${window._state.levelups.length} registos`;
         if(list.length===0){ el.innerHTML='<div class="empty-state" style="padding:60px;">' + (search ? 'Nenhum resultado encontrado.' : 'Nenhum Level UP registado. Clique em "Gerar LVL UP" para começar.') + '</div>'; return; }
