@@ -699,11 +699,14 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
         <div id="page-rebocamento" class="page">
             <div class="card" style="padding: 0; background: transparent; border: none; box-shadow: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom:14px;">
                     <h2 style="color: var(--danger);"><i class="ph-fill ph-warning-circle"></i> MEMBROS INATIVOS / REBOCADOS</h2>
-                    <button onclick="window.openMemberModal('inativo')" class="btn-add" style="background:var(--warning); color:#000;"><i class="ph-bold ph-user-minus"></i> ADD INATIVO</button>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <input type="text" id="ipt-search-reb" placeholder="Procurar inativo..." style="min-width:220px;margin-bottom:0;" oninput="window.renderMembers()">
+                        <button onclick="window.openMemberModal('inativo')" class="btn-add" style="background:var(--warning); color:#000;"><i class="ph-bold ph-user-minus"></i> ADD INATIVO</button>
+                    </div>
                 </div>
-                <p style="margin-top: 10px; font-size: 14px; font-weight: 500;">Membros inativos ou sem pontos para análise.</p>
+                <p style="margin-top: 0; font-size: 14px; font-weight: 500;">Membros inativos ou sem pontos para análise.</p>
             </div>
             <div class="card" style="border-color: rgba(244,63,94,0.3); overflow-x: auto; padding: 0;">
                 <table><thead><tr><th style="text-align: center; width: 100px;">TEMPO OFF</th><th>NOME / ID</th><th>STAFF</th><th>ÁREA DE UP</th><th>UP</th><th>CARGO</th><th>SUB-ÁREAS</th><th style="text-align: right;">AÇÕES</th></tr></thead><tbody id="tbody-rebocamento"></tbody></table>
@@ -2325,7 +2328,9 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         <div class="form-grid">
             <div class="section-title">1. IDENTIFICAÇÃO</div>
             <div class="form-group col-span-2"><label>NOME NO SERVIDOR</label><input type="text" id="f-nome" placeholder="Ex: João Silva"></div>
-            <div class="form-group"><label>ID DO DISCORD</label><input type="text" id="f-id" placeholder="Ex: 9876543210987"></div>
+            <div class="form-group"><label>ID DO DISCORD</label><input type="text" id="f-id" placeholder="Ex: 9876543210987" oninput="window.validarIdDiscord(this)">
+                <div id="f-id-aviso" style="display:none; margin-top:5px; font-size:11px; color:var(--danger); font-family:'Rajdhani'; font-weight:700;"><i class="ph-bold ph-warning-circle"></i> <span id="f-id-aviso-txt"></span></div>
+            </div>
             <div class="form-group"><label>DATA DE ENTRADA</label><input type="date" id="f-data"></div>
             
             <div class="section-title">2. HIERARQUIA E STATUS</div>
@@ -2361,13 +2366,14 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
 <div id="modal-excluir" class="modal-overlay">
     <div class="modal-content small" id="box-excluir">
-        <h2 style="margin-bottom: 10px; color:var(--warning);"><i class="ph-bold ph-warning"></i> CONFIRMAR AÇÃO</h2>
-        <p id="ex-nome-membro" style="margin-bottom: 25px; color: var(--white); font-size: 18px; font-weight: bold; text-align:center; font-family:'Share Tech Mono';"></p>
+        <h2 style="margin-bottom: 10px; color:var(--danger);"><i class="ph-bold ph-warning-octagon"></i> REMOVER MEMBRO</h2>
+        <p style="margin-bottom:8px; color:var(--text); font-size:13px; text-align:center; font-family:'Rajdhani'; font-weight:600;">Tens a certeza que queres remover:</p>
+        <p id="ex-nome-membro" style="margin-bottom: 20px; color: var(--danger); font-size: 20px; font-weight: bold; text-align:center; font-family:'Share Tech Mono'; background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.2); border-radius:8px; padding:10px;"></p>
         <input type="hidden" id="ex-docid"><input type="hidden" id="ex-acao">
         <div id="div-motivo-membro" class="form-group" style="display: none;"><label>MOTIVO</label><select id="ex-motivo-select"><option>Saiu da Staff</option><option>Saiu da Área</option><option>Banido</option></select></div>
         <div id="div-tempo-off" class="form-group" style="display: none;"><label>TEMPO OFF</label><input type="text" id="ex-tempo-off" readonly style="color: var(--danger); text-align:center; font-weight:bold;"></div>
-        <div class="form-group" style="margin-top: 15px;"><label>OBSERVAÇÃO (Opcional)</label><input type="text" id="ex-obs"></div>
-        <div class="modal-actions"><button onclick="window.closeModal('modal-excluir')" class="btn-cancel">CANCELAR</button><button onclick="window.confirmarExclusao()" id="btn-confirmar-exclusao" class="btn-save">CONFIRMAR</button></div>
+        <div class="form-group" style="margin-top: 15px;"><label>OBSERVAÇÃO (Opcional)</label><input type="text" id="ex-obs" placeholder="Motivo adicional..."></div>
+        <div class="modal-actions"><button onclick="window.closeModal('modal-excluir')" class="btn-cancel">CANCELAR</button><button onclick="window.confirmarExclusao()" id="btn-confirmar-exclusao" class="btn-save" style="background:var(--danger);color:#fff;"><i class="ph-bold ph-trash"></i> REMOVER</button></div>
     </div>
 </div>
 <div id="modal-mov" class="modal-overlay">
@@ -3938,7 +3944,23 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     };
 
     window.doLogout = async function() { if(await window.showConfirm("Tem a certeza que quer sair?", "Sair", false)) signOut(auth); };
-    window.switchTab = function(tid, btn) { document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display='none'; }); btn.classList.add('active'); const pg = document.getElementById(tid); if(pg){ pg.style.display='block'; pg.classList.add('active'); } };
+    window.switchTab = function(tid, btn) {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display='none'; });
+        btn.classList.add('active');
+        const pg = document.getElementById(tid);
+        if(pg){ pg.style.display='block'; pg.classList.add('active'); }
+        // Restaurar visual dos filtros de membros ao voltar à aba
+        if(tid === 'page-membros') {
+            document.querySelectorAll('.membros-pos-btn').forEach(b => {
+                const f = b.getAttribute('onclick')?.match(/setMembrosFilter\('(\w+)'/)?.[1];
+                const isActive = f === (window._membrosFilter || 'todos');
+                b.style.background = isActive ? 'rgba(0,220,255,0.15)' : 'transparent';
+                b.style.borderColor = isActive ? 'rgba(0,220,255,0.4)' : 'rgba(255,255,255,0.07)';
+                b.style.color = isActive ? 'var(--accent)' : 'var(--text)';
+            });
+        }
+    };
 
     function startListen() {
         if (unsubMembers) unsubMembers(); if (unsubHistorico) unsubHistorico(); if (unsubMovs) unsubMovs(); if(unsubGameNews) unsubGameNews(); if(unsubInstrucoes) unsubInstrucoes(); if(unsubAcolhimentos) unsubAcolhimentos(); if(unsubPermissoes) unsubPermissoes(); if(unsubNVerificados) unsubNVerificados(); if(unsubAusencias) unsubAusencias(); if(unsubIndicacoes) unsubIndicacoes();
@@ -4119,15 +4141,16 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                 return matchText && matchPos;
             }).sort(sortFn);
 
-            // rebocamento: only text search, no position filter
+            // rebocamento: text search from ipt-search-reb, no position filter
             let reb = allReb.filter(m => {
                 const n = (m.m||'').toLowerCase(), id = (m.id||'').toLowerCase();
-                return !t || n.includes(t) || id.includes(t);
+                const tR = (document.getElementById('ipt-search-reb')?.value || '').toLowerCase();
+                return !tR || n.includes(tR) || id.includes(tR);
             }).sort(sortFn);
 
-            // inline counter
+            // inline counter — mostra filtrados se pesquisa activa
             const counter = document.getElementById('membros-counter');
-            if(counter) counter.innerText = nor.length === allAtivos.length ? `${nor.length} membros` : `${nor.length} / ${allAtivos.length}`;
+            if(counter) counter.innerText = t ? `${nor.length} / ${allAtivos.length} membros` : `${allAtivos.length} membros`;
 
             document.getElementById('count-ativos').innerText   = allAtivos.length;
             document.getElementById('count-rebocados').innerText = allReb.length + window._state.naoVerificados.length;
@@ -4180,7 +4203,10 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         document.getElementById('f-docid').value = ""; 
         document.getElementById('f-nv-origin-id').value = "";
         document.getElementById('f-nome').value = ""; 
-        document.getElementById('f-id').value = ""; 
+        document.getElementById('f-id').value = "";
+        document.getElementById('f-id').style.borderColor = '';
+        document.getElementById('f-id').style.boxShadow = '';
+        const av = document.getElementById('f-id-aviso'); if(av) av.style.display='none';
         document.getElementById('f-pts').value = (tipo === 'inativo') ? '1_mes' : 'sim';
         window.atualizarCargos(); 
         document.getElementById('modal-membro').style.display = 'flex'; 
@@ -4188,6 +4214,26 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
     window.editMember = (id) => { const m = window._state.members.find(x => x._id === id); if(m){ document.getElementById('f-docid').value = m._id; document.getElementById('f-nv-origin-id').value = ""; document.getElementById('f-nome').value = m.m || ""; document.getElementById('f-id').value = m.id || ""; document.getElementById('f-posicao').value = m.posicao || "comum"; window.toggleHierarquia(); document.getElementById('f-hierarquia').value = m.hierarquia || ''; document.getElementById('f-pts').value = m.pts || 'sim'; document.getElementById('f-tipoup').value = m.tipoUp || ""; document.getElementById('f-upagames').value = m.upaGames || "sim"; window.atualizarCargos(); document.getElementById('f-cargo').value = m.cargo || ""; document.getElementById('f-sub-instrucao').checked = !!m.subAreas?.instrucao; document.getElementById('f-sub-acolhimento').checked = !!m.subAreas?.acolhimento; document.getElementById('f-sub-gamenews').checked = !!m.subAreas?.gamenews; document.getElementById('modal-membro').style.display = 'flex'; } };
     
+    window.validarIdDiscord = (input) => {
+        const val = (input.value||'').trim();
+        const docId = document.getElementById('f-docid').value; // id do membro a editar (vazio se novo)
+        const aviso = document.getElementById('f-id-aviso');
+        const avisoTxt = document.getElementById('f-id-aviso-txt');
+        if(!val) { aviso.style.display='none'; input.style.borderColor=''; return; }
+        // Verificar duplicado — ignorar o próprio membro em edição
+        const duplicado = (window._state.members||[]).find(m => String(m.id) === String(val) && m._id !== docId);
+        if(duplicado) {
+            aviso.style.display='block';
+            avisoTxt.textContent = `ID já cadastrado: ${duplicado.m}`;
+            input.style.borderColor = 'var(--danger)';
+            input.style.boxShadow = '0 0 0 1px var(--danger)';
+        } else {
+            aviso.style.display='none';
+            input.style.borderColor = 'rgba(52,211,153,0.4)';
+            input.style.boxShadow = '0 0 0 1px rgba(52,211,153,0.2)';
+        }
+    };
+
     window.saveMember = async () => { 
         const btn = document.getElementById('btn-salvar-membro'); 
         btn.disabled = true; btn.innerHTML = "A GUARDAR..."; 
@@ -4195,10 +4241,14 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         const nvOriginId = document.getElementById('f-nv-origin-id').value; 
         const nome = document.getElementById('f-nome').value.trim(); 
         
-        if(!nome) { window.showToast("Nome obrigatório!", "error"); btn.disabled = false; btn.innerHTML = "GUARDAR REGISTO"; return; } 
+        if(!nome) { window.showToast("Nome obrigatório!", "error"); btn.disabled = false; btn.innerHTML = "GUARDAR REGISTO"; return; }
+        const discordId = document.getElementById('f-id').value.trim();
+        if(!discordId) { window.showToast("ID Discord obrigatório!", "error"); btn.disabled = false; btn.innerHTML = "GUARDAR REGISTO"; return; }
+        const duplicado = (window._state.members||[]).find(m => String(m.id) === String(discordId) && m._id !== id);
+        if(duplicado) { window.showToast(`ID já cadastrado: ${duplicado.m}`, "error"); btn.disabled = false; btn.innerHTML = "GUARDAR REGISTO"; return; } 
         const d = { 
             m: nome, 
-            id: document.getElementById('f-id').value.trim(), 
+            id: discordId, 
             posicao: document.getElementById('f-posicao').value,
             hierarquia: document.getElementById('f-posicao').value === 'gestao' ? (document.getElementById('f-hierarquia').value||'') : '', 
             pts: document.getElementById('f-pts').value, 
@@ -4233,12 +4283,35 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     window.openExcluirModal = (id, acao) => { const m = window._state.members.find(x => x._id === id); if(!m) return; document.getElementById('ex-docid').value = m._id; document.getElementById('ex-acao').value = acao; document.getElementById('ex-nome-membro').innerText = escapeHTML(m.m); const divM = document.getElementById('div-motivo-membro'); const divR = document.getElementById('div-tempo-off'); if(acao === 'REMOVIDO') { divM.style.display = 'flex'; divR.style.display = 'none'; } else { divM.style.display = 'none'; divR.style.display = 'flex'; document.getElementById('ex-tempo-off').value = m.pts; } document.getElementById('modal-excluir').style.display = 'flex'; };
     window.confirmarExclusao = async () => { const id = document.getElementById('ex-docid').value, acao = document.getElementById('ex-acao').value; const m = window._state.members.find(x => x._id === id); if(!m) return; const obs = document.getElementById('ex-obs').value.trim(); let mot = acao === 'REMOVIDO' ? document.getElementById('ex-motivo-select').value : document.getElementById('ex-tempo-off').value; if(obs) mot += ` | ${obs}`; try { await deleteDoc(doc(db, "members", id)); await window.logHistorico(acao, m.m, m.id, mot); window.closeModal('modal-excluir'); window.showToast("Ação Concluída.", "success"); } catch(e){ console.error("[PRZ Error]", e); } };
     
-    window.mudarStatusRapido = async (id, ns) => { const m = window._state.members.find(x => x._id === id); try { await setDoc(doc(db, "members", id), { pts: ns }, { merge: true }); if(m && m.pts !== ns) await window.logHistorico('STATUS', m.m, m.id, `Status alterado para: ${ns}`); window.showToast("Status atualizado!", "success"); } catch(e){ console.error("[PRZ Error]", e); } };
-    window.mudarPosicaoRapido = async (id, np) => { const m = window._state.members.find(x => x._id === id); try { await setDoc(doc(db, "members", id), { posicao: np }, { merge: true }); if(m && m.posicao !== np) await window.logHistorico('STAFF', m.m, m.id, `Hierarquia alterada para: ${np}`); window.showToast("Staff atualizado!", "success"); } catch(e){ console.error("[PRZ Error]", e); } };
+    window.mudarStatusRapido = async (id, ns) => {
+        const m = window._state.members.find(x => x._id === id);
+        if(ns === 'sem_pontos' && m?.pts !== 'sem_pontos') {
+            if(!await window.showConfirm(`Marcar "${m?.m}" como Sem Pontos? O membro será movido para inativos.`, 'Confirmar', true)) {
+                window.renderMembers(); return;
+            }
+        }
+        try { await setDoc(doc(db, "members", id), { pts: ns }, { merge: true }); if(m && m.pts !== ns) await window.logHistorico('STATUS', m.m, m.id, `Status alterado para: ${ns}`); window.showToast("Status atualizado!", "success"); } catch(e){ console.error("[PRZ Error]", e); }
+    };
+    window.mudarPosicaoRapido = async (id, np) => { const m = window._state.members.find(x => x._id === id); try { const upd = { posicao: np }; if(np !== 'gestao') upd.hierarquia = ''; await setDoc(doc(db, "members", id), upd, { merge: true }); if(m && m.posicao !== np) await window.logHistorico('STAFF', m.m, m.id, `Hierarquia alterada para: ${np}`); window.showToast("Staff atualizado!", "success"); } catch(e){ console.error("[PRZ Error]", e); } };
     window.mudarCargoRapido = async (id, nc) => { const m = window._state.members.find(x => x._id === id); try { await setDoc(doc(db, "members", id), { cargo: nc }, { merge: true }); if(m && m.cargo !== nc) await window.logHistorico('CARGO', m.m, m.id, `Cargo alterado para: ${nc || 'Nenhum'}`); window.showToast("Cargo atualizado!", "success"); } catch(e){ console.error("[PRZ Error]", e); } };
-    window.mudarTipoUpRapido = async (id, nt) => { try { await setDoc(doc(db, "members", id), { tipoUp: nt, cargo: "" }, { merge: true }); window.showToast("UP atualizado!", "success");} catch(e){ console.error("[PRZ Error]", e); } };
+    window.mudarTipoUpRapido = async (id, nt) => {
+        const m = window._state.members.find(x => x._id === id);
+        if(m && m.cargo && nt !== m.tipoUp) {
+            if(!await window.showConfirm(`Mudar o tipo de UP vai remover o cargo "${m.cargo}". Continuar?`, 'Alterar UP', true)) {
+                window.renderMembers(); return;
+            }
+        }
+        try { await setDoc(doc(db, "members", id), { tipoUp: nt, cargo: "" }, { merge: true }); window.showToast("UP atualizado!", "success"); } catch(e){ console.error("[PRZ Error]", e); }
+    };
     window.mudarUpaGamesRapido = async (id, nv) => { try { await setDoc(doc(db, "members", id), { upaGames: nv }, { merge: true }); window.showToast("Área atualizada!", "success");} catch(e){ console.error("[PRZ Error]", e); } };
-    window.toggleSubArea = async (id, a) => { if(!['lider_geral', 'lider', 'sublider', 'gerente'].includes(window.currentUserRole)) return; const m = window._state.members.find(x => x._id === id); if(!m) return; const cur = m.subAreas || {}; try { await setDoc(doc(db, "members", id), { subAreas: { ...cur, [a]: !cur[a] } }, { merge: true }); } catch(e){ console.error("[PRZ Error]", e); } };
+    window.toggleSubArea = async (id, a) => {
+        if(!['lider_geral', 'lider', 'sublider', 'gerente'].includes(window.currentUserRole)) return;
+        const m = window._state.members.find(x => x._id === id); if(!m) return;
+        const cur = m.subAreas || {};
+        const label = { instrucao:'Instrução', acolhimento:'Acolhimento', gamenews:'Game News' }[a] || a;
+        if(cur[a] && !await window.showConfirm(`Remover "${m.m}" da sub-área ${label}?`, 'Confirmar', true)) return;
+        try { await setDoc(doc(db, "members", id), { subAreas: { ...cur, [a]: !cur[a] } }, { merge: true }); } catch(e){ console.error("[PRZ Error]", e); }
+    };
 
     // NÃO VERIFICADOS E AUSÊNCIAS 
     window.promoverNVerificado = (id) => {
@@ -4657,7 +4730,15 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             const tipoFilter = document.getElementById('movs-filter-tipo')?.value || '';
             let o = [...window._state.movs].sort((a,b) => ((a.data||'')+'T'+(a.horario||'')).localeCompare((b.data||'')+'T'+(b.horario||'')));
 
-            o.forEach(m => { m._f = m.finalizada || (m.data && m.horario && new Date().getTime() > new Date(`${m.data}T${m.horario}:00`).getTime() + (m.tipo==='Cine'?5400000:3600000)); });
+            const agora = new Date().getTime();
+            o.forEach(m => {
+                const deviaFinalizar = m.data && m.horario && agora > new Date(`${m.data}T${m.horario}:00`).getTime() + (m.tipo==='Cine'?5400000:3600000);
+                m._f = m.finalizada || deviaFinalizar;
+                // Persistir finalização automática no Firestore se ainda não estava marcada
+                if(deviaFinalizar && !m.finalizada) {
+                    setDoc(doc(db,'movs',m._id),{finalizada:true},{merge:true}).catch(()=>{});
+                }
+            });
 
             // update counters
             const cAg = document.getElementById('movs-count-ag'); const cFi = document.getElementById('movs-count-fi');
@@ -4666,8 +4747,8 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             if(cFi) cFi.innerText = `${totalFi} finalizada${totalFi!==1?'s':''}`;
 
             // apply filters
-            if(tipoFilter) o = o.filter(m => m.tipo === tipoFilter);
-            if(search) o = o.filter(m => (m.resp||'').toLowerCase().includes(search) || (m.aux||'').toLowerCase().includes(search));
+            if(tipoFilter) { window._movsFiLimit = 10; o = o.filter(m => m.tipo === tipoFilter); }
+            if(search) { window._movsFiLimit = 10; o = o.filter(m => (m.resp||'').toLowerCase().includes(search) || (m.aux||'').toLowerCase().includes(search)); }
 
             if(o.length===0) { c.innerHTML='<div class="empty-state">Nenhuma MOV encontrada.</div>'; return; }
 
@@ -4708,7 +4789,12 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
             let fH = '';
             if(ag.length) fH += `<h3 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:15px; display:flex; align-items:center; gap:10px;"><i class="ph-bold ph-calendar-plus"></i> MOVS AGENDADAS</h3>` + rL(ag, 'var(--accent)', 'var(--accent-glow)');
-            if(fi.length) fH += `<h3 style="font-family:'Orbitron'; color:var(--success); margin-top:50px; margin-bottom:15px; padding-top:30px; border-top:1px dashed var(--border); display:flex; align-items:center; gap:10px;"><i class="ph-bold ph-check-circle"></i> MOVS FINALIZADAS</h3>` + rL(fi, 'var(--success)', 'rgba(16,185,129,0.3)');
+            if(fi.length) {
+                const fiVisiveis = fi.slice(0, window._movsFiLimit || 10);
+                const fiResto = fi.length - fiVisiveis.length;
+                fH += `<h3 style="font-family:'Orbitron'; color:var(--success); margin-top:50px; margin-bottom:15px; padding-top:30px; border-top:1px dashed var(--border); display:flex; align-items:center; gap:10px;"><i class="ph-bold ph-check-circle"></i> MOVS FINALIZADAS <span style="font-size:11px;color:var(--text);font-family:'Share Tech Mono';">(${fi.length})</span></h3>` + rL(fiVisiveis, 'var(--success)', 'rgba(16,185,129,0.3)');
+                if(fiResto > 0) fH += `<div style="text-align:center;margin-top:16px;"><button class="btn-acao btn-outline primary" onclick="window._movsFiLimit=(window._movsFiLimit||10)+10;window.renderMovs()"><i class="ph-bold ph-caret-down"></i> Ver mais ${fiResto > 10 ? 10 : fiResto} de ${fiResto}</button></div>`;
+            }
             c.innerHTML = fH;
         } catch(e){ console.error("[PRZ Error]", e); }
     };
@@ -4763,6 +4849,116 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     window.filtrarMembrosRelatorio = () => { const t = (document.getElementById('r-search-member').value || '').toLowerCase(); const sel = document.getElementById('r-select-member'); const f = window._state.members.filter(m => m.ativo && !['1_mes','2_meses','3_meses','sem_pontos'].includes(m.pts) && ((m.m && m.m.toLowerCase().includes(t)) || (m.id && String(m.id).includes(t)))).sort((a,b) => (a.m||'').localeCompare(b.m||'')); sel.innerHTML = '<option value="">Selecione...</option>' + f.map(m => `<option value="${m._id}">${escapeHTML(m.m)}</option>`).join(''); };
 
     // ─── PRINTS DO RELATÓRIO ───
+    window.lerPrintComIA = async (file) => {
+        if(!file) return;
+        const statusEl = document.getElementById('rel-ia-status');
+        const btn = document.getElementById('btn-ia-print');
+        document.getElementById('rel-ia-file').value = '';
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(251,191,36,0.08)';
+        statusEl.style.borderColor = 'rgba(251,191,36,0.2)';
+        statusEl.style.color = 'var(--warning)';
+        statusEl.innerHTML = '🤖 A analisar a imagem com IA...';
+        btn.disabled = true;
+        try {
+            // Comprimir imagem antes de enviar (max 1200px, qualidade 0.85)
+            const base64 = await new Promise((res, rej) => {
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    const maxW = 1200;
+                    let w = img.width, h = img.height;
+                    if(w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    URL.revokeObjectURL(url);
+                    res(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
+                };
+                img.onerror = rej;
+                img.src = url;
+            });
+
+            const membros = (window._state.members||[])
+                .filter(m => m.ativo && !['1_mes','2_meses','3_meses','sem_pontos'].includes(m.pts))
+                .map(m => m.m);
+
+            const prompt = `Esta é uma print de uma movimentação/evento de um servidor Discord chamado GAMES PRZ.
+A lista de membros activos do servidor é: ${membros.join(', ')}.
+Analisa a imagem e identifica quais membros da lista estão visíveis (nomes de utilizadores, mensagens, reacções, lista de participantes, etc).
+Responde APENAS com um array JSON com os nomes exactos como aparecem na lista. Sem mais texto, sem markdown.
+Exemplo: ["NomeA", "NomeB"]
+Se não identificares nenhum: []`;
+
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 1000,
+                    messages: [{ role: 'user', content: [
+                        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
+                        { type: 'text', text: prompt }
+                    ]}]
+                })
+            });
+
+            if(!response.ok) {
+                const err = await response.json().catch(()=>({}));
+                throw new Error(err?.error?.message || `HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            const txt = (data.content||[]).find(c=>c.type==='text')?.text || '[]';
+            const clean = txt.replace(/```json|```/g,'').trim();
+            let nomes = [];
+            try { nomes = JSON.parse(clean); } catch(e) { throw new Error('Resposta inválida da IA: ' + txt); }
+
+            if(!Array.isArray(nomes) || !nomes.length) {
+                statusEl.style.background = 'rgba(248,113,113,0.08)';
+                statusEl.style.borderColor = 'rgba(248,113,113,0.2)';
+                statusEl.style.color = 'var(--danger)';
+                statusEl.innerHTML = '⚠️ Nenhum membro identificado na imagem.';
+                return;
+            }
+
+            let adicionados = 0;
+            const movId = document.getElementById('r-docid').value;
+            const mov = window._state.movs.find(x=>x._id===movId);
+            if(!mov) return;
+
+            for(const nome of nomes) {
+                const mem = window._state.members.find(m => m.m === nome);
+                if(!mem) continue;
+                const jaExiste = (mov.participantes||[]).find(p => p.id === mem._id || p.idDiscord === mem.id);
+                if(jaExiste) continue;
+                await window._addParticipanteDirecto(mem);
+                adicionados++;
+            }
+
+            if(adicionados > 0) {
+                statusEl.style.background = 'rgba(52,211,153,0.08)';
+                statusEl.style.borderColor = 'rgba(52,211,153,0.2)';
+                statusEl.style.color = 'var(--success)';
+                statusEl.innerHTML = `✅ ${adicionados} membro${adicionados!==1?'s':''} adicionado${adicionados!==1?'s':''}: ${nomes.join(', ')}`;
+            } else {
+                statusEl.style.background = 'rgba(251,191,36,0.08)';
+                statusEl.style.borderColor = 'rgba(251,191,36,0.2)';
+                statusEl.style.color = 'var(--warning)';
+                statusEl.innerHTML = `⚠️ IA identificou (${nomes.join(', ')}) mas já estavam na lista.`;
+            }
+
+        } catch(e) {
+            console.error('[PRZ IA]', e);
+            statusEl.style.background = 'rgba(248,113,113,0.08)';
+            statusEl.style.borderColor = 'rgba(248,113,113,0.2)';
+            statusEl.style.color = 'var(--danger)';
+            statusEl.innerHTML = `❌ Erro: ${e.message || 'Tenta novamente.'}`;
+        } finally {
+            btn.disabled = false;
+        }
+    };
+
     window.handleRelPrints = (files) => {
         Array.from(files).forEach(file => {
             if(!file.type.startsWith('image/')) return;
@@ -4805,10 +5001,50 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     };
 
     window.abrirRelatorio = (id) => { const m = window._state.movs.find(x => x._id === id); if(!m) return; document.getElementById('r-docid').value = m._id; document.getElementById('rel-info').innerHTML = `<b>${escapeHTML(m.tipo)}</b> | Resp: ${escapeHTML(m.resp)}`; relPrints = []; window.renderRelPrints(); const qa = document.getElementById('r-quiz-area'); if(m.tipo === 'Quiz') { qa.style.display = 'block'; document.getElementById('r-top1').value = m.topQuiz?.primeiro || ''; document.getElementById('r-top2').value = m.topQuiz?.segundo || ''; document.getElementById('r-top3').value = m.topQuiz?.terceiro || ''; } else qa.style.display = 'none'; window.filtrarMembrosRelatorio(); window.renderParticipantes(); document.getElementById('modal-relatorio').style.display = 'flex'; };
+    window._addParticipanteDirecto = async (mem) => {
+        const movId = document.getElementById('r-docid').value;
+        const mov = window._state.movs.find(x => x._id === movId);
+        if(!mem || !mov) return;
+        if((mov.participantes||[]).find(p => p.id === mem._id || p.idDiscord === mem.id)) return;
+        const st = mov.tipo === 'Cine' ? '✅ ASSISTINDO' : '✅ PRESENTE';
+        const nL = [...(mov.participantes||[]), { id: mem._id, nome: mem.m, idDiscord: mem.id, posicao: mem.posicao, status: st }];
+        mov.participantes = nL;
+        window.renderParticipantes();
+        try { await setDoc(doc(db,'movs',movId), { participantes: nL }, { merge:true }); } catch(e){ console.error('[PRZ]',e); }
+    };
+
     window.addParticipante = async () => { const idM = document.getElementById('r-select-member').value, movId = document.getElementById('r-docid').value; if(!idM) return; const m = window._state.members.find(x => x._id === idM); const mov = window._state.movs.find(x => x._id === movId); if(!m || !mov) return; if(mov.participantes && mov.participantes.find(p => p.id === idM)) return; let st = mov.tipo === 'Cine' ? '✅ ASSISTINDO' : '✅ PRESENTE'; const nL = [...(mov.participantes || []), { id: m._id, nome: m.m, idDiscord: m.id, posicao: m.posicao, status: st }]; mov.participantes = nL; window.renderParticipantes(); try { await setDoc(doc(db, "movs", movId), { participantes: nL }, { merge: true }); } catch(e){ console.error("[PRZ Error]", e); } };
-    window.removerParticipante = async (mId, pId) => { const mov = window._state.movs.find(x => x._id === mId); if(!mov) return; const nL = (mov.participantes || []).filter(p => p.id !== pId); mov.participantes = nL; window.renderParticipantes(); try { await setDoc(doc(db, "movs", mId), { participantes: nL }, { merge: true }); } catch(e){ console.error("[PRZ Error]", e); } };
+    window.removerParticipante = async (mId, pId) => {
+        if(!await window.showConfirm('Remover este participante do relatório?', 'Remover', true)) return;
+        const mov = window._state.movs.find(x => x._id === mId); if(!mov) return;
+        const nL = (mov.participantes || []).filter(p => p.id !== pId);
+        mov.participantes = nL; window.renderParticipantes();
+        try { await setDoc(doc(db, "movs", mId), { participantes: nL }, { merge: true }); } catch(e){ console.error("[PRZ Error]", e); }
+    };
     window.toggleStatus = async (mId, pId) => { const mov = window._state.movs.find(x => x._id === mId); if(!mov) return; const pts = mov.participantes || []; const i = pts.findIndex(x => x.id === pId); if(i === -1) return; const s = pts[i].status; if(mov.tipo === 'Cine') { pts[i].status = s === '✅ ASSISTINDO' ? '❌ FALTOU' : '✅ ASSISTINDO'; } else if(mov.tipo === 'Jogatina') { if(s === '✅ PRESENTE') pts[i].status = '\uD83D\uDC40 ASSISTIU'; else if(s === '\uD83D\uDC40 ASSISTIU') pts[i].status = '❌ FALTOU'; else pts[i].status = '✅ PRESENTE'; } else { pts[i].status = s === '✅ PRESENTE' ? '❌ FALTOU' : '✅ PRESENTE'; } window.renderParticipantes(); try { await setDoc(doc(db, "movs", mId), { participantes: pts }, { merge: true }); } catch(e){ console.error("[PRZ Error]", e); } };
-    window.renderParticipantes = () => { const mov = window._state.movs.find(x => x._id === document.getElementById('r-docid').value), tb = document.getElementById('tbody-participantes'); if(!mov || !mov.participantes || mov.participantes.length === 0) { tb.innerHTML = '<tr><td colspan="4" class="empty-state">Vazio.</td></tr>'; return; } tb.innerHTML = mov.participantes.map(p => `<tr><td><b style="font-family:'Orbitron';">${escapeHTML(p.nome)}</b></td><td><span class="badge b-gray">${escapeHTML(p.posicao)}</span></td><td style="text-align:center;"><button class="btn-acao outline-primary" onclick="window.toggleStatus('${mov._id}', '${p.id}')">${escapeHTML(p.status)}</button></td><td style="text-align:right;"><button class="btn-acao outline-danger" onclick="window.removerParticipante('${mov._id}', '${p.id}')"><i class="ph-bold ph-trash"></i></button></td></tr>`).join(''); };
+    window.renderParticipantes = () => {
+        const mov = window._state.movs.find(x => x._id === document.getElementById('r-docid').value);
+        const tb = document.getElementById('tbody-participantes');
+        if(!mov || !mov.participantes || mov.participantes.length === 0) { tb.innerHTML = '<tr><td colspan="4" class="empty-state">Vazio.</td></tr>'; return; }
+        const statusCor = { '✅ PRESENTE':'var(--success)', '✅ ASSISTINDO':'var(--success)', '👀 ASSISTIU':'var(--accent)', '❌ FALTOU':'var(--danger)' };
+        const posLabel = { gestao:'Gestão', subgestao:'Sub-Gestão', comum:'Comum' };
+        const isJog = mov.tipo === 'Jogatina';
+        tb.innerHTML = mov.participantes.map(p => {
+            const cor = statusCor[p.status] || 'var(--text)';
+            const posicao = posLabel[p.posicao] || p.posicao || '—';
+            const hint = isJog ? ' title="Clique: PRESENTE → ASSISTIU → FALTOU"' : '';
+            return `<tr>
+                <td><b style="font-family:'Orbitron';">${escapeHTML(p.nome)}</b><br><small style="font-family:'Share Tech Mono';color:var(--text);">${escapeHTML(p.idDiscord||'')}</small></td>
+                <td><span class="badge b-gray">${escapeHTML(posicao)}</span></td>
+                <td style="text-align:center;">
+                    <button class="btn-acao" style="border:1px solid ${cor}33;color:${cor};background:${cor}11;min-width:110px;"${hint} onclick="window.toggleStatus('${mov._id}','${p.id}')">${escapeHTML(p.status)}</button>
+                </td>
+                <td style="text-align:right;">
+                    <button class="btn-acao outline-danger" onclick="window.removerParticipante('${mov._id}','${p.id}')"><i class="ph-bold ph-trash"></i></button>
+                </td>
+            </tr>`;
+        }).join('');
+    };
     window.salvarPodioLocal = async () => { const movId = document.getElementById('r-docid').value; try { await setDoc(doc(db, "movs", movId), { topQuiz: { primeiro: document.getElementById('r-top1').value, segundo: document.getElementById('r-top2').value, terceiro: document.getElementById('r-top3').value } }, { merge: true }); } catch(e){ console.error("[PRZ Error]", e); } };
     window.copiarRelatorioDiscord = async () => { const mov = window._state.movs.find(x => x._id === document.getElementById('r-docid').value); if(!mov) return; if(mov.tipo === 'Quiz') await window.salvarPodioLocal(); const pts = mov.participantes || []; const pC = pts.filter(p => p.posicao === 'comum'); const pS = pts.filter(p => p.posicao === 'subgestao'); const pG = pts.filter(p => p.posicao === 'gestao'); const mkL = (l) => l.length > 0 ? l.map(m => `${m.status.includes('ASSISTIU')?'\uD83D\uDC40':(m.status.includes('FALTOU')?'❌':'✅')} ${m.nome} | ${m.idDiscord}`).join('\n') : 'Nenhum.'; let txt = `**Relatório Mov - Games**\n\n• Responsável: ${mov.resp}\n• Auxiliar: ${mov.aux || '-'}\n• Data: ${mov.data.split('-').reverse().join('/')}\n• Horário: ${mov.horario}\n• Mov: ${mov.tipo}\n• Participantes: ${pts.length}\n\n•—•—•—• ✿ •—•—•—•\n### Membros:\n${mkL(pC)}\n\n•—•—•—• ✿ •—•—•—•\n### Sub-Gestão:\n${mkL(pS)}\n\n•—•—•—• ✿ •—•—•—•\n### Gestão:\n${mkL(pG)}\n\n•—•—•—• ✿ •—•—•—•\nParticipação:\n\n•—•—•—• ✿ •—•—•—•\n`; if(mov.tipo === 'Quiz') txt += `TOP QUIZ:\n\uD83E\uDD47Lugar: ${document.getElementById('r-top1').value||'...'}\n\uD83E\uDD48Lugar: ${document.getElementById('r-top2').value||'...'}\n\uD83E\uDD49Lugar: ${document.getElementById('r-top3').value||'...'}\n•—•—•—• ✿ •—•—•—•\n`; // Upload any pending prints and append URLs
         if(relPrints.length > 0) {
