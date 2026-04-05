@@ -453,29 +453,10 @@
             <input type="text" id="perfil-nome" placeholder="Seu nome no portal">
         </div>
         <div class="form-group" style="margin-bottom:6px;">
-            <label>AVATAR</label>
-            <!-- Preview atual -->
-            <div id="perfil-avatar-atual" style="display:none; align-items:center; gap:10px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:8px;">
-                <img id="perfil-avatar-atual-img" src="" alt="" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;">
-                <div style="flex:1; font-size:12px; font-family:'Rajdhani'; font-weight:600; color:var(--text);">Foto actual</div>
-                <button onclick="window.removerAvatarPerfil()" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--danger);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-family:'Orbitron';font-weight:900;" title="Remover foto"><i class="ph-bold ph-trash"></i> REMOVER</button>
-            </div>
-            <!-- Input de upload -->
-            <div id="perfil-upload-area" style="border:2px dashed var(--border); border-radius:10px; padding:16px; text-align:center; cursor:pointer; transition:0.2s;" onclick="document.getElementById('perfil-file-input').click()" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-                <input type="file" id="perfil-file-input" accept="image/*" style="display:none;" onchange="window.previewPerfilAvatar(event)">
-                <div id="perfil-upload-placeholder">
-                    <i class="ph-bold ph-upload-simple" style="font-size:22px;color:var(--text);display:block;margin-bottom:6px;"></i>
-                    <div style="font-size:12px;font-family:'Rajdhani';font-weight:600;color:var(--text);">Clique para selecionar imagem</div>
-                    <div style="font-size:10px;font-family:'Share Tech Mono';color:var(--text);opacity:0.6;margin-top:3px;">JPG, PNG ou WEBP · máx. 2MB</div>
-                </div>
-                <div id="perfil-upload-preview" style="display:none;">
-                    <img id="perfil-file-preview-img" src="" alt="" style="width:60px;height:60px;border-radius:10px;object-fit:cover;border:2px solid var(--accent);margin-bottom:6px;">
-                    <div style="font-size:11px;font-family:'Rajdhani';font-weight:600;color:var(--accent);" id="perfil-file-nome">ficheiro.jpg</div>
-                    <div style="font-size:10px;font-family:'Share Tech Mono';color:var(--text);opacity:0.6;">Clique para trocar</div>
-                </div>
-            </div>
+            <label>AVATAR (URL da imagem)</label>
+            <input type="url" id="perfil-avatar-url" placeholder="https://cdn.discordapp.com/avatars/..." oninput="window.previewPerfilAvatar()">
         </div>
-        <div style="font-size:10px; color:var(--text); font-family:'Rajdhani'; margin-bottom:18px;">A foto anterior é apagada automaticamente ao salvar uma nova.</div>
+        <div style="font-size:10px; color:var(--text); font-family:'Rajdhani'; margin-bottom:18px;">Dica: No Discord, clique no seu avatar → Abrir no navegador → copie o URL</div>
 
         <!-- Status -->
         <div class="form-group" style="margin-bottom:20px;">
@@ -2796,7 +2777,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, writeBatch, query, where, getDocs, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+    import { getStorage, ref, uploadBytes, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     window._moduleLoaded=true; if(window._moduleTimeout)clearTimeout(window._moduleTimeout);
 
@@ -3758,7 +3739,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         try {
             await b.commit();
             // Recarregar semanasAtividade localmente após gravar
-            await window.carregarSemanasAtividade();
+            window.carregarSemanasAtividade && window.carregarSemanasAtividade();
             if(mudancas > 0) {
                 window.showToast(`Status atualizado para ${mudancas} membro${mudancas>1?'s':''}!`, 'success');
             }
@@ -3770,18 +3751,19 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
     // Exibir semanas sem pontuar na aba de atividade
     window._state.semanasAtividade = {};
-    window.carregarSemanasAtividade = async () => {
-        try {
-            const snap = await getDocs(collection(db, 'gestao_semanas_atividade'));
+    let unsubSemanasAtividade;
+    window.carregarSemanasAtividade = () => {
+        if(unsubSemanasAtividade) unsubSemanasAtividade();
+        unsubSemanasAtividade = onSnapshot(collection(db, 'gestao_semanas_atividade'), snap => {
             window._state.semanasAtividade = {};
             snap.docs.forEach(d => {
                 const data = d.data();
                 window._state.semanasAtividade[data.membroId] = data;
             });
-            window.renderAtividade();
+            window.renderAtividade && window.renderAtividade();
             window.renderMembers && window.renderMembers();
             window.renderDashAlertas && window.renderDashAlertas();
-        } catch(e) { console.error('[PRZ] Erro semanas:', e); }
+        }, e => { console.error('[PRZ] Erro semanas:', e); });
     };
 
 
@@ -4534,6 +4516,10 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
     function startListen() {
         if (unsubMembers) unsubMembers(); if (unsubHistorico) unsubHistorico(); if (unsubMovs) unsubMovs(); if(unsubGameNews) unsubGameNews(); if(unsubInstrucoes) unsubInstrucoes(); if(unsubAcolhimentos) unsubAcolhimentos(); if(unsubPermissoes) unsubPermissoes(); if(unsubNVerificados) unsubNVerificados(); if(unsubAusencias) unsubAusencias(); if(unsubIndicacoes) unsubIndicacoes();
+
+        // ── Semanas de atividade PRIMEIRO — badges prontos antes do renderMembers ──
+        window.carregarSemanasAtividade && window.carregarSemanasAtividade();
+
         unsubPermissoes = onSnapshot(collection(db, "portal_users"), (s) => { window._state.permissoes = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderAdminUsers(); });
         unsubNVerificados = onSnapshot(collection(db, "nao_verificados"), (s) => { window._state.naoVerificados = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderMembers(); window.renderNaoVerificados(); });
         unsubAusencias = onSnapshot(collection(db, "ausencias"), (s) => { window._state.ausencias = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderAusencias(); window.renderDashAlertas && window.renderDashAlertas(); });
@@ -4570,8 +4556,6 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         window.startListenArea();
         window.startListenChat();
         window.startListenStatus();
-        // Carregar semanas de atividade ao iniciar
-        window.carregarSemanasAtividade && window.carregarSemanasAtividade();
     }
 
     // ==========================================
@@ -4797,84 +4781,37 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             </tr>`;
         }).join('');
     };
-    window._perfilFileNovo = null; // ficheiro novo a fazer upload
-    window._perfilRemoverAvatar = false; // flag para apagar foto actual
-
-    window.previewPerfilAvatar = (event) => {
-        const file = event?.target?.files?.[0];
-        if(!file) return;
-        if(file.size > 2 * 1024 * 1024) { window.showToast('Imagem muito grande. Máx. 2MB.', 'error'); return; }
-        window._perfilFileNovo = file;
-        window._perfilRemoverAvatar = false;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            document.getElementById('perfil-file-preview-img').src = e.target.result;
-            document.getElementById('perfil-file-nome').innerText = file.name;
-            document.getElementById('perfil-upload-placeholder').style.display = 'none';
-            document.getElementById('perfil-upload-preview').style.display = 'block';
-            // Actualizar preview do avatar no topo do modal
-            document.getElementById('perfil-avatar-img').src = e.target.result;
-            document.getElementById('perfil-avatar-img').style.display = 'block';
-            document.getElementById('perfil-avatar-initials').style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-    };
-
-    window.removerAvatarPerfil = async () => {
-        if(!await window.showConfirm('Remover a foto de perfil?', 'Remover Avatar', true)) return;
-        window._perfilRemoverAvatar = true;
-        window._perfilFileNovo = null;
-        // Reset UI
-        document.getElementById('perfil-avatar-atual').style.display = 'none';
-        document.getElementById('perfil-upload-placeholder').style.display = 'block';
-        document.getElementById('perfil-upload-preview').style.display = 'none';
-        document.getElementById('perfil-file-input').value = '';
-        // Preview volta para iniciais
-        document.getElementById('perfil-avatar-img').style.display = 'none';
-        document.getElementById('perfil-avatar-initials').style.display = 'flex';
+    window._perfilFileNovo = null; // base64 string da imagem comprimida
+    window.previewPerfilAvatar = () => {
+        const url = document.getElementById('perfil-avatar-url').value.trim();
+        const img = document.getElementById('perfil-avatar-img');
+        const initials = document.getElementById('perfil-avatar-initials');
+        if(url) { img.src = url; img.style.display = 'block'; initials.style.display = 'none'; }
+        else { img.style.display = 'none'; initials.style.display = 'flex'; }
     };
 
     window.openPerfilModal = () => {
         const sm = document.getElementById('status-menu');
         if(sm) sm.style.display = 'none';
 
-        window._perfilFileNovo = null;
-        window._perfilRemoverAvatar = false;
-
-        // Reset file input
-        const fi = document.getElementById('perfil-file-input');
-        if(fi) fi.value = '';
-        document.getElementById('perfil-upload-placeholder').style.display = 'block';
-        document.getElementById('perfil-upload-preview').style.display = 'none';
-
-        // Preencher campos
         document.getElementById('perfil-nome').value = window.currentUserName || '';
+        document.getElementById('perfil-avatar-url').value = window.currentUserAvatar || '';
 
-        // Preview avatar
         const img = document.getElementById('perfil-avatar-img');
         const initials = document.getElementById('perfil-avatar-initials');
         const nome = window.currentUserName || '?';
         initials.innerText = nome.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-
         if(window.currentUserAvatar) {
             img.src = window.currentUserAvatar;
             img.style.display = 'block';
             initials.style.display = 'none';
-            // Mostrar foto actual com botão remover
-            const atualEl = document.getElementById('perfil-avatar-atual');
-            const atualImg = document.getElementById('perfil-avatar-atual-img');
-            atualImg.src = window.currentUserAvatar;
-            atualEl.style.display = 'flex';
         } else {
             img.style.display = 'none';
             initials.style.display = 'flex';
-            document.getElementById('perfil-avatar-atual').style.display = 'none';
         }
 
-        // Status atual
         window._perfilStatusSelecionado = window._userStatus || 'online';
         window.selectPerfilStatus(window._perfilStatusSelecionado);
-
         document.getElementById('modal-perfil').style.display = 'flex';
     };
 
@@ -4882,35 +4819,10 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         const btn = document.getElementById('btn-salvar-perfil');
         await window.withLoading(btn, 'SALVANDO...', async () => {
             const nome = document.getElementById('perfil-nome').value.trim();
+            const avatarUrl = document.getElementById('perfil-avatar-url').value.trim();
             const status = window._perfilStatusSelecionado || 'online';
             if(!nome) { window.showToast('Nome obrigatório!', 'error'); return; }
 
-            let avatarUrl = window.currentUserAvatar || '';
-            const storageKey = `avatars/${window.currentUserEmail || 'shinos'}.jpg`;
-
-            // Apagar foto antiga se solicitado ou se vai subir nova
-            if((window._perfilRemoverAvatar || window._perfilFileNovo) && avatarUrl) {
-                try {
-                    await deleteObject(ref(storage, storageKey));
-                } catch(e) { /* ignora se não existir */ }
-                avatarUrl = '';
-            }
-
-            // Upload nova foto
-            if(window._perfilFileNovo) {
-                try {
-                    btn.innerHTML = '<i class="ph-bold ph-spinner" style="animation:spin 0.8s linear infinite;"></i> ENVIANDO...';
-                    const storageRef = ref(storage, storageKey);
-                    await uploadBytes(storageRef, window._perfilFileNovo);
-                    avatarUrl = await getDownloadURL(storageRef);
-                } catch(e) {
-                    console.error('[PRZ Avatar]', e);
-                    window.showToast('Erro ao fazer upload da imagem.', 'error');
-                    return;
-                }
-            }
-
-            // Atualizar globals
             window.currentUserName   = nome;
             window.currentUserAvatar = avatarUrl;
             window._userStatus       = status;
@@ -4921,30 +4833,21 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             const avatarImg  = document.getElementById('nav-user-avatar-img');
             const initialsEl = document.getElementById('nav-user-initials');
             if(avatarUrl && avatarImg) {
-                avatarImg.src = avatarUrl;
-                avatarImg.style.display = 'block';
+                avatarImg.src = avatarUrl; avatarImg.style.display = 'block';
                 if(initialsEl) initialsEl.style.display = 'none';
             } else {
                 if(avatarImg) avatarImg.style.display = 'none';
-                if(initialsEl) {
-                    initialsEl.style.display = 'flex';
-                    initialsEl.innerText = nome.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-                }
+                if(initialsEl) { initialsEl.style.display = 'flex'; initialsEl.innerText = nome.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
             }
             window.applyStatusUI(status);
             if(window._allUserStatus) window._allUserStatus[nome] = status;
 
-            // Salvar no Firestore
             try {
                 const q = query(collection(db,'portal_users'), where('email','==', window.currentUserEmail||''));
                 const snap = await getDocs(q);
-                if(!snap.empty) {
-                    await setDoc(doc(db,'portal_users',snap.docs[0].id), { nome, avatarUrl, status }, { merge:true });
-                }
+                if(!snap.empty) await setDoc(doc(db,'portal_users',snap.docs[0].id), { nome, avatarUrl, status }, { merge:true });
             } catch(e) { console.error('[PRZ Perfil]', e); }
 
-            window._perfilFileNovo = null;
-            window._perfilRemoverAvatar = false;
             window.closeModal('modal-perfil');
             window.showToast('Perfil atualizado!', 'success');
         });
