@@ -923,6 +923,9 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                     <option value="Jogatina">Jogatina</option>
                     <option value="Cine">Cine</option>
                     <option value="Reunião Setorial">Reunião Setorial</option>
+                    <option value="Livre">Livre</option>
+                    <option value="Outras">Outras</option>
+                    <option value="Parceria">Parceria</option>
                 </select>
             </div>
             <div id="div-movs-list"></div>
@@ -946,6 +949,9 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                     <option value="Jogatina">Jogatina</option>
                     <option value="Cine">Cine</option>
                     <option value="Reunião Setorial">Reunião Setorial</option>
+                    <option value="Livre">Livre</option>
+                    <option value="Outras">Outras</option>
+                    <option value="Parceria">Parceria</option>
                 </select>
             </div>
             <div id="div-relatorios-list"></div>
@@ -2639,7 +2645,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         <h2 style="color: var(--accent); margin-bottom: 25px;"><i class="ph-bold ph-calendar-plus"></i> AGENDAR MOVIMENTAÇÃO</h2>
         <input type="hidden" id="m-docid">
         <div class="form-grid">
-            <div class="form-group"><label>TIPO DE MOV</label><select id="m-tipo" onchange="window.autoPontos()"><option>Temática</option><option>Quiz</option><option>Jogatina</option><option>Cine</option><option>Reunião Setorial</option></select></div>
+            <div class="form-group"><label>TIPO DE MOV</label><select id="m-tipo" onchange="window.autoPontos()"><option>Temática</option><option>Quiz</option><option>Jogatina</option><option>Cine</option><option>Reunião Setorial</option><option>Livre</option><option>Outras</option><option>Parceria</option></select></div>
             <div class="form-group"><label>PONTUAÇÃO BASE</label><input type="number" id="m-pontos" value="15"></div>
             <div class="form-group"><label>DATA</label><input type="date" id="m-data"></div>
             <div class="form-group"><label>HORÁRIO</label><input type="time" id="m-hora"></div>
@@ -4845,7 +4851,16 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             try {
                 const q = query(collection(db,'portal_users'), where('email','==', window.currentUserEmail||''));
                 const snap = await getDocs(q);
-                if(!snap.empty) await setDoc(doc(db,'portal_users',snap.docs[0].id), { nome, avatarUrl, status }, { merge:true });
+                if(!snap.empty) {
+                    await setDoc(doc(db,'portal_users',snap.docs[0].id), { nome, avatarUrl, status }, { merge:true });
+                } else if(window.currentUserEmail) {
+                    // Criar registo para o Shinos (ou qualquer utilizador sem registo)
+                    await setDoc(doc(collection(db,'portal_users')), {
+                        email: window.currentUserEmail,
+                        nome, avatarUrl, status,
+                        cargo: window.currentUserRole || 'administrador'
+                    });
+                }
             } catch(e) { console.error('[PRZ Perfil]', e); }
 
             window.closeModal('modal-perfil');
@@ -5621,7 +5636,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         txt += `${sep}\n📌 ${ranked.length} membro${ranked.length!==1?'s':''} envolvido${ranked.length!==1?'s':''}`;
         try { await navigator.clipboard.writeText(txt); window.showToast("Relatório copiado!", "success"); } catch(e){ window.showToast("Erro ao copiar.", "error"); }
     };
-    window.autoPontos = () => { document.getElementById('m-pontos').value = { 'Temática':15, 'Jogatina':16, 'Quiz':12, 'Cine':30, 'Reunião Setorial':40 }[document.getElementById('m-tipo').value] || 15; };
+    window.autoPontos = () => { document.getElementById('m-pontos').value = { 'Temática':15, 'Jogatina':16, 'Quiz':12, 'Cine':30, 'Reunião Setorial':40, 'Livre':15, 'Outras':15, 'Parceria':15 }[document.getElementById('m-tipo').value] || 15; };
     window.openMovModal = () => { document.getElementById('m-docid').value = ""; document.getElementById('m-tipo').value = "Temática"; window.autoPontos(); const gm = window._state.members.filter(m => m.ativo && !['1_mes','2_meses','3_meses','sem_pontos'].includes(m.pts)).sort((x,y) => (x.m||'').localeCompare(y.m||'')); let hG = '<option value="">Gestor...</option><option value="Gestão">Gestão</option>'; let hS = '<option value="">Nenhum</option>'; gm.forEach(m => { if(m.posicao==='gestao') hG += `<option value="${escapeHTML(m.m)}">${escapeHTML(m.m)}</option>`; if(m.posicao==='subgestao') hS += `<option value="${escapeHTML(m.m)}">${escapeHTML(m.m)}</option>`; }); document.getElementById('m-resp').innerHTML = hG; document.getElementById('m-aux').innerHTML = hS; document.getElementById('modal-mov').style.display = 'flex'; };
     window.editMov = (id) => { const m = window._state.movs.find(x => x._id === id); if(!m) return; document.getElementById('m-docid').value = m._id; document.getElementById('m-tipo').value = m.tipo; document.getElementById('m-pontos').value = m.pontos; document.getElementById('m-data').value = m.data; document.getElementById('m-hora').value = m.horario; const gm = window._state.members.filter(x => x.ativo && !['1_mes','2_meses','3_meses','sem_pontos'].includes(x.pts)).sort((a,b) => (a.m||'').localeCompare(b.m||'')); let hG = '<option value="">Gestor...</option><option value="Gestão">Gestão</option>'; let hS = '<option value="">Nenhum</option>'; gm.forEach(x => { if(x.posicao==='gestao') hG += `<option value="${escapeHTML(x.m)}" ${x.m===m.resp?'selected':''}>${escapeHTML(x.m)}</option>`; if(x.posicao==='subgestao') hS += `<option value="${escapeHTML(x.m)}" ${x.m===m.aux?'selected':''}>${escapeHTML(x.m)}</option>`; }); if(m.resp && !gm.find(x=>x.m===m.resp)) hG+=`<option value="${escapeHTML(m.resp)}" selected>${escapeHTML(m.resp)} (Atual)</option>`; if(m.aux && !gm.find(x=>x.m===m.aux)) hS+=`<option value="${escapeHTML(m.aux)}" selected>${escapeHTML(m.aux)} (Atual)</option>`; document.getElementById('m-resp').innerHTML = hG; document.getElementById('m-aux').innerHTML = hS; document.getElementById('modal-mov').style.display = 'flex'; };
     window.saveMov = async () => { const btn = document.getElementById('btn-salvar-mov'); btn.disabled=true; btn.innerHTML="SALVANDO..."; const id = document.getElementById('m-docid').value; const d = { tipo: document.getElementById('m-tipo').value, pontos: parseInt(document.getElementById('m-pontos').value)||0, data: document.getElementById('m-data').value, horario: document.getElementById('m-hora').value, resp: document.getElementById('m-resp').value, aux: document.getElementById('m-aux').value }; if(!d.data || !d.horario || !d.resp) { window.showToast("Preencha data, hora e responsável!", "error"); btn.disabled=false; btn.innerHTML="SALVAR MOV"; return; } if (id) { const o = window._state.movs.find(x => x._id === id); if (o) { d.participantes = o.participantes || []; d.topQuiz = o.topQuiz || { primeiro: '', segundo: '', terceiro: '' }; d.finalizada = o.finalizada || false; } } else { d.participantes = []; d.topQuiz = { primeiro: '', segundo: '', terceiro: '' }; d.finalizada = false; } try { if(id) await setDoc(doc(db, "movs", id), d, { merge: true }); else await setDoc(doc(collection(db, "movs")), d); window.closeModal('modal-mov'); window.showToast("Salvo com sucesso!", "success"); } catch(e){ console.error("[PRZ Error]", e); window.showToast("Erro ao salvar MOV.", "error"); } finally { btn.disabled=false; btn.innerHTML="SALVAR MOV"; } };
