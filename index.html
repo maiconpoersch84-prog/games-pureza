@@ -432,6 +432,69 @@
     </div>
 </div>
 
+<!-- MODAL MEU PERFIL -->
+<div id="modal-perfil" class="modal-overlay">
+    <div class="modal-content small">
+        <h2 style="color:var(--accent); margin-bottom:20px;"><i class="ph-bold ph-user-circle"></i> MEU PERFIL</h2>
+
+        <!-- Preview do avatar -->
+        <div style="display:flex; justify-content:center; margin-bottom:20px;">
+            <div style="position:relative; width:72px; height:72px;">
+                <div id="perfil-avatar-preview-wrap" style="width:72px; height:72px; border-radius:14px; background:rgba(0,220,255,0.12); border:2px solid rgba(0,220,255,0.3); display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-size:22px; font-weight:900; color:var(--accent); overflow:hidden;">
+                    <span id="perfil-avatar-initials">?</span>
+                    <img id="perfil-avatar-img" src="" alt="" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:12px;" onerror="this.style.display='none'; document.getElementById('perfil-avatar-initials').style.display='flex';">
+                </div>
+                <div id="perfil-status-dot-preview" style="position:absolute; bottom:-2px; right:-2px; width:14px; height:14px; border-radius:50%; border:2px solid #09090b; background:var(--success);"></div>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:15px;">
+            <label>NOME DE APRESENTAÇÃO</label>
+            <input type="text" id="perfil-nome" placeholder="Seu nome no portal">
+        </div>
+        <div class="form-group" style="margin-bottom:6px;">
+            <label>AVATAR</label>
+            <!-- Preview atual -->
+            <div id="perfil-avatar-atual" style="display:none; align-items:center; gap:10px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:8px;">
+                <img id="perfil-avatar-atual-img" src="" alt="" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;">
+                <div style="flex:1; font-size:12px; font-family:'Rajdhani'; font-weight:600; color:var(--text);">Foto actual</div>
+                <button onclick="window.removerAvatarPerfil()" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--danger);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-family:'Orbitron';font-weight:900;" title="Remover foto"><i class="ph-bold ph-trash"></i> REMOVER</button>
+            </div>
+            <!-- Input de upload -->
+            <div id="perfil-upload-area" style="border:2px dashed var(--border); border-radius:10px; padding:16px; text-align:center; cursor:pointer; transition:0.2s;" onclick="document.getElementById('perfil-file-input').click()" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                <input type="file" id="perfil-file-input" accept="image/*" style="display:none;" onchange="window.previewPerfilAvatar(event)">
+                <div id="perfil-upload-placeholder">
+                    <i class="ph-bold ph-upload-simple" style="font-size:22px;color:var(--text);display:block;margin-bottom:6px;"></i>
+                    <div style="font-size:12px;font-family:'Rajdhani';font-weight:600;color:var(--text);">Clique para selecionar imagem</div>
+                    <div style="font-size:10px;font-family:'Share Tech Mono';color:var(--text);opacity:0.6;margin-top:3px;">JPG, PNG ou WEBP · máx. 2MB</div>
+                </div>
+                <div id="perfil-upload-preview" style="display:none;">
+                    <img id="perfil-file-preview-img" src="" alt="" style="width:60px;height:60px;border-radius:10px;object-fit:cover;border:2px solid var(--accent);margin-bottom:6px;">
+                    <div style="font-size:11px;font-family:'Rajdhani';font-weight:600;color:var(--accent);" id="perfil-file-nome">ficheiro.jpg</div>
+                    <div style="font-size:10px;font-family:'Share Tech Mono';color:var(--text);opacity:0.6;">Clique para trocar</div>
+                </div>
+            </div>
+        </div>
+        <div style="font-size:10px; color:var(--text); font-family:'Rajdhani'; margin-bottom:18px;">A foto anterior é apagada automaticamente ao salvar uma nova.</div>
+
+        <!-- Status -->
+        <div class="form-group" style="margin-bottom:20px;">
+            <label>STATUS</label>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <div class="perfil-status-btn" data-s="online"    onclick="window.selectPerfilStatus('online')"    style="padding:8px 10px; border-radius:8px; border:1px solid rgba(34,197,94,0.3); background:rgba(34,197,94,0.08); display:flex; align-items:center; gap:7px; cursor:pointer; font-family:'Rajdhani'; font-size:13px; font-weight:700; color:var(--white); transition:0.15s;"><span style="width:9px;height:9px;border-radius:50%;background:#22c55e;flex-shrink:0;"></span> Online</div>
+                <div class="perfil-status-btn" data-s="ausente"   onclick="window.selectPerfilStatus('ausente')"   style="padding:8px 10px; border-radius:8px; border:1px solid rgba(245,158,11,0.3); background:rgba(245,158,11,0.05); display:flex; align-items:center; gap:7px; cursor:pointer; font-family:'Rajdhani'; font-size:13px; font-weight:700; color:var(--white); transition:0.15s;"><span style="width:9px;height:9px;border-radius:50%;background:#f59e0b;flex-shrink:0;"></span> Ausente</div>
+                <div class="perfil-status-btn" data-s="nperturbe" onclick="window.selectPerfilStatus('nperturbe')" style="padding:8px 10px; border-radius:8px; border:1px solid rgba(239,68,68,0.3); background:rgba(239,68,68,0.05); display:flex; align-items:center; gap:7px; cursor:pointer; font-family:'Rajdhani'; font-size:13px; font-weight:700; color:var(--white); transition:0.15s;"><span style="width:9px;height:9px;border-radius:50%;background:#ef4444;flex-shrink:0;"></span> Não Perturbe</div>
+                <div class="perfil-status-btn" data-s="offline"   onclick="window.selectPerfilStatus('offline')"   style="padding:8px 10px; border-radius:8px; border:1px solid rgba(107,114,128,0.3); background:rgba(107,114,128,0.05); display:flex; align-items:center; gap:7px; cursor:pointer; font-family:'Rajdhani'; font-size:13px; font-weight:700; color:var(--white); transition:0.15s;"><span style="width:9px;height:9px;border-radius:50%;background:#6b7280;border:1px solid rgba(255,255,255,0.2);flex-shrink:0;"></span> Offline</div>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button onclick="window.closeModal('modal-perfil')" class="btn-cancel">CANCELAR</button>
+            <button onclick="window.salvarPerfil()" id="btn-salvar-perfil" class="btn-save" style="background:var(--accent); color:#000;"><i class="ph-bold ph-check"></i> SALVAR PERFIL</button>
+        </div>
+    </div>
+</div>
+
 <div id="toast-container"></div>
 <div id="loading-screen">
     <div class="ld-logo">GAMES PRZ</div>
@@ -508,7 +571,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                                 <div id="nav-cat-membros" class="nav-category" onclick="window.toggleCategory(this)"><span>MEMBROS</span><i class="ph-bold ph-caret-down caret"></i></div>
                 <div id="nav-group-membros" class="nav-group">
                     <button class="nav-btn nav-sub-btn" onclick="window.switchTab('page-rebocamento', this)"><i class="ph-fill ph-user-minus"></i> Inativos</button>
-                    <button class="nav-btn nav-sub-btn" onclick="window.switchTab('page-ausencias', this)"><i class="ph-fill ph-calendar-x"></i> Ausências</button>
+                    <button id="btn-nav-ausencias" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-ausencias', this)"><i class="ph-fill ph-calendar-x"></i> Ausências</button>
                     <button id="btn-nav-ind" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-indicacoes', this)"><i class="ph-fill ph-user-plus"></i> Indicações</button>
                     <button id="btn-nav-destaques" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-destaques', this)"><i class="ph-fill ph-star"></i> Destaques</button>
                     <button id="btn-nav-levelup" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-levelup', this)"><i class="ph-fill ph-trophy"></i> Level UP</button>
@@ -541,6 +604,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                 <div id="nav-cat-gestao" class="nav-category" onclick="window.toggleCategory(this)"><span>GESTÃO</span><i class="ph-bold ph-caret-right caret"></i></div>
                 <div id="nav-group-gestao" class="nav-group closed">
                     <button id="btn-nav-info-semana" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-info-semana', this)"><i class="ph-fill ph-calendar-star"></i> Registro Semanal</button>
+                    <button id="btn-nav-historico-semanal" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-historico-semanal', this)"><i class="ph-fill ph-chart-line-up"></i> Histórico Semanal</button>
                     <button id="btn-nav-funcoes" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-funcoes', this)"><i class="ph-fill ph-identification-badge"></i> Funções</button>
                     <button id="btn-nav-pautas" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-pautas', this)"><i class="ph-fill ph-note-pencil"></i> Pautas</button>
                     <button id="btn-nav-adv" class="nav-btn nav-sub-btn" onclick="window.switchTab('page-adv', this)"><i class="ph-fill ph-warning-circle"></i> Advertências</button>
@@ -561,21 +625,21 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 
         <div id="nav-info-user" style="padding:12px 14px; background:rgba(0,0,0,0.5); border-top:1px solid var(--border);">
             <div style="display:flex; align-items:center; gap:10px;">
-                <!-- Avatar com indicador de status clicável -->
-                <div style="position:relative; flex-shrink:0; cursor:pointer;" onclick="window.toggleStatusMenu?.()" title="Alterar status">
+                <!-- Avatar clicável — abre perfil -->
+                <div style="position:relative; flex-shrink:0; cursor:pointer;" onclick="window.openPerfilModal()" title="Editar perfil">
                     <div id="nav-user-avatar" style="width:38px; height:38px; border-radius:10px; background:rgba(0,220,255,0.12); border:1px solid rgba(0,220,255,0.3); display:flex; align-items:center; justify-content:center; font-family:'Orbitron'; font-size:13px; font-weight:900; color:var(--accent); overflow:hidden;">
                         <span id="nav-user-initials">?</span>
                         <img id="nav-user-avatar-img" src="" alt="" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'; document.getElementById('nav-user-initials').style.display='flex';">
                     </div>
-                    <!-- Ponto de status -->
                     <div id="nav-status-dot" style="position:absolute; bottom:-2px; right:-2px; width:12px; height:12px; border-radius:50%; border:2px solid #09090b; z-index:2; background:var(--success); box-shadow:0 0 6px rgba(52,211,153,0.8); transition:0.2s;"></div>
                 </div>
-                <!-- Info + status text -->
+                <!-- Info + botão editar -->
                 <div style="flex:1; min-width:0;">
-                    <div id="nav-user-name" style="color:var(--white); font-weight:900; font-family:'Orbitron'; font-size:11px; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:2px;"></div>
                     <div style="display:flex; align-items:center; gap:5px;">
-                        <div id="nav-user-role" style="font-size:10px; font-family:'Orbitron'; font-weight:900; letter-spacing:0.5px; color:var(--accent);">CARREGANDO...</div>
+                        <div id="nav-user-name" style="color:var(--white); font-weight:900; font-family:'Orbitron'; font-size:11px; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+                        <button onclick="window.openPerfilModal()" title="Editar perfil" style="background:transparent; border:none; color:var(--text); cursor:pointer; padding:2px; font-size:11px; flex-shrink:0; opacity:0.5; transition:0.15s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'"><i class="ph-bold ph-pencil-simple"></i></button>
                     </div>
+                    <div id="nav-user-role" style="font-size:10px; font-family:'Orbitron'; font-weight:900; letter-spacing:0.5px; color:var(--accent);">CARREGANDO...</div>
                     <div id="nav-user-status-label" style="font-size:10px; font-family:'Rajdhani'; font-weight:600; color:var(--text); margin-top:1px; cursor:pointer;" onclick="window.toggleStatusMenu?.()">🟢 Online</div>
                 </div>
             </div>
@@ -633,7 +697,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
             <!-- Hidden panels — renderizados dinamicamente pelo dashLayout -->
             <div style="display:none;">
                 <div id="dash-panel-avisos" class="dash-panel" style="border-color:rgba(251,191,36,0.25);"><div class="dash-panel-hdr" style="color:var(--warning);"><i class="ph-fill ph-bell-ringing"></i> AVISOS RECENTES</div><div id="dash-avisos-recentes" style="display:flex;flex-direction:column;gap:8px;"></div></div>
-                <div id="dash-panel-alertas" class="dash-panel" style="border-color:rgba(248,113,113,0.25);"><div class="dash-panel-hdr" style="color:var(--danger);"><i class="ph-fill ph-warning-octagon"></i> ALERTAS &amp; PENDÊNCIAS</div><div id="dash-alertas" style="display:flex;flex-wrap:wrap;gap:8px;"></div></div>
+                <div id="dash-panel-alertas" class="dash-panel" style="border-color:rgba(248,113,113,0.25);"><div class="dash-panel-hdr" style="color:var(--danger);"><i class="ph-fill ph-warning-octagon"></i> ALERTAS &amp; PENDÊNCIAS</div><div id="dash-alertas" style="display:flex;flex-direction:column;gap:6px;"></div></div>
                 <div id="dash-panel-movs" class="dash-panel" style="border-color:rgba(0,220,255,0.2);flex:1.4;"><div class="dash-panel-hdr" style="color:var(--accent);display:flex;justify-content:space-between;align-items:center;"><span><i class="ph-fill ph-calendar-check"></i> MOVs DE HOJE</span><span id="dash-proxima-mov" style="font-size:10px;font-family:'Share Tech Mono';color:var(--text);font-weight:400;"></span></div><div id="dash-movs-hoje"></div></div>
                 <div id="dash-panel-gn" class="dash-panel" style="border-color:rgba(251,191,36,0.2);"><div class="dash-panel-hdr" style="color:var(--gn-color);"><i class="ph-fill ph-article"></i> GAME NEWS</div><div id="dash-gamenews"></div></div>
                 <div id="dash-panel-sug" class="dash-panel" style="border-color:rgba(245,158,11,0.2);"><div class="dash-panel-hdr" style="color:#f59e0b;"><i class="ph-fill ph-lightbulb"></i> SUGESTÕES</div><div id="dash-sug-movs"></div></div>
@@ -1681,6 +1745,35 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
     </div>
 </div>
 
+<!-- HISTÓRICO SEMANAL -->
+<div id="page-historico-semanal" class="page" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+        <h2 style="color:var(--accent); text-shadow:0 0 15px var(--accent-glow);"><i class="ph-fill ph-chart-line-up"></i> HISTÓRICO SEMANAL</h2>
+        <button class="btn-acao btn-outline primary" style="padding:10px 18px;" onclick="window.renderHistoricoSemanal()"><i class="ph-bold ph-arrows-clockwise"></i> Atualizar</button>
+    </div>
+
+    <!-- Cards de comparativo -->
+    <div id="hist-sem-cards" style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:24px;"></div>
+
+    <!-- Gráfico de barras expandido -->
+    <div class="card" style="margin-bottom:20px; padding:20px;">
+        <div style="font-family:'Orbitron'; font-size:11px; font-weight:900; color:var(--accent); letter-spacing:1px; margin-bottom:16px;"><i class="ph-fill ph-chart-bar"></i> PARTICIPAÇÕES POR SEMANA</div>
+        <div id="hist-sem-grafico" style="display:flex; align-items:flex-end; gap:6px; height:100px;"></div>
+    </div>
+
+    <!-- Ranking histórico de presenças -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+        <div class="card" style="padding:20px;">
+            <div style="font-family:'Orbitron'; font-size:11px; font-weight:900; color:var(--warning); letter-spacing:1px; margin-bottom:14px;"><i class="ph-fill ph-trophy"></i> TOP PRESENÇAS (GERAL)</div>
+            <div id="hist-sem-ranking" style="display:flex; flex-direction:column; gap:6px;"></div>
+        </div>
+        <div class="card" style="padding:20px;">
+            <div style="font-family:'Orbitron'; font-size:11px; font-weight:900; color:var(--success); letter-spacing:1px; margin-bottom:14px;"><i class="ph-fill ph-calendar-check"></i> DETALHES POR SEMANA</div>
+            <div id="hist-sem-detalhes" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+    </div>
+</div>
+
 <!-- ========== SUGESTÕES ========== -->
 <!-- AVISOS -->
 <div id="page-avisos" class="page" style="display:none;">
@@ -2536,6 +2629,13 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                 <label>OBSERVAÇÕES <span style="font-size:10px; color:var(--text); font-weight:400; font-family:'Rajdhani';">(visível apenas para gestão)</span></label>
                 <textarea id="f-notas" placeholder="Ex: Membro em período de teste, histórico de advertências, contexto relevante..." style="min-height:70px; resize:vertical;"></textarea>
             </div>
+
+            <div class="section-title">5. HISTÓRICO DE UPS</div>
+            <div class="form-group col-span-2">
+                <div id="f-historico-ups" style="display:flex; flex-direction:column; gap:6px; min-height:32px;">
+                    <span style="font-size:12px; color:var(--text); font-family:'Rajdhani';">Carregando...</span>
+                </div>
+            </div>
         </div>
         <div class="modal-actions"><button onclick="window.closeModal('modal-membro')" class="btn-cancel">CANCELAR</button><button onclick="window.saveMember()" id="btn-salvar-membro" class="btn-save">SALVAR REGISTRO</button></div>
     </div>
@@ -2696,7 +2796,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, writeBatch, query, where, getDocs, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     window._moduleLoaded=true; if(window._moduleTimeout)clearTimeout(window._moduleTimeout);
 
@@ -2910,9 +3010,9 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             'nav-cat-sub', 'nav-group-sub', 
             'btn-nav-inst', 'btn-nav-acol', 'btn-nav-gn', 
             'nav-sep-notif', 'nav-cat-notif', 'nav-group-notif', 'btn-nav-notif-mov', 'btn-nav-notif-up', 'btn-nav-notif-rpp', 'btn-nav-notif-conta',
-            'nav-sep-gestao', 'nav-cat-gestao', 'nav-group-gestao', 'btn-nav-funcoes', 'btn-nav-pautas', 'btn-nav-adv', 'btn-nav-autorizacoes', 'btn-nav-atividade', 'btn-nav-blacklist',
+            'nav-sep-gestao', 'nav-cat-gestao', 'nav-group-gestao', 'btn-nav-funcoes', 'btn-nav-pautas', 'btn-nav-adv', 'btn-nav-autorizacoes', 'btn-nav-atividade', 'btn-nav-blacklist', 'btn-nav-historico-semanal',
             'nav-admin-separator', 'nav-cat-admin', 'nav-group-admin', 'btn-nav-acessos', 'btn-nav-historico',
-            'btn-nav-relatorios', 'btn-nav-movs', 'btn-nav-ind', 'btn-nav-destaques', 'btn-nav-levelup', 'btn-nav-upamentos', 'nav-sep-area', 'nav-cat-area', 'nav-group-area', 'btn-nav-membros-area', 'btn-nav-sugestoes', 'btn-nav-feedbacks'
+            'btn-nav-relatorios', 'btn-nav-movs', 'btn-nav-ind', 'btn-nav-destaques', 'btn-nav-levelup', 'btn-nav-upamentos', 'nav-sep-area', 'nav-cat-area', 'nav-group-area', 'btn-nav-membros-area', 'btn-nav-ausencias', 'btn-nav-sugestoes', 'btn-nav-feedbacks'
         ];
         idsToHide.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
 
@@ -3099,6 +3199,124 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             slotNext.style.display = 'flex';
         } else { slotNext.style.display = 'none'; }
         bar.style.display = (emAndamento || proxima) ? 'block' : 'none';
+    };
+
+    window.renderHistoricoSemanal = async () => {
+        const cardEl   = document.getElementById('hist-sem-cards');
+        const graficoEl = document.getElementById('hist-sem-grafico');
+        const rankEl   = document.getElementById('hist-sem-ranking');
+        const detEl    = document.getElementById('hist-sem-detalhes');
+        if(!cardEl) return;
+
+        // Loading state
+        [cardEl, graficoEl, rankEl, detEl].forEach(el => { if(el) el.innerHTML = '<span style="font-size:12px;color:var(--text);font-family:\'Rajdhani\';">Carregando...</span>'; });
+
+        try {
+            const snap = await getDocs(collection(db, 'gestao_historico_semanal'));
+            const semanas = snap.docs.map(d => d.data())
+                .sort((a,b) => (a.semana||'').localeCompare(b.semana||''));
+
+            if(!semanas.length) {
+                cardEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text);font-family:\'Rajdhani\';font-size:13px;padding:20px;">Nenhum histórico ainda. O histórico é gerado automaticamente a cada reset semanal.</div>';
+                [graficoEl, rankEl, detEl].forEach(el => { if(el) el.innerHTML = ''; });
+                return;
+            }
+
+            const ultima = semanas[semanas.length - 1];
+            const penultima = semanas.length >= 2 ? semanas[semanas.length - 2] : null;
+
+            // ── Cards comparativos ──
+            const diff = (curr, prev, label) => {
+                if(!prev) return '';
+                const d = curr - prev;
+                const pct = prev > 0 ? Math.round((d/prev)*100) : 0;
+                const cor = d >= 0 ? 'var(--success)' : 'var(--danger)';
+                const icon = d >= 0 ? '▲' : '▼';
+                return `<div style="font-size:10px;color:${cor};font-family:'Share Tech Mono';margin-top:4px;">${icon} ${Math.abs(d)} ${label} (${d>=0?'+':''}${pct}% vs semana ant.)</div>`;
+            };
+
+            cardEl.innerHTML = [
+                { label:'PARTICIPAÇÕES', val: ultima.totalParticipacoes||0, prev: penultima?.totalParticipacoes||0, icon:'ph-users', cor:'var(--accent)', diffLabel:'participações' },
+                { label:'MOVs REALIZADAS', val: ultima.totalMovs||0, prev: penultima?.totalMovs||0, icon:'ph-calendar-check', cor:'var(--success)', diffLabel:'MOVs' },
+                { label:'MEMBROS ATIVOS', val: ultima.totalMembros||0, prev: penultima?.totalMembros||0, icon:'ph-user-circle-check', cor:'var(--purple)', diffLabel:'membros' },
+            ].map(c => `
+                <div class="card" style="margin:0;padding:18px;border-left:3px solid ${c.cor};">
+                    <div style="font-size:10px;font-family:'Orbitron';font-weight:900;color:var(--text);letter-spacing:1px;margin-bottom:6px;display:flex;align-items:center;gap:6px;"><i class="ph-fill ${c.icon}" style="color:${c.cor};"></i>${c.label}</div>
+                    <div style="font-size:32px;font-family:'Rajdhani';font-weight:900;color:${c.cor};">${c.val}</div>
+                    <div style="font-size:10px;color:var(--text);font-family:'Share Tech Mono';">semana de ${(ultima.semana||'').split('-').reverse().join('/')}</div>
+                    ${diff(c.val, c.prev, c.diffLabel)}
+                </div>`
+            ).join('');
+
+            // ── Gráfico de barras ──
+            const max = Math.max(...semanas.map(s => s.totalParticipacoes||0), 1);
+            graficoEl.innerHTML = semanas.slice(-8).map((s, i, arr) => {
+                const prev = arr[i-1];
+                const val = s.totalParticipacoes||0;
+                const pct = Math.max(6, Math.round((val/max)*100));
+                const isUltima = i === arr.length - 1;
+                const subiu = prev && val > (prev.totalParticipacoes||0);
+                const desceu = prev && val < (prev.totalParticipacoes||0);
+                const cor = isUltima ? 'var(--accent)' : subiu ? 'rgba(52,211,153,0.5)' : desceu ? 'rgba(248,113,113,0.4)' : 'rgba(0,220,255,0.2)';
+                const borderCor = isUltima ? 'var(--accent)' : subiu ? 'var(--success)' : desceu ? 'var(--danger)' : 'rgba(0,220,255,0.4)';
+                const dataFmt = (s.semana||'').split('-').reverse().join('/').substring(0,5);
+                return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;" title="${dataFmt}: ${val} participações, ${s.totalMovs||0} MOVs, ${s.totalMembros||0} membros">
+                    <span style="font-size:9px;font-family:'Share Tech Mono';color:${isUltima?'var(--accent)':'var(--text)'};">${val}</span>
+                    <div style="width:100%;height:${pct}%;background:${cor};border-radius:4px 4px 0 0;border-top:2px solid ${borderCor};min-height:4px;transition:height 0.3s;"></div>
+                    <span style="font-size:8px;font-family:'Share Tech Mono';color:${isUltima?'var(--accent)':'var(--text)'};white-space:nowrap;">${dataFmt}</span>
+                </div>`;
+            }).join('');
+
+            // ── Ranking acumulado de presenças ──
+            const presencaMap = {};
+            semanas.forEach(s => {
+                (s.ranking||[]).forEach(r => {
+                    const k = r.id || r.nome;
+                    if(!presencaMap[k]) presencaMap[k] = { nome: r.nome, id: r.id, total: 0, semanas: 0 };
+                    presencaMap[k].total += r.count || 0;
+                    presencaMap[k].semanas++;
+                });
+            });
+            const topRanking = Object.values(presencaMap)
+                .sort((a,b) => b.total - a.total)
+                .slice(0, 10);
+
+            const medal = i => i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}º`;
+            rankEl.innerHTML = topRanking.length ? topRanking.map((r,i) => `
+                <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                    <span style="font-size:13px;flex-shrink:0;width:20px;text-align:center;">${medal(i)}</span>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:12px;font-weight:700;font-family:'Rajdhani';color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(r.nome||'—')}</div>
+                        <div style="font-size:10px;font-family:'Share Tech Mono';color:var(--text);">${r.semanas} semana${r.semanas!==1?'s':''} presente</div>
+                    </div>
+                    <span style="font-size:13px;font-weight:900;font-family:'Share Tech Mono';color:var(--accent);flex-shrink:0;">${r.total}</span>
+                </div>`).join('')
+            : '<span style="font-size:12px;color:var(--text);font-family:\'Rajdhani\';">Sem dados.</span>';
+
+            // ── Detalhes por semana ──
+            detEl.innerHTML = [...semanas].reverse().slice(0,6).map((s,i) => {
+                const prev = semanas[semanas.length - 2 - i];
+                const val = s.totalParticipacoes||0;
+                const prevVal = prev?.totalParticipacoes||0;
+                const d = val - prevVal;
+                const corD = d > 0 ? 'var(--success)' : d < 0 ? 'var(--danger)' : 'var(--text)';
+                return `<div style="padding:8px 10px;background:rgba(0,0,0,0.2);border-radius:8px;border:1px solid var(--border);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                        <span style="font-size:11px;font-family:'Share Tech Mono';color:var(--accent);">${(s.semana||'').split('-').reverse().join('/')}</span>
+                        ${prev ? `<span style="font-size:10px;font-family:'Share Tech Mono';color:${corD};">${d>=0?'+':''}${d} vs ant.</span>` : '<span style="font-size:10px;color:var(--text);">—</span>'}
+                    </div>
+                    <div style="display:flex;gap:12px;">
+                        <span style="font-size:11px;font-family:'Rajdhani';font-weight:700;color:var(--white);"><i class="ph-fill ph-users" style="color:var(--accent);"></i> ${val} partic.</span>
+                        <span style="font-size:11px;font-family:'Rajdhani';font-weight:700;color:var(--text);"><i class="ph-fill ph-calendar-check"></i> ${s.totalMovs||0} MOVs</span>
+                        <span style="font-size:11px;font-family:'Rajdhani';font-weight:700;color:var(--text);"><i class="ph-fill ph-user-circle-check"></i> ${s.totalMembros||0} membros</span>
+                    </div>
+                </div>`;
+            }).join('');
+
+        } catch(e) {
+            console.error('[PRZ Histórico]', e);
+            cardEl.innerHTML = '<div style="grid-column:1/-1;color:var(--danger);font-family:\'Rajdhani\';">Erro ao carregar histórico.</div>';
+        }
     };
 
     window.renderDashGraficoSemanal = async () => {
@@ -3539,6 +3757,8 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
         try {
             await b.commit();
+            // Recarregar semanasAtividade localmente após gravar
+            await window.carregarSemanasAtividade();
             if(mudancas > 0) {
                 window.showToast(`Status atualizado para ${mudancas} membro${mudancas>1?'s':''}!`, 'success');
             }
@@ -3559,6 +3779,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                 window._state.semanasAtividade[data.membroId] = data;
             });
             window.renderAtividade();
+            window.renderMembers && window.renderMembers();
             window.renderDashAlertas && window.renderDashAlertas();
         } catch(e) { console.error('[PRZ] Erro semanas:', e); }
     };
@@ -3774,70 +3995,113 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
     window.renderDashAlertas = () => {
         const el = document.getElementById('dash-alertas'); if(!el) return;
-        const alertas = [];
 
-        // Mapa de página → botão nav correto
         const navMap = {
+            'page-membros':     'btn-nav-membros-area',
             'page-atividade':   'btn-nav-atividade',
             'page-adv':         'btn-nav-adv',
-            'page-ausencias':   null,
+            'page-ausencias':   'btn-nav-ausencias',
             'page-blacklist':   'btn-nav-blacklist',
             'page-info-semana': 'btn-nav-info-semana',
+            'page-upamentos':   'btn-nav-upamentos',
+            'page-notif-rpp':   'btn-nav-notif-rpp',
         };
 
         const ir = (page) => {
-            const btnId = navMap[page];
-            const btn = btnId ? document.getElementById(btnId) : null;
-            if(btn) window.switchTab(page, btn);
-            else {
-                // Fallback: mudar manualmente sem botão
-                document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+            const btn = document.getElementById(navMap[page]);
+            if(btn) {
+                btn.style.display = 'flex'; // garantir visível mesmo que RBAC esconda
+                window.switchTab(page, btn);
+            } else {
+                // Fallback geral
+                document.querySelectorAll('.page').forEach(p => { p.style.display='none'; p.classList.remove('active'); });
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 const pageEl = document.getElementById(page);
-                if(pageEl) pageEl.style.display = 'block';
+                if(pageEl) { pageEl.style.display='block'; pageEl.classList.add('active'); }
             }
         };
 
-        // Membros inativos por semanas
-        const inativos = Object.values(window._state.semanasAtividade||{}).filter(s => s.statusCalculado === 'inativo');
-        const emAlerta = Object.values(window._state.semanasAtividade||{}).filter(s => s.statusCalculado === 'alerta');
-        if(inativos.length) alertas.push({ cor:'var(--danger)', bg:'rgba(248,113,113,0.1)', icon:'ph-user-minus', label: inativos.length + ' membro' + (inativos.length>1?'s':'') + ' inativo' + (inativos.length>1?'s':''), page:'page-atividade' });
-        if(emAlerta.length) alertas.push({ cor:'var(--warning)', bg:'rgba(251,191,36,0.1)', icon:'ph-warning', label: emAlerta.length + ' em alerta de atividade', page:'page-atividade' });
+        const alertas  = []; // urgentes — vermelho/laranja
+        const avisos   = []; // atenção — amarelo/cyan
+        const infos    = []; // informativo — verde/cinza
 
-        // Advertências 2ª/3ª
+        // ── URGENTE: Membros inativos (1+ mês) ──
+        const inativos = (window._state.members||[]).filter(m => m.ativo && ['1_mes','2_meses','3_meses'].includes(m.pts));
+        if(inativos.length) alertas.push({ cor:'#ef4444', bg:'rgba(239,68,68,0.08)', icon:'ph-user-minus', label:`${inativos.length} membro${inativos.length>1?'s':''} inativo${inativos.length>1?'s':''}`, detalhe:'1+ mês sem pontuar', page:'page-membros' });
+
+        // ── URGENTE: Membros sem pontos ──
+        const semPontos = (window._state.members||[]).filter(m => m.ativo && m.pts === 'sem_pontos');
+        if(semPontos.length) alertas.push({ cor:'#ef4444', bg:'rgba(239,68,68,0.08)', icon:'ph-x-circle', label:`${semPontos.length} membro${semPontos.length>1?'s':''} sem pontos`, detalhe:'Rebocamento pendente', page:'page-membros' });
+
+        // ── URGENTE: Advertências 2ª/3ª ──
         const advs = (window._state.adv||[]).filter(a => a.numero >= 2);
-        if(advs.length) alertas.push({ cor:'#f97316', bg:'rgba(249,115,22,0.1)', icon:'ph-warning-octagon', label: advs.length + ' adv. 2\u00aa/3\u00aa em aberto', page:'page-adv' });
+        if(advs.length) alertas.push({ cor:'#f97316', bg:'rgba(249,115,22,0.08)', icon:'ph-warning-octagon', label:`${advs.length} adv. 2ª/3ª em aberto`, detalhe:'Requer atenção imediata', page:'page-adv' });
 
-        // Ausências pendentes
-        const ausPend = (window._state.ausencias||[]).filter(a => a.status === 'Pendente');
-        if(ausPend.length) alertas.push({ cor:'var(--accent)', bg:'rgba(0,220,255,0.08)', icon:'ph-calendar-x', label: ausPend.length + ' aus\u00eancia' + (ausPend.length>1?'s':'') + ' pendente' + (ausPend.length>1?'s':''), page:'page-ausencias' });
-
-        // Problemas abertos
+        // ── URGENTE: Problemas abertos ──
         const probAbertos = (window._state.problemas||[]).filter(p => p.status === 'aberto');
-        if(probAbertos.length) alertas.push({ cor:'var(--danger)', bg:'rgba(248,113,113,0.1)', icon:'ph-bug', label: probAbertos.length + ' problema' + (probAbertos.length>1?'s':'') + ' aberto' + (probAbertos.length>1?'s':''), page:'page-info-semana' });
+        if(probAbertos.length) alertas.push({ cor:'#ef4444', bg:'rgba(239,68,68,0.08)', icon:'ph-bug', label:`${probAbertos.length} problema${probAbertos.length>1?'s':''} aberto${probAbertos.length>1?'s':''}`, detalhe:'Registro semanal', page:'page-info-semana' });
 
-        // Blacklist recente (últimos 7 dias)
+        // ── ATENÇÃO: Membros 2-3 semanas sem pontuar ──
+        const emAlerta2s = (window._state.members||[]).filter(m => m.ativo && ['2_semanas','3_semanas'].includes(m.pts));
+        if(emAlerta2s.length) avisos.push({ cor:'#f59e0b', bg:'rgba(245,158,11,0.08)', icon:'ph-warning', label:`${emAlerta2s.length} em alerta de atividade`, detalhe:'2-3 semanas OFF', page:'page-atividade' });
+
+        // ── ATENÇÃO: UPs prontos para aprovar ──
+        const upsPendentes = (window._state.upamentos||[]).filter(u => !u.aprovado && !u.ignorado);
+        if(upsPendentes.length) avisos.push({ cor:'#f59e0b', bg:'rgba(245,158,11,0.08)', icon:'ph-arrow-fat-up', label:`${upsPendentes.length} UP${upsPendentes.length>1?'s':''} aguardando aprovação`, detalhe:'Verifique os upamentos', page:'page-upamentos' });
+
+        // ── ATENÇÃO: Ausências pendentes ──
+        const ausPend = (window._state.ausencias||[]).filter(a => a.status === 'Pendente');
+        if(ausPend.length) avisos.push({ cor:'#22d3ee', bg:'rgba(34,211,238,0.07)', icon:'ph-calendar-x', label:`${ausPend.length} ausência${ausPend.length>1?'s':''} pendente${ausPend.length>1?'s':''}`, detalhe:'Aguardando validação', page:'page-ausencias' });
+
+        // ── ATENÇÃO: RPP ativos ──
+        const rppAtivos = (window._state.notifRpp||[]).filter(r => r.status === 'ativo');
+        if(rppAtivos.length) avisos.push({ cor:'#f59e0b', bg:'rgba(245,158,11,0.08)', icon:'ph-shield-warning', label:`${rppAtivos.length} staff em RPP`, detalhe:'Retorno pendente', page:'page-notif-rpp' });
+
+        // ── ATENÇÃO: Blacklist recente (7 dias) ──
         const seteDias = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
         const blRecente = (window._state.blacklist||[]).filter(b => (b.data||'') >= seteDias);
-        if(blRecente.length) alertas.push({ cor:'var(--danger)', bg:'rgba(248,113,113,0.1)', icon:'ph-skull', label: blRecente.length + ' entrada' + (blRecente.length>1?'s':'') + ' recente' + (blRecente.length>1?'s':'') + ' na blacklist', page:'page-blacklist' });
+        if(blRecente.length) avisos.push({ cor:'#ef4444', bg:'rgba(239,68,68,0.07)', icon:'ph-skull', label:`${blRecente.length} entrada${blRecente.length>1?'s':''} recente${blRecente.length>1?'s':''} na BL`, detalhe:'Últimos 7 dias', page:'page-blacklist' });
 
-        if(!alertas.length) {
-            el.innerHTML = '<span class="dash-empty" style="padding:8px 0;">\u2714 Nenhum alerta no momento.</span>';
+        // ── INFO: Membros 1 semana sem pontuar ──
+        const umaSemana = (window._state.members||[]).filter(m => m.ativo && m.pts === '1_semana');
+        if(umaSemana.length) infos.push({ cor:'#6b7280', bg:'rgba(107,114,128,0.07)', icon:'ph-clock', label:`${umaSemana.length} membro${umaSemana.length>1?'s':''} 1 semana OFF`, detalhe:'Monitorar atividade', page:'page-atividade' });
+
+        // ── INFO: Tudo ok ──
+        const total = alertas.length + avisos.length + infos.length;
+        if(total === 0) {
+            el.innerHTML = '<div style="width:100%;padding:10px 0;display:flex;align-items:center;gap:8px;"><i class="ph-fill ph-check-circle" style="color:var(--success);font-size:16px;"></i><span style="font-size:12px;color:var(--text);font-family:\'Rajdhani\';font-weight:700;">Nenhum alerta no momento. Tudo em ordem ✓</span></div>';
             return;
         }
 
-        el.innerHTML = '';
-        alertas.forEach(a => {
+        // ── Render ──
+        const mkCard = (a) => {
             const div = document.createElement('div');
-            div.style.cssText = 'display:flex;align-items:center;gap:8px;background:'+a.bg+';border:1px solid '+a.cor+'55;border-radius:8px;padding:8px 14px;cursor:pointer;transition:opacity 0.2s;flex:1;min-width:200px;';
-            div.innerHTML = '<i class="ph-fill '+a.icon+'" style="font-size:15px;color:'+a.cor+';flex-shrink:0;"></i>'
-                + '<span style="font-size:12px;color:var(--white);font-family:\'Rajdhani\';font-weight:700;">'+a.label+'</span>'
-                + '<i class="ph-bold ph-arrow-right" style="font-size:11px;color:'+a.cor+';margin-left:auto;opacity:0.6;"></i>';
-            div.addEventListener('mouseenter', function(){ this.style.opacity='0.8'; });
-            div.addEventListener('mouseleave', function(){ this.style.opacity='1'; });
-            div.addEventListener('click', function(){ ir(a.page); });
-            el.appendChild(div);
-        });
+            div.style.cssText = `display:flex;align-items:center;gap:10px;background:${a.bg};border:1px solid ${a.cor}44;border-radius:8px;padding:8px 12px;cursor:pointer;transition:all 0.15s;flex:1;min-width:180px;`;
+            div.innerHTML = `<i class="ph-fill ${a.icon}" style="font-size:16px;color:${a.cor};flex-shrink:0;"></i>`
+                + `<div style="flex:1;min-width:0;">`
+                + `<div style="font-size:12px;color:var(--white);font-family:'Rajdhani';font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.label}</div>`
+                + `<div style="font-size:10px;color:${a.cor};font-family:'Share Tech Mono';opacity:0.8;">${a.detalhe}</div>`
+                + `</div>`
+                + `<i class="ph-bold ph-arrow-right" style="font-size:11px;color:${a.cor};opacity:0.6;flex-shrink:0;"></i>`;
+            div.addEventListener('mouseenter', function(){ this.style.borderColor=a.cor+'99'; this.style.transform='translateY(-1px)'; });
+            div.addEventListener('mouseleave', function(){ this.style.borderColor=a.cor+'44'; this.style.transform=''; });
+            div.addEventListener('click', () => ir(a.page));
+            return div;
+        };
+
+        el.innerHTML = '';
+
+        // Separadores por severidade
+        const mkSep = (label, cor) => {
+            const s = document.createElement('div');
+            s.style.cssText = `width:100%;font-size:9px;font-family:'Orbitron';font-weight:900;color:${cor};letter-spacing:1px;padding:4px 2px 2px;opacity:0.7;`;
+            s.innerText = label;
+            return s;
+        };
+
+        if(alertas.length) { el.appendChild(mkSep('▲ URGENTE', '#ef4444')); alertas.forEach(a => el.appendChild(mkCard(a))); }
+        if(avisos.length)  { el.appendChild(mkSep('● ATENÇÃO', '#f59e0b')); avisos.forEach(a => el.appendChild(mkCard(a))); }
+        if(infos.length)   { el.appendChild(mkSep('◌ INFO', '#6b7280')); infos.forEach(a => el.appendChild(mkCard(a))); }
     };
 
 
@@ -4263,13 +4527,16 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                 b.style.color = isActive ? 'var(--accent)' : 'var(--text)';
             });
         }
+        if(tid === 'page-historico-semanal') {
+            window.renderHistoricoSemanal && window.renderHistoricoSemanal();
+        }
     };
 
     function startListen() {
         if (unsubMembers) unsubMembers(); if (unsubHistorico) unsubHistorico(); if (unsubMovs) unsubMovs(); if(unsubGameNews) unsubGameNews(); if(unsubInstrucoes) unsubInstrucoes(); if(unsubAcolhimentos) unsubAcolhimentos(); if(unsubPermissoes) unsubPermissoes(); if(unsubNVerificados) unsubNVerificados(); if(unsubAusencias) unsubAusencias(); if(unsubIndicacoes) unsubIndicacoes();
         unsubPermissoes = onSnapshot(collection(db, "portal_users"), (s) => { window._state.permissoes = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderAdminUsers(); });
         unsubNVerificados = onSnapshot(collection(db, "nao_verificados"), (s) => { window._state.naoVerificados = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderMembers(); window.renderNaoVerificados(); });
-        unsubAusencias = onSnapshot(collection(db, "ausencias"), (s) => { window._state.ausencias = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderAusencias(); });
+        unsubAusencias = onSnapshot(collection(db, "ausencias"), (s) => { window._state.ausencias = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderAusencias(); window.renderDashAlertas && window.renderDashAlertas(); });
         unsubIndicacoes = onSnapshot(collection(db, "indicacoes"), (s) => { window._state.indicacoes = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderIndicacoes(); });
         unsubMembers = onSnapshot(collection(db, "members"), (s) => { window._state.members = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderMembers(); window.renderIndicacoes(); });
         unsubHistorico = onSnapshot(collection(db, "historico"), (s) => { window._state.historico = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderHistorico(); });
@@ -4303,6 +4570,8 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         window.startListenArea();
         window.startListenChat();
         window.startListenStatus();
+        // Carregar semanas de atividade ao iniciar
+        window.carregarSemanasAtividade && window.carregarSemanasAtividade();
     }
 
     // ==========================================
@@ -4528,6 +4797,207 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             </tr>`;
         }).join('');
     };
+    window._perfilFileNovo = null; // ficheiro novo a fazer upload
+    window._perfilRemoverAvatar = false; // flag para apagar foto actual
+
+    window.previewPerfilAvatar = (event) => {
+        const file = event?.target?.files?.[0];
+        if(!file) return;
+        if(file.size > 2 * 1024 * 1024) { window.showToast('Imagem muito grande. Máx. 2MB.', 'error'); return; }
+        window._perfilFileNovo = file;
+        window._perfilRemoverAvatar = false;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('perfil-file-preview-img').src = e.target.result;
+            document.getElementById('perfil-file-nome').innerText = file.name;
+            document.getElementById('perfil-upload-placeholder').style.display = 'none';
+            document.getElementById('perfil-upload-preview').style.display = 'block';
+            // Actualizar preview do avatar no topo do modal
+            document.getElementById('perfil-avatar-img').src = e.target.result;
+            document.getElementById('perfil-avatar-img').style.display = 'block';
+            document.getElementById('perfil-avatar-initials').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.removerAvatarPerfil = async () => {
+        if(!await window.showConfirm('Remover a foto de perfil?', 'Remover Avatar', true)) return;
+        window._perfilRemoverAvatar = true;
+        window._perfilFileNovo = null;
+        // Reset UI
+        document.getElementById('perfil-avatar-atual').style.display = 'none';
+        document.getElementById('perfil-upload-placeholder').style.display = 'block';
+        document.getElementById('perfil-upload-preview').style.display = 'none';
+        document.getElementById('perfil-file-input').value = '';
+        // Preview volta para iniciais
+        document.getElementById('perfil-avatar-img').style.display = 'none';
+        document.getElementById('perfil-avatar-initials').style.display = 'flex';
+    };
+
+    window.openPerfilModal = () => {
+        const sm = document.getElementById('status-menu');
+        if(sm) sm.style.display = 'none';
+
+        window._perfilFileNovo = null;
+        window._perfilRemoverAvatar = false;
+
+        // Reset file input
+        const fi = document.getElementById('perfil-file-input');
+        if(fi) fi.value = '';
+        document.getElementById('perfil-upload-placeholder').style.display = 'block';
+        document.getElementById('perfil-upload-preview').style.display = 'none';
+
+        // Preencher campos
+        document.getElementById('perfil-nome').value = window.currentUserName || '';
+
+        // Preview avatar
+        const img = document.getElementById('perfil-avatar-img');
+        const initials = document.getElementById('perfil-avatar-initials');
+        const nome = window.currentUserName || '?';
+        initials.innerText = nome.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+
+        if(window.currentUserAvatar) {
+            img.src = window.currentUserAvatar;
+            img.style.display = 'block';
+            initials.style.display = 'none';
+            // Mostrar foto actual com botão remover
+            const atualEl = document.getElementById('perfil-avatar-atual');
+            const atualImg = document.getElementById('perfil-avatar-atual-img');
+            atualImg.src = window.currentUserAvatar;
+            atualEl.style.display = 'flex';
+        } else {
+            img.style.display = 'none';
+            initials.style.display = 'flex';
+            document.getElementById('perfil-avatar-atual').style.display = 'none';
+        }
+
+        // Status atual
+        window._perfilStatusSelecionado = window._userStatus || 'online';
+        window.selectPerfilStatus(window._perfilStatusSelecionado);
+
+        document.getElementById('modal-perfil').style.display = 'flex';
+    };
+
+    window.salvarPerfil = async () => {
+        const btn = document.getElementById('btn-salvar-perfil');
+        await window.withLoading(btn, 'SALVANDO...', async () => {
+            const nome = document.getElementById('perfil-nome').value.trim();
+            const status = window._perfilStatusSelecionado || 'online';
+            if(!nome) { window.showToast('Nome obrigatório!', 'error'); return; }
+
+            let avatarUrl = window.currentUserAvatar || '';
+            const storageKey = `avatars/${window.currentUserEmail || 'shinos'}.jpg`;
+
+            // Apagar foto antiga se solicitado ou se vai subir nova
+            if((window._perfilRemoverAvatar || window._perfilFileNovo) && avatarUrl) {
+                try {
+                    await deleteObject(ref(storage, storageKey));
+                } catch(e) { /* ignora se não existir */ }
+                avatarUrl = '';
+            }
+
+            // Upload nova foto
+            if(window._perfilFileNovo) {
+                try {
+                    btn.innerHTML = '<i class="ph-bold ph-spinner" style="animation:spin 0.8s linear infinite;"></i> ENVIANDO...';
+                    const storageRef = ref(storage, storageKey);
+                    await uploadBytes(storageRef, window._perfilFileNovo);
+                    avatarUrl = await getDownloadURL(storageRef);
+                } catch(e) {
+                    console.error('[PRZ Avatar]', e);
+                    window.showToast('Erro ao fazer upload da imagem.', 'error');
+                    return;
+                }
+            }
+
+            // Atualizar globals
+            window.currentUserName   = nome;
+            window.currentUserAvatar = avatarUrl;
+            window._userStatus       = status;
+
+            // Atualizar sidebar
+            const nameEl = document.getElementById('nav-user-name');
+            if(nameEl) nameEl.innerText = nome;
+            const avatarImg  = document.getElementById('nav-user-avatar-img');
+            const initialsEl = document.getElementById('nav-user-initials');
+            if(avatarUrl && avatarImg) {
+                avatarImg.src = avatarUrl;
+                avatarImg.style.display = 'block';
+                if(initialsEl) initialsEl.style.display = 'none';
+            } else {
+                if(avatarImg) avatarImg.style.display = 'none';
+                if(initialsEl) {
+                    initialsEl.style.display = 'flex';
+                    initialsEl.innerText = nome.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+                }
+            }
+            window.applyStatusUI(status);
+            if(window._allUserStatus) window._allUserStatus[nome] = status;
+
+            // Salvar no Firestore
+            try {
+                const q = query(collection(db,'portal_users'), where('email','==', window.currentUserEmail||''));
+                const snap = await getDocs(q);
+                if(!snap.empty) {
+                    await setDoc(doc(db,'portal_users',snap.docs[0].id), { nome, avatarUrl, status }, { merge:true });
+                }
+            } catch(e) { console.error('[PRZ Perfil]', e); }
+
+            window._perfilFileNovo = null;
+            window._perfilRemoverAvatar = false;
+            window.closeModal('modal-perfil');
+            window.showToast('Perfil atualizado!', 'success');
+        });
+    };
+
+    window.selectPerfilStatus = (status) => {
+        window._perfilStatusSelecionado = status;
+        const cfg = STATUS_CFG[status] || STATUS_CFG.online;
+        // Highlight botão selecionado
+        document.querySelectorAll('.perfil-status-btn').forEach(el => {
+            el.style.opacity = el.dataset.s === status ? '1' : '0.4';
+            el.style.transform = el.dataset.s === status ? 'scale(1.03)' : 'scale(1)';
+        });
+        // Atualizar ponto do preview
+        const dot = document.getElementById('perfil-status-dot-preview');
+        if(dot) { dot.style.background = cfg.cor; }
+    };
+
+    window.renderHistoricoUps = (membroId) => {
+        const el = document.getElementById('f-historico-ups');
+        if(!el) return;
+
+        const ups = (window._state.upamentos || [])
+            .filter(u => u.membroId === membroId && u.aprovado)
+            .sort((a,b) => (a.dataAprovacao||'').localeCompare(b.dataAprovacao||''));
+
+        if(!ups.length) {
+            el.innerHTML = '<span style="font-size:12px;color:var(--text);font-family:\'Rajdhani\';">Nenhum UP aprovado registado.</span>';
+            return;
+        }
+
+        el.innerHTML = ups.map((u, i) => {
+            const cargo = u.cargoAprovado || u.proximoCargo || '—';
+            const de = u.cargoAtual || '—';
+            const data = u.dataAprovacao ? u.dataAprovacao.split('-').reverse().join('/') : '—';
+            const foiSugerido = u.foiSugerido !== false; // default true se não tiver o campo
+            const cargoCor = window.cargoColors?.[cargo] || '#9ca3af';
+            return `<div style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+                <div style="width:22px;height:22px;border-radius:50%;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'Orbitron';font-weight:900;color:var(--warning);flex-shrink:0;">${i+1}</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                        <span style="font-size:11px;color:var(--text);font-family:'Share Tech Mono';">${escapeHTML(de)}</span>
+                        <i class="ph-bold ph-arrow-right" style="font-size:10px;color:var(--text);opacity:0.5;"></i>
+                        <span style="font-size:12px;font-weight:700;font-family:'Rajdhani';color:${cargoCor};">${escapeHTML(cargo)}</span>
+                        ${!foiSugerido ? '<span style="font-size:9px;font-family:\'Orbitron\';color:var(--purple);background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);padding:1px 5px;border-radius:4px;">personalizado</span>' : ''}
+                    </div>
+                    ${u.obs ? `<div style="font-size:10px;color:var(--text);font-family:'Rajdhani';margin-top:2px;opacity:0.8;">${escapeHTML(u.obs)}</div>` : ''}
+                </div>
+                <span style="font-size:10px;font-family:'Share Tech Mono';color:var(--text);flex-shrink:0;">${data}</span>
+            </div>`;
+        }).join('');
+    };
+
     window.previewAdminAvatar = () => {
         const url = document.getElementById('ad-avatar').value.trim();
         const img = document.getElementById('ad-avatar-preview');
@@ -4717,6 +5187,12 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                 const rowBorder = posCorBorder[m.posicao] || 'transparent';
                 const idSpan = `<small style="font-family:'Share Tech Mono';color:var(--text);cursor:pointer;" onclick="window.copiarIdDiscord('${escapeHTML(m.id)}',this)" title="Clique para copiar">${escapeHTML(m.id)}</small>`;
                 const notaBadge = m.notas ? `<span title="${escapeHTML(m.notas)}" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:4px;background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.35);cursor:help;flex-shrink:0;" class="ph-fill ph-note" data-tooltip="${escapeHTML(m.notas)}"></span>` : '';
+                // Badge de semanas sem pontuar
+                const hist = window._state.semanasAtividade?.[m._id];
+                const semanas = hist?.semanasSemPontuar || 0;
+                const semStatus = hist?.statusCalculado || 'ativo';
+                const semCor = semStatus === 'inativo' ? '#ef4444' : semStatus === 'alerta' ? '#f59e0b' : null;
+                const semBadge = (semanas > 0 && semCor) ? `<span title="${semanas} semana${semanas>1?'s':''} sem pontuar" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:'Share Tech Mono';font-weight:700;color:${semCor};background:${semCor}18;border:1px solid ${semCor}44;border-radius:10px;padding:1px 6px;flex-shrink:0;cursor:help;"><i class="ph-fill ph-clock" style="font-size:9px;"></i>${semanas}s</span>` : '';
                 return `<tr style="background:${rowBg};border-left:2px solid ${rowBorder};">
                     <td><div style="display:flex; justify-content:center;"><select class="status-dot ${s}" onchange="window.mudarStatusRapido('${m._id}', this.value)" ${!isGestaoMaster?'disabled':''}>
                         <option value="sim" ${m.pts==='sim'?'selected':''}>Ativo</option>
@@ -4728,7 +5204,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
                         <option value="3_meses" ${m.pts==='3_meses'?'selected':''}>3 Meses OFF</option>
                         <option value="sem_pontos" ${m.pts==='sem_pontos'?'selected':''}>Sem Pontos</option>
                     </select></div></td>
-                    <td><div style="display:flex;align-items:center;">${avatar}<div><div style="display:flex;align-items:center;gap:5px;"><b style="font-family:'Orbitron'; font-size:14px;">${escapeHTML(m.m)}</b>${notaBadge}</div>${idSpan}</div></div></td>
+                    <td><div style="display:flex;align-items:center;">${avatar}<div><div style="display:flex;align-items:center;gap:5px;"><b style="font-family:'Orbitron'; font-size:14px;">${escapeHTML(m.m)}</b>${notaBadge}${semBadge}</div>${idSpan}</div></div></td>
                     <td><select class="badge-select" onchange="window.mudarPosicaoRapido('${m._id}', this.value)" ${!isGestaoMaster?'disabled':''}><option value="comum" ${m.posicao==='comum'?'selected':''}>Comum</option><option value="subgestao" ${m.posicao==='subgestao'?'selected':''}>Sub-Gestão</option><option value="gestao" ${m.posicao==='gestao'?'selected':''}>Gestão</option></select></td>
                     <td><select class="badge-select" style="text-align:center;" onchange="window.mudarUpaGamesRapido('${m._id}', this.value)" ${!isGestaoMaster?'disabled':''}><option value="sim" ${m.upaGames==='sim'?'selected':''}>Games</option><option value="nao" ${m.upaGames==='nao'?'selected':''}>Outra</option></select></td>
                     <td><select class="badge-select" onchange="window.mudarTipoUpRapido('${m._id}', this.value)" ${!isGestaoMaster?'disabled':''}><option value="" ${!m.tipoUp?'selected':''}>S/ UP</option><option value="meta" ${m.tipoUp==='meta'?'selected':''}>Meta</option><option value="merito" ${m.tipoUp==='merito'?'selected':''}>Mérito</option></select></td>
@@ -4755,11 +5231,17 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         document.getElementById('f-notas').value = '';
         const av = document.getElementById('f-id-aviso'); if(av) av.style.display='none';
         document.getElementById('f-pts').value = (tipo === 'inativo') ? '1_mes' : 'sim';
+        // Limpar histórico de UPs para novo membro
+        const hEl = document.getElementById('f-historico-ups');
+        if(hEl) hEl.innerHTML = '<span style="font-size:12px;color:var(--text);font-family:\'Rajdhani\';">Nenhum UP registado ainda.</span>';
         window.atualizarCargos(); 
         document.getElementById('modal-membro').style.display = 'flex'; 
     };
 
-    window.editMember = (id) => { const m = window._state.members.find(x => x._id === id); if(m){ document.getElementById('f-docid').value = m._id; document.getElementById('f-nv-origin-id').value = ""; document.getElementById('f-nome').value = m.m || ""; document.getElementById('f-id').value = m.id || ""; document.getElementById('f-posicao').value = m.posicao || "comum"; window.toggleHierarquia(); document.getElementById('f-hierarquia').value = m.hierarquia || ''; document.getElementById('f-pts').value = m.pts || 'sim'; document.getElementById('f-tipoup').value = m.tipoUp || ""; document.getElementById('f-upagames').value = m.upaGames || "sim"; window.atualizarCargos(); document.getElementById('f-cargo').value = m.cargo || ""; document.getElementById('f-sub-instrucao').checked = !!m.subAreas?.instrucao; document.getElementById('f-sub-acolhimento').checked = !!m.subAreas?.acolhimento; document.getElementById('f-sub-gamenews').checked = !!m.subAreas?.gamenews; document.getElementById('f-notas').value = m.notas || ''; const av = document.getElementById('f-id-aviso'); if(av) av.style.display='none'; document.getElementById('f-id').style.borderColor=''; document.getElementById('f-id').style.boxShadow=''; document.getElementById('modal-membro').style.display = 'flex'; } };
+    window.editMember = (id) => { const m = window._state.members.find(x => x._id === id); if(m){ document.getElementById('f-docid').value = m._id; document.getElementById('f-nv-origin-id').value = ""; document.getElementById('f-nome').value = m.m || ""; document.getElementById('f-id').value = m.id || ""; document.getElementById('f-posicao').value = m.posicao || "comum"; window.toggleHierarquia(); document.getElementById('f-hierarquia').value = m.hierarquia || ''; document.getElementById('f-pts').value = m.pts || 'sim'; document.getElementById('f-tipoup').value = m.tipoUp || ""; document.getElementById('f-upagames').value = m.upaGames || "sim"; window.atualizarCargos(); document.getElementById('f-cargo').value = m.cargo || ""; document.getElementById('f-sub-instrucao').checked = !!m.subAreas?.instrucao; document.getElementById('f-sub-acolhimento').checked = !!m.subAreas?.acolhimento; document.getElementById('f-sub-gamenews').checked = !!m.subAreas?.gamenews; document.getElementById('f-notas').value = m.notas || ''; const av = document.getElementById('f-id-aviso'); if(av) av.style.display='none'; document.getElementById('f-id').style.borderColor=''; document.getElementById('f-id').style.boxShadow='';
+        // Carregar histórico de UPs
+        window.renderHistoricoUps(m._id);
+        document.getElementById('modal-membro').style.display = 'flex'; } };
     
     window.validarIdDiscord = (input) => {
         const val = (input.value||'').trim();
@@ -8056,7 +8538,7 @@ ${r.motivo}`;
         if(unsubLevelUp) unsubLevelUp();
         if(unsubUpamentos) unsubUpamentos();
         unsubLevelUp   = onSnapshot(collection(db,'levelups'),   s=>{ window._state.levelups   = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderLevelUps(); });
-        unsubUpamentos = onSnapshot(collection(db,'upamentos'),  s=>{ window._state.upamentos  = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderUpamentos(); });
+        unsubUpamentos = onSnapshot(collection(db,'upamentos'),  s=>{ window._state.upamentos  = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderUpamentos(); window.renderDashAlertas && window.renderDashAlertas(); });
     };
 
 
@@ -8837,7 +9319,7 @@ Registado por: ${r.registadoPor} | ${labelData(r.data)}`;
         unsubAutorizacoes = onSnapshot(collection(db,'gestao_autorizacoes'), s => { window._state.autorizacoes = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAutorizacoes(); window.renderDashInfoSemana(); });
         unsubAtividade = onSnapshot(collection(db,'gestao_atividade'), s => { window._state.atividade = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderAtividade(); window.renderDashTopMembros(); });
         if(unsubBlacklist) unsubBlacklist();
-        unsubBlacklist = onSnapshot(collection(db,'gestao_blacklist'), s => { window._state.blacklist = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderBlacklist(); });
+        unsubBlacklist = onSnapshot(collection(db,'gestao_blacklist'), s => { window._state.blacklist = s.docs.map(d=>({_id:d.id,...d.data()})); window.renderBlacklist(); window.renderDashAlertas && window.renderDashAlertas(); });
     };
 
     window.renderCalendar = () => {
