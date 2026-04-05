@@ -2294,9 +2294,20 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
 <div id="modal-aprovar-up" class="modal-overlay">
     <div class="modal-content small">
         <h2 style="color:var(--warning); margin-bottom:8px;"><i class="ph-fill ph-arrow-fat-up"></i> APROVAR UPAMENTO</h2>
-        <p style="color:var(--text); font-size:13px; font-family:'Rajdhani'; font-weight:600; margin-bottom:22px;">Confirmar o up de cargo deste membro no sistema?</p>
+        <p style="color:var(--text); font-size:13px; font-family:'Rajdhani'; font-weight:600; margin-bottom:16px;">Confirmar o up de cargo deste membro no sistema?</p>
         <input type="hidden" id="up-approve-id">
-        <div id="up-approve-info" style="background:rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.2); border-radius:10px; padding:16px; margin-bottom:20px; font-family:'Share Tech Mono'; font-size:13px; color:var(--white); line-height:2;"></div>
+        <div id="up-approve-info" style="background:rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.2); border-radius:10px; padding:16px; margin-bottom:16px; font-family:'Share Tech Mono'; font-size:13px; color:var(--white); line-height:2;"></div>
+
+        <!-- Seleção de cargo destino -->
+        <div class="form-group" style="margin-bottom:15px;">
+            <label style="display:flex; align-items:center; gap:8px;">
+                CARGO DE DESTINO
+                <span id="up-cargo-sugestao" style="font-size:10px; font-family:'Rajdhani'; font-weight:700; color:var(--success); background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.25); padding:1px 8px; border-radius:10px;">⭐ Sugerido</span>
+            </label>
+            <select id="up-cargo-destino" onchange="window.onUpCargoChange()" style="background:rgba(0,0,0,0.4); border:1px solid var(--border); color:var(--white); padding:10px 14px; border-radius:8px; font-family:'Rajdhani'; font-size:14px; font-weight:700; outline:none; width:100%; cursor:pointer;"></select>
+            <div id="up-cargo-aviso" style="display:none; margin-top:6px; font-size:11px; color:var(--warning); font-family:'Rajdhani'; font-weight:700;"><i class="ph-bold ph-warning-circle"></i> Cargo diferente do sugerido pelo sistema</div>
+        </div>
+
         <div class="form-group" style="margin-bottom:15px;"><label>OBSERVAÇÃO (opcional)</label>
             <textarea id="up-approve-obs" placeholder="Ex: Excelente desempenho nas últimas semanas..."></textarea>
         </div>
@@ -7674,7 +7685,7 @@ ${r.motivo}`;
         catch(e){ window.showToast('Erro ao copiar.','error'); }
     };
     window.copiarTodosLevelUp = async () => {
-        const list = [...window._state.levelups].sort((a,b) => b.criadoEm.localeCompare(a.criadoEm));
+        const list = [...window._state.levelups].sort((a,b) => (b.pontos||0) - (a.pontos||0));
         if(list.length === 0) { window.showToast('Nenhum Level UP registado.', 'error'); return; }
         const txt = list.map(r => r.mensagem).join('\n');
         try {
@@ -7821,15 +7832,48 @@ ${r.motivo}`;
         window.showToast(`${candidatos.length} membro(s) adicionado(s)!`,'success');
     };
 
+    window.onUpCargoChange = () => {
+        const u = window._state.upamentos.find(x=>x._id===document.getElementById('up-approve-id').value);
+        if(!u) return;
+        const sel = document.getElementById('up-cargo-destino');
+        const aviso = document.getElementById('up-cargo-aviso');
+        const badge = document.getElementById('up-cargo-sugestao');
+        const isSugerido = sel.value === u.proximoCargo;
+        aviso.style.display = isSugerido ? 'none' : 'block';
+        badge.style.display = isSugerido ? 'inline' : 'none';
+    };
+
     window.openAprovarUpModal = (id) => {
         const u = window._state.upamentos.find(x=>x._id===id); if(!u) return;
         document.getElementById('up-approve-id').value = id;
         document.getElementById('up-approve-obs').value = '';
+
+        // Popular select com todos os cargos do tipo do membro (meta)
+        const tipoUp = window._state.members.find(m=>m._id===u.membroId)?.tipoUp || 'meta';
+        const grupos = window.opcoesDeCargo[tipoUp] || [];
+        const sel = document.getElementById('up-cargo-destino');
+        sel.innerHTML = '';
+        grupos.forEach(g => {
+            const og = document.createElement('optgroup');
+            og.label = g.grupo;
+            g.roles.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.v;
+                opt.textContent = r.v + (r.v === u.proximoCargo ? ' ⭐ (sugerido)' : '');
+                if(r.v === u.proximoCargo) opt.style.color = '#34d399';
+                og.appendChild(opt);
+            });
+            sel.appendChild(og);
+        });
+        sel.value = u.proximoCargo; // pré-selecionar o sugerido
+        document.getElementById('up-cargo-aviso').style.display = 'none';
+        document.getElementById('up-cargo-sugestao').style.display = 'inline';
+
         const cfgAtual = META_CARGOS[u.cargoAtual] || {};
         document.getElementById('up-approve-info').innerHTML =
             `<b style="color:var(--white);">${escapeHTML(u.membroNome)}</b><br>` +
             `Cargo atual: <span style="color:var(--warning);">${escapeHTML(u.cargoAtual)}</span> (Meta: ${u.metaAtual} pts)<br>` +
-            `Próximo cargo: <span style="color:var(--success);">${escapeHTML(u.proximoCargo)}</span><br>` +
+            `Próximo sugerido: <span style="color:var(--success);">${escapeHTML(u.proximoCargo)}</span><br>` +
             `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0;font-family:'Share Tech Mono';font-size:11px;">` +
             `<div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:6px;padding:6px;text-align:center;"><div style="color:var(--warning);font-size:9px;">MOVs</div><b style="color:var(--white);">${u.ptMovs||0} pts</b></div>` +
             `<div style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);border-radius:6px;padding:6px;text-align:center;"><div style="color:var(--purple);font-size:9px;">LV UP</div><b style="color:var(--white);">${u.ptLvup||0} pts</b></div>` +
@@ -7841,21 +7885,28 @@ ${r.motivo}`;
                 ? `<br><span style="font-size:11px;color:#71717a;">Reunião Setorial: nenhuma registada esta semana</span>`
                 : u.estavaNaReuniao
                     ? `<br><span style="font-size:11px;color:var(--success);">✓ Presente na Reunião Setorial</span>`
-                    : `<br><span style="font-size:11px;color:var(--danger);">✗ Ausente na Reunião Setorial — ID não consta no relatório</span>`);
+                    : `<br><span style="font-size:11px;color:var(--danger);">✗ Ausente na Reunião Setorial</span>`);
         document.getElementById('modal-aprovar-up').style.display = 'flex';
     };
 
     window.confirmarUpamento = async () => {
         const id = document.getElementById('up-approve-id').value;
         const obs = document.getElementById('up-approve-obs').value.trim();
+        const cargoDestino = document.getElementById('up-cargo-destino').value;
         const u = window._state.upamentos.find(x=>x._id===id); if(!u) return;
+        if(!cargoDestino) { window.showToast('Selecione o cargo de destino!','error'); return; }
+        const isSugerido = cargoDestino === u.proximoCargo;
         try {
-            // Mark upamento as approved
-            await setDoc(doc(db,'upamentos',id), { aprovado:true, ignorado:false, obs:obs||'', dataAprovacao:todayStr() }, { merge:true });
-            // Update member's cargo in members collection
-            await setDoc(doc(db,'members',u.membroId), { cargo:u.proximoCargo }, { merge:true });
+            await setDoc(doc(db,'upamentos',id), {
+                aprovado: true, ignorado: false,
+                obs: obs||'',
+                cargoAprovado: cargoDestino,
+                foiSugerido: isSugerido,
+                dataAprovacao: todayStr()
+            }, { merge:true });
+            await setDoc(doc(db,'members',u.membroId), { cargo: cargoDestino }, { merge:true });
             window.closeModal('modal-aprovar-up');
-            window.showToast(`UP aprovado! ${u.cargoAtual} → ${u.proximoCargo}`,'success');
+            window.showToast(`UP aprovado! ${u.cargoAtual} → ${cargoDestino}${!isSugerido?' (personalizado)':''}`, 'success');
         } catch(e){ console.error('[PRZ]',e); window.showToast('Erro ao aprovar.','error'); }
     };
 
@@ -7975,20 +8026,26 @@ ${r.motivo}`;
         const aprovados = window._state.upamentos
             .filter(x => x.aprovado)
             .sort((a,b) => (a.membroNome||'').localeCompare(b.membroNome||''));
-        const pendentes = window._state.upamentos
-            .filter(x => !x.aprovado && !x.ignorado)
-            .sort((a,b) => (a.membroNome||'').localeCompare(b.membroNome||''));
 
-        const lista = [...aprovados, ...pendentes];
-        if(lista.length === 0) { window.showToast('Nenhum upamento para copiar.', 'error'); return; }
+        if(aprovados.length === 0) {
+            window.showToast('Nenhum UP aprovado para copiar.', 'error');
+            return;
+        }
 
-        const linhas = lista.map(u =>
-            `<@${u.discordId}> | \`${u.discordId}\`\n-# Upando para **${u.proximoCargo}**`
-        );
-        const txt = linhas.join('\n\n');
+        const sep = '•—•—•—• ✿ •—•—•—•';
+        let txt = `**🏆 UPs Aprovados — GAMES PRZ**\n${sep}\n\n`;
+
+        aprovados.forEach(u => {
+            const cargoFinal = u.cargoAprovado || u.proximoCargo;
+            txt += `<@${u.discordId}> | \`${u.discordId}\`\n`;
+            txt += `-# Upando para **${cargoFinal}**\n\n`;
+        });
+
+        txt += `${sep}\n📌 Total: ${aprovados.length} UP${aprovados.length !== 1 ? 's' : ''} aprovado${aprovados.length !== 1 ? 's' : ''}`;
+
         try {
             await navigator.clipboard.writeText(txt);
-            window.showToast('Upamentos copiados!', 'success');
+            window.showToast(`${aprovados.length} UP${aprovados.length!==1?'s':''} copiado${aprovados.length!==1?'s':''}!`, 'success');
         } catch(e) {
             console.error('[PRZ]', e);
             window.showToast('Erro ao copiar.', 'error');
