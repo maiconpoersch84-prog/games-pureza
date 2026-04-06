@@ -5957,7 +5957,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             const c = document.getElementById('div-relatorios-list'); if(!c) return;
             const search = (document.getElementById('rel-search')?.value || '').toLowerCase();
             const tipoFilter = document.getElementById('rel-filter-tipo')?.value || '';
-            let o = [...window._state.movs].sort((a,b) => ((b.data||'')+'T'+(b.horario||'')).localeCompare((a.data||'')+'T'+(a.horario||'')));
+            let o = [...window._state.movs].sort((a,b) => ((a.data||'')+'T'+(a.horario||'')).localeCompare((b.data||'')+'T'+(b.horario||'')));
 
             // update counters
             const semPart = o.filter(m => !m.participantes || m.participantes.length === 0).length;
@@ -5966,37 +5966,72 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             if(ctTotal) ctTotal.innerText = `${o.length} MOV${o.length!==1?'s':''}`;
             if(ctSem) { if(semPart > 0) { ctSem.innerText = `${semPart} sem participantes`; ctSem.style.display='inline'; } else ctSem.style.display='none'; }
 
+            // Marcar finalizadas
+            const agora = new Date().getTime();
+            o.forEach(m => {
+                const deviaFinalizar = m.data && m.horario && agora > new Date(`${m.data}T${m.horario}:00`).getTime() + (m.tipo==='Cine'?5400000:3600000);
+                m._f = m.finalizada || deviaFinalizar;
+            });
+
             if(tipoFilter) o = o.filter(m => m.tipo === tipoFilter);
             if(search) o = o.filter(m => (m.resp||'').toLowerCase().includes(search) || (m.aux||'').toLowerCase().includes(search));
             if(o.length===0) { c.innerHTML='<div class="empty-state">Nenhum resultado.</div>'; return; }
 
-            const agrupado = {}; o.forEach(m => { const dataChave = m.data || 'N/A'; if(!agrupado[dataChave]) agrupado[dataChave] = []; agrupado[dataChave].push(m); });
-            let h = '';
-            for(const [k, movs] of Object.entries(agrupado)) {
-                let dataTitulo = k !== 'N/A' ? formatD(k) : 'N/A';
-                h += `<div style="margin:20px 0 15px; display:flex; align-items:center; gap:15px;"><div style="font-family:'Orbitron'; font-size:14px; font-weight:900; background:rgba(0,0,0,0.6); padding:8px 15px; border-radius:8px; border:1px solid var(--purple); color:var(--purple); box-shadow:0 0 10px rgba(168,85,247,0.3);"><i class="ph-bold ph-calendar-blank"></i> ${dataTitulo}</div><div style="flex:1; height:1px; background:linear-gradient(90deg, var(--purple) 0%, transparent 100%); opacity:0.5;"></div></div>`;
-                h += `<div class="mov-grid">`;
-                movs.forEach(m => {
-                    const cont = m.participantes ? m.participantes.length : 0;
-                    const semPartBadge = cont === 0 ? `<span class="badge" style="background:rgba(248,113,113,0.15);color:var(--danger);border:1px solid rgba(248,113,113,0.3);font-size:9px;"><i class="ph-bold ph-warning"></i> SEM PARTICIPANTES</span>` : '';
-                    h += `<div class="mov-card" style="border-left:3px solid var(--purple);">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                                <span class="badge" style="background:rgba(168,85,247,0.1); color:var(--purple); border:1px solid rgba(168,85,247,0.4);">${escapeHTML(m.tipo)}</span>
-                                <div style="font-family:'Share Tech Mono'; font-size:20px; font-weight:bold; color:var(--success);"><i class="ph-bold ph-clock"></i> ${escapeHTML(m.horario)}</div>
+            const DIAS_PT = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+
+            const renderGrupo = (lista, cor, glow) => {
+                if(!lista.length) return '';
+                // Agrupar por data
+                const agrupado = {};
+                lista.forEach(m => { const k = m.data||'N/A'; if(!agrupado[k]) agrupado[k] = []; agrupado[k].push(m); });
+                let h = '';
+                for(const [k, movs] of Object.entries(agrupado)) {
+                    let dLabel = k !== 'N/A' ? formatD(k) : 'N/A';
+                    if(k !== 'N/A') {
+                        const [y,mo,d] = k.split('-').map(Number);
+                        const diaSem = new Date(y, mo-1, d).getDay();
+                        dLabel = `${DIAS_PT[diaSem]} · ${formatD(k)}`;
+                    }
+                    h += `<div style="margin:20px 0 15px;display:flex;align-items:center;gap:15px;">
+                        <div style="font-family:'Orbitron';font-size:13px;font-weight:900;background:rgba(0,0,0,0.6);padding:7px 14px;border-radius:8px;border:1px solid ${cor};color:${cor};box-shadow:0 0 10px ${glow};white-space:nowrap;"><i class="ph-bold ph-calendar-blank"></i> ${dLabel}</div>
+                        <div style="flex:1;height:1px;background:linear-gradient(90deg,${cor} 0%,transparent 100%);opacity:0.5;"></div>
+                    </div>`;
+                    h += `<div class="mov-grid">`;
+                    movs.forEach(m => {
+                        const cont = m.participantes ? m.participantes.length : 0;
+                        const semPartBadge = cont === 0 ? `<span class="badge" style="background:rgba(248,113,113,0.15);color:var(--danger);border:1px solid rgba(248,113,113,0.3);font-size:9px;"><i class="ph-bold ph-warning"></i> SEM PARTICIPANTES</span>` : '';
+                        h += `<div class="mov-card" style="border-left:3px solid ${cor};">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                                <span class="badge" style="background:${cor}18;color:${cor};border:1px solid ${cor}55;">${escapeHTML(m.tipo)}</span>
+                                <div style="font-family:'Share Tech Mono';font-size:20px;font-weight:bold;color:var(--success);"><i class="ph-bold ph-clock"></i> ${escapeHTML(m.horario)}</div>
                             </div>
                             ${semPartBadge ? `<div style="margin-bottom:10px;">${semPartBadge}</div>` : ''}
-                            <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px;">
-                                <div style="font-size:14px; color:var(--white); font-weight:bold; margin-bottom:5px;">Resp: <span style="color:var(--purple);">${escapeHTML(m.resp)}</span></div>
-                                <div style="font-size:12px; color:var(--text);">Aux: <span style="color:var(--white);">${m.aux?escapeHTML(m.aux):'-'}</span></div>
+                            <div style="background:rgba(0,0,0,0.4);padding:15px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);margin-bottom:20px;">
+                                <div style="font-size:14px;color:var(--white);font-weight:bold;margin-bottom:5px;">Resp: <span style="color:${cor};">${escapeHTML(m.resp)}</span></div>
+                                <div style="font-size:12px;color:var(--text);">Aux: <span style="color:var(--white);">${m.aux?escapeHTML(m.aux):'-'}</span></div>
                             </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; border-top:1px solid var(--border); padding-top:15px;">
-                                <span class="badge b-blue" style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3);"><i class="ph-bold ph-users"></i> ${cont} PARTICIPANTE${cont!==1?'S':''}</span>
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;border-top:1px solid var(--border);padding-top:15px;">
+                                <span class="badge b-blue" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);"><i class="ph-bold ph-users"></i> ${cont} PARTICIPANTE${cont!==1?'S':''}</span>
                                 <button class="btn-acao outline-purple" onclick="window.abrirRelatorio('${m._id}')"><i class="ph-bold ph-file-text"></i> GERAR</button>
                             </div>
-                          </div>`;
-                });
-                h += `</div>`;
-            } c.innerHTML = h;
+                        </div>`;
+                    });
+                    h += `</div>`;
+                }
+                return h;
+            };
+
+            const ag = o.filter(m => !m._f);
+            const fi = o.filter(m => m._f).reverse();
+            let h = '';
+            if(ag.length) h += `<h3 style="font-family:'Orbitron';color:var(--purple);margin-bottom:15px;display:flex;align-items:center;gap:10px;"><i class="ph-bold ph-chart-line-up"></i> RELATÓRIOS</h3>` + renderGrupo(ag, 'var(--purple)', 'rgba(168,85,247,0.3)');
+            if(fi.length) {
+                const fiVis = fi.slice(0, window._relFiLimit || 10);
+                const fiResto = fi.length - fiVis.length;
+                h += `<h3 style="font-family:'Orbitron';color:var(--success);margin-top:50px;margin-bottom:15px;padding-top:30px;border-top:1px dashed var(--border);display:flex;align-items:center;gap:10px;"><i class="ph-bold ph-check-circle"></i> FINALIZADAS <span style="font-size:11px;color:var(--text);font-family:'Share Tech Mono';">(${fi.length})</span></h3>` + renderGrupo(fiVis, 'var(--success)', 'rgba(16,185,129,0.3)');
+                if(fiResto > 0) h += `<div style="text-align:center;margin-top:16px;"><button class="btn-acao btn-outline primary" onclick="window._relFiLimit=(window._relFiLimit||10)+10;window.renderRelatorios()"><i class="ph-bold ph-caret-down"></i> Ver mais ${fiResto>10?10:fiResto} de ${fiResto}</button></div>`;
+            }
+            c.innerHTML = h;
         } catch(e){ console.error("[PRZ Error]", e); }
     };
     window.filtrarMembrosRelatorio = () => {
