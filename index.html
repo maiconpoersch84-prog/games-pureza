@@ -5824,20 +5824,22 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     };
 
     window.copiarCronograma = async () => {
+        const br = getBrTime();
+        const day = br.getDay();
+        const diffToMon = (day === 0 ? -6 : 1 - day);
+        const mon = new Date(br); mon.setDate(br.getDate() + diffToMon); mon.setHours(0,0,0,0);
+        const sun = new Date(mon); sun.setDate(mon.getDate() + 6); sun.setHours(23,59,59,999);
+
+        const toDate = (str) => { const [y,mo,d] = str.split('-').map(Number); return new Date(y, mo-1, d); };
+
         const movs = [...window._state.movs]
-            .filter(m => !m.finalizada)
+            .filter(m => !m.finalizada && m.data && toDate(m.data) >= mon && toDate(m.data) <= sun)
             .sort((a,b) => ((a.data||'')+'T'+(a.horario||'')).localeCompare((b.data||'')+'T'+(b.horario||'')));
 
-        if(movs.length === 0) { window.showToast('Nenhuma MOV agendada.', 'error'); return; }
-
-        // Calculate Monday and Friday of the current week (Brazil time)
-        const br = getBrTime();
-        const day = br.getDay(); // 0=sun, 1=mon...
-        const diffToMon = (day === 0 ? -6 : 1 - day);
-        const mon = new Date(br); mon.setDate(br.getDate() + diffToMon);
-        const fri = new Date(mon); fri.setDate(mon.getDate() + 4);
+        if(movs.length === 0) { window.showToast('Nenhuma MOV agendada para esta semana.', 'error'); return; }
 
         const fmtShort = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+        const fri = new Date(mon); fri.setDate(mon.getDate() + 4);
 
         const DIAS_PT = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
 
