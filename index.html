@@ -2961,10 +2961,34 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
             window.closeModal('modal-limpeza');
             window.showToast("Limpeza semanal concluída!", "success");
             if(tipo === 'movs') { document.getElementById('aviso-reset-semanal').style.display = 'none'; window._avisoResetDado = false;
+                window._resetSemanalFeito = true;
+                // Gravar flag no Firestore com a semana actual
+                try { await setDoc(doc(db,'gestao_config','reset_semanal_flag'), { semana: window._getSemanaAtual(), ts: Date.now() }, { merge:true }); } catch(e){}
                 (window._state.destaques||[]).forEach(d => deleteDoc(doc(db,'gestao_destaques',d._id)).catch(()=>{}));
                 setTimeout(() => window.atualizarStatusPorSemanas && window.atualizarStatusPorSemanas(), 1000);
             }
         } catch(e) { window.showToast("Erro ao limpar dados.", "error"); }
+    };
+
+    // Retorna string única para a semana actual (ano + número da semana)
+    window._getSemanaAtual = () => {
+        const br = getBrTime();
+        const startOfYear = new Date(br.getFullYear(), 0, 1);
+        const week = Math.ceil(((br - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
+        return `${br.getFullYear()}-W${week}`;
+    };
+    window._resetSemanalFeito = false;
+
+    // Carregar flag do Firestore ao iniciar
+    window.carregarFlagReset = async () => {
+        try {
+            const snap = await getDoc(doc(db,'gestao_config','reset_semanal_flag'));
+            if(snap.exists() && snap.data().semana === window._getSemanaAtual()) {
+                window._resetSemanalFeito = true;
+            } else {
+                window._resetSemanalFeito = false;
+            }
+        } catch(e) { window._resetSemanalFeito = false; }
     };
 
     window.applyRBAC = () => {
@@ -4536,6 +4560,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
 
         // ── Semanas de atividade PRIMEIRO — badges prontos antes do renderMembers ──
         window.carregarSemanasAtividade && window.carregarSemanasAtividade();
+        window.carregarFlagReset && window.carregarFlagReset();
 
         unsubPermissoes = onSnapshot(collection(db, "portal_users"), (s) => { window._state.permissoes = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderAdminUsers(); });
         unsubNVerificados = onSnapshot(collection(db, "nao_verificados"), (s) => { window._state.naoVerificados = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderMembers(); window.renderNaoVerificados(); });
@@ -4546,7 +4571,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         unsubMovs = onSnapshot(collection(db, "movs"), (s) => { 
             window._state.movs = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderMovs(); window.renderRelatorios(); window.renderCalendar(); window.renderAcolhimentos(); window.renderDashSugMovs(); window.renderDashMovsHoje(); window.renderDashSugMovs(); window.renderDashResetInfo && window.renderDashResetInfo(); window.renderMovLiveBar && window.renderMovLiveBar();
             if (document.getElementById('modal-relatorio').style.display === 'flex') window.renderParticipantes();
-            const br = getBrTime(); if (window._state.movs.length > 0 && ((br.getDay() === 0 && br.getHours() >= 21) || (br.getDay() === 1 && br.getHours() < 12))) { document.getElementById('aviso-reset-semanal').style.display = 'flex'; } else { document.getElementById('aviso-reset-semanal').style.display = 'none'; }
+            const br = getBrTime(); const precisaReset = (br.getDay() === 0 && br.getHours() >= 21) || (br.getDay() === 1 && br.getHours() < 12); if (window._state.movs.length > 0 && precisaReset && !window._resetSemanalFeito) { document.getElementById('aviso-reset-semanal').style.display = 'flex'; } else { document.getElementById('aviso-reset-semanal').style.display = 'none'; }
         });
         unsubGameNews = onSnapshot(collection(db, "gamenews"), (s) => { window._state.gamenews = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderGameNews(); window.renderDashGameNews(); window.renderDashSubareas(); });
         unsubInstrucoes = onSnapshot(collection(db, "instrucoes"), (s) => { window._state.instrucoes = s.docs.map(d => ({ _id: d.id, ...d.data() })); window.renderInstrucoes(); window.renderDashSubareas(); });
