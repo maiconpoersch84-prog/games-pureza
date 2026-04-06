@@ -81,14 +81,14 @@
     .side-square .tooltip { position: absolute; top: -30px; background: var(--panel-solid); border: 1px solid var(--border); padding: 5px 10px; border-radius: 4px; font-size: 10px; color: var(--white); font-family: 'Orbitron'; font-weight: bold; opacity: 0; transition: 0.2s; pointer-events: none; white-space: nowrap; }
     .side-square:hover .tooltip { opacity: 1; top: -35px; }
     
-    .sidebar-calendar { padding: 15px 25px; border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); margin-bottom: 10px; }
-    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .cal-header #cal-month-year { font-family: 'Orbitron'; font-size: 13px; font-weight: 900; color: var(--accent); letter-spacing: 2px; text-transform: uppercase;}
-    .cal-header .btn-cal-nav { background: transparent; border: none; color: #71717a; cursor: pointer; font-size: 14px; padding: 4px; transition: 0.2s;}
+    .sidebar-calendar { padding: 10px 18px; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .cal-header #cal-month-year { font-family: 'Orbitron'; font-size: 11px; font-weight: 900; color: var(--accent); letter-spacing: 1px; text-transform: uppercase;}
+    .cal-header .btn-cal-nav { background: transparent; border: none; color: #71717a; cursor: pointer; font-size: 12px; padding: 3px; transition: 0.2s;}
     .cal-header .btn-cal-nav:hover { color: var(--white); transform: scale(1.2); }
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
-    .cal-day-header { font-size: 10px; color: #52525b; font-weight: 900; font-family: 'Orbitron'; margin-bottom: 8px; }
-    .cal-day { padding: 8px 0; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 13px; position: relative; font-family: 'Share Tech Mono'; color: #a1a1aa;}
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; }
+    .cal-day-header { font-size: 8px; color: #52525b; font-weight: 900; font-family: 'Orbitron'; margin-bottom: 4px; }
+    .cal-day { padding: 5px 0; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 11px; position: relative; font-family: 'Share Tech Mono'; color: #a1a1aa;}
     .cal-day:hover { background: var(--panel-hover); color: var(--white); }
     .cal-day.today { color: var(--accent); border-bottom: 2px solid var(--accent); font-weight: bold;}
     .cal-day.active { background: var(--accent); color: #000; font-weight: 900; box-shadow: 0 0 15px var(--accent-glow); transform: scale(1.1); z-index: 2;}
@@ -227,6 +227,7 @@
     .modal-actions { display: flex; gap: 15px; margin-top: 30px; }
     .btn-save { flex: 1; background: var(--success); color: #000; border: none; padding: 15px; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; border-radius: 8px; transition: 0.2s; font-size: 13px; display: flex; justify-content: center; align-items: center; gap: 8px; text-transform: uppercase;}
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes pulse-online { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
     .btn-save:disabled { background: #27272a !important; color: #52525b !important; cursor: not-allowed; }
     .btn-save:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.4); }
     .btn-cancel { flex: 1; background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 15px; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; border-radius: 8px; transition: 0.2s; font-size: 13px; text-transform: uppercase;}
@@ -418,9 +419,11 @@
         <div style="display:flex;align-items:center;gap:8px;">
             <i class="ph-fill ph-chat-circle-text" style="color:var(--accent);font-size:16px;"></i>
             <span style="font-family:'Orbitron';font-size:12px;font-weight:900;color:var(--white);">CHAT DA GESTÃO</span>
-            <span id="chat-online-count" style="font-size:10px;font-family:'Share Tech Mono';color:var(--success);"></span>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <!-- Avatares flutuantes de online -->
+            <div id="chat-online-avatars" style="display:flex;align-items:center;" title="Usuários online"></div>
+            <span id="chat-online-count" style="font-size:9px;font-family:'Share Tech Mono';color:var(--text);"></span>
             <button id="chat-clear-btn" onclick="window.resetChat?.(false)" title="Limpar chat" style="display:none;background:transparent;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:4px;opacity:0.6;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="ph-bold ph-trash"></i></button>
             <button onclick="window.toggleChat?.()" style="background:transparent;border:none;color:var(--text);cursor:pointer;font-size:16px;padding:4px;"><i class="ph-bold ph-x"></i></button>
         </div>
@@ -508,26 +511,26 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
     <aside>
         <div class="brand"><i class="ph-fill ph-game-controller"></i> GAMES <span style="color:var(--accent); opacity:0.6;">|</span> PRZ</div>
         
-        <div class="sidebar-scroll-area">
-            <div class="sidebar-widgets">
-                <div class="side-square" style="--c: var(--success); --c-glow: rgba(16,185,129,0.5);">
-                    <div class="tooltip">ATIVOS</div><div class="icon radar-ping"><i class="ph-fill ph-check-circle"></i></div><h1 id="count-ativos">0</h1>
-                </div>
-                <div class="side-square" style="--c: var(--danger); --c-glow: rgba(244,63,94,0.5);">
-                    <div class="tooltip">INATIVOS</div><div class="icon"><i class="ph-fill ph-warning-circle"></i></div><h1 id="count-rebocados">0</h1>
-                </div>
-                <div class="side-square" style="--c: var(--accent); --c-glow: rgba(14,165,233,0.5);">
-                    <div class="tooltip">TOTAL</div><div class="icon"><i class="ph-fill ph-users"></i></div><h1 id="count-total">0</h1>
-                </div>
+        <!-- Fixo: widgets + calendário -->
+        <div class="sidebar-widgets">
+            <div class="side-square" style="--c: var(--success); --c-glow: rgba(16,185,129,0.5);">
+                <div class="tooltip">ATIVOS</div><div class="icon radar-ping"><i class="ph-fill ph-check-circle"></i></div><h1 id="count-ativos">0</h1>
             </div>
-
-            <div class="sidebar-calendar">
-                <div class="cal-header"><button class="btn-cal-nav" onclick="window.mudarMes(-1)"><i class="ph-bold ph-caret-left"></i></button><span id="cal-month-year"></span><button class="btn-cal-nav" onclick="window.mudarMes(1)"><i class="ph-bold ph-caret-right"></i></button></div>
-                <div id="calendar-grid" class="calendar-grid"></div>
+            <div class="side-square" style="--c: var(--danger); --c-glow: rgba(244,63,94,0.5);">
+                <div class="tooltip">INATIVOS</div><div class="icon"><i class="ph-fill ph-warning-circle"></i></div><h1 id="count-rebocados">0</h1>
             </div>
+            <div class="side-square" style="--c: var(--accent); --c-glow: rgba(14,165,233,0.5);">
+                <div class="tooltip">TOTAL</div><div class="icon"><i class="ph-fill ph-users"></i></div><h1 id="count-total">0</h1>
+            </div>
+        </div>
+        <div class="sidebar-calendar">
+            <div class="cal-header"><button class="btn-cal-nav" onclick="window.mudarMes(-1)"><i class="ph-bold ph-caret-left"></i></button><span id="cal-month-year"></span><button class="btn-cal-nav" onclick="window.mudarMes(1)"><i class="ph-bold ph-caret-right"></i></button></div>
+            <div id="calendar-grid" class="calendar-grid"></div>
+        </div>
 
-            <div style="display: flex; flex-direction: column;">
-                <button class="nav-btn nav-btn-dash active" onclick="window.switchTab('page-dash', this)" style="margin-bottom:5px; justify-content:center; padding:10px;" title="Dashboard">
+        <!-- Botão Dashboard fixo -->
+        <div style="padding:6px 12px;border-bottom:1px solid rgba(255,255,255,0.04);">
+            <button class="nav-btn nav-btn-dash active" onclick="window.switchTab('page-dash', this)" style="margin-bottom:0;justify-content:center;padding:10px;width:100%;" title="Dashboard">
     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" class="dash-ctrl-icon">
         <rect x="2" y="2" width="10" height="10" rx="2.5" fill="currentColor" opacity="0.9"/>
         <rect x="14" y="2" width="10" height="10" rx="2.5" fill="currentColor" opacity="0.5"/>
@@ -538,6 +541,11 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
         <rect x="19.5" y="19.5" width="4.5" height="4.5" rx="1.2" fill="currentColor" opacity="0.3"/>
     </svg>
 </button>
+        </div>
+
+        <!-- Scroll: navegação -->
+        <div class="sidebar-scroll-area">
+            <div style="display: flex; flex-direction: column;">
 
 
                 <div id="nav-sep-area" style="height: 1px; background: rgba(255,255,255,0.05); margin: 6px 20px 8px;"></div>
@@ -662,6 +670,7 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
             </div>
         </div>
         <div id="main-content">
+        <div id="dash-online-bar" style="display:none;"><div id="dash-online-avatars"></div><span id="dash-online-count"></span></div>
         <div id="aviso-reset-semanal" style="display:none; background:rgba(244,63,94,0.1); border:1px solid var(--danger); padding:20px 25px; border-radius:12px; margin-bottom:30px; justify-content:space-between; align-items:center; box-shadow:0 10px 30px rgba(244,63,94,0.15);">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <i class="ph-fill ph-warning" style="font-size: 28px; color: var(--danger);"></i>
@@ -688,13 +697,14 @@ window.addEventListener('unhandledrejection',function(){if(!window._moduleLoaded
                 <div id="dash-panel-info" class="dash-panel" style="border-color:rgba(0,220,255,0.15);"><div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-calendar-star"></i> REGISTRO SEMANAL</div><div id="dash-info-semana"></div></div>
                 <div id="dash-panel-destaques" class="dash-panel" style="border-color:rgba(251,191,36,0.2);"><div class="dash-panel-hdr" style="color:#fbbf24;"><i class="ph-fill ph-trophy"></i> MEMBROS EM DESTAQUE</div><div id="dash-top-membros"></div></div>
                 <div id="dash-panel-subareas" class="dash-panel" style="border-color:rgba(244,114,182,0.2);"><div class="dash-panel-hdr" style="color:#f472b6;"><i class="ph-fill ph-chart-bar"></i> RENDIMENTO SUB ÁREAS</div><div id="dash-subareas"></div></div>
+                <div id="dash-panel-online" class="dash-panel" style="border-color:rgba(34,197,94,0.25);"><div class="dash-panel-hdr" style="color:var(--success);display:flex;justify-content:space-between;align-items:center;"><span><i class="ph-fill ph-circle" style="font-size:9px;animation:pulse-online 2s infinite;"></i> ONLINE AGORA</span><span id="dash-online-count" style="font-size:10px;font-family:'Share Tech Mono';color:var(--text);font-weight:400;"></span></div><div id="dash-online-list" style="display:flex;flex-direction:column;gap:6px;"></div></div>
                 <div id="dash-panel-feedbacks" class="dash-panel" style="border-color:rgba(167,139,250,0.2);"><div class="dash-panel-hdr" style="color:var(--purple);"><i class="ph-fill ph-chat-centered-text"></i> FEEDBACKS</div><div id="dash-feedbacks"></div></div>
                 <div id="dash-panel-trocaconta" class="dash-panel" style="border-color:rgba(0,220,255,0.2);"><div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-arrows-clockwise"></i> TROCA DE CONTA</div><div id="dash-troca-conta"></div></div>
                 <div id="dash-panel-grafico" class="dash-panel" style="border-color:rgba(0,220,255,0.15);"><div class="dash-panel-hdr" style="color:var(--accent);"><i class="ph-fill ph-chart-bar"></i> ATIVIDADE SEMANAL</div><div id="dash-grafico-semanal"></div></div>
             </div>
 
             <!-- Container dinâmico -->
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                 <div id="dash-reset-info" style="font-size:11px;font-family:'Share Tech Mono';color:var(--text);display:flex;align-items:center;gap:8px;"></div>
                 <button id="btn-config-dash" onclick="window.openConfigDash()" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--text);padding:7px 14px;border-radius:8px;font-family:'Orbitron';font-size:10px;font-weight:900;cursor:pointer;letter-spacing:1px;transition:0.2s;" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--text)'"><i class="ph-bold ph-layout"></i> CONFIGURAR</button>
             </div>
@@ -4436,6 +4446,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         // Botão de limpar chat — só lider_geral
         const chatClearBtn = document.getElementById('chat-clear-btn');
         if(chatClearBtn) chatClearBtn.style.display = ['administrador','lider_geral'].includes(window.currentUserRole) ? 'block' : 'none';
+        window.renderDashOnline && window.renderDashOnline();
     };
 
     onAuthStateChanged(auth, async (user) => { 
@@ -4562,6 +4573,7 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         window.startListenArea();
         window.startListenChat();
         window.startListenStatus();
+        window.startHeartbeat && window.startHeartbeat();
     }
 
     // ==========================================
@@ -4587,9 +4599,18 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
     window.setUserStatus = async (status) => {
         window._userStatus = status;
         // Atualizar imediatamente no mapa local
-        if(window.currentUserName) window._allUserStatus[window.currentUserName] = status;
+        if(window.currentUserName) {
+            window._allUserStatus[window.currentUserName] = status;
+            if(window._allUserData) {
+                if(!window._allUserData[window.currentUserName]) window._allUserData[window.currentUserName] = {};
+                window._allUserData[window.currentUserName].status = status;
+                window._allUserData[window.currentUserName].ultimoAcesso = Date.now();
+            }
+        }
         window.applyStatusUI(status);
         window.renderChatMessages && window.renderChatMessages();
+        window.renderDashOnline && window.renderDashOnline();
+        window.renderChatOnlineCount && window.renderChatOnlineCount();
         document.getElementById('status-menu').style.display = 'none';
         // Salvar no Firestore no documento do portal_user
         try {
@@ -4628,15 +4649,143 @@ window.cargoColors = { "Mysterious": "#a855f7", "Hall da Fama": "#a855f7", "80's
         if(unsubStatus) unsubStatus();
         unsubStatus = onSnapshot(collection(db,'portal_users'), snap => {
             if(!window._allUserStatus) window._allUserStatus = {};
+            window._allUserData = {};
             snap.docs.forEach(d => {
                 const data = d.data();
                 window._allUserStatus[data.nome] = data.status || 'online';
+                window._allUserData[data.nome] = {
+                    avatarUrl: data.avatarUrl || '',
+                    cargo: data.cargo || '',
+                    ultimoAcesso: data.ultimoAcesso || null
+                };
             });
             // Garantir que o próprio user (Shinos) está sempre no mapa
-            if(window.currentUserName) window._allUserStatus[window.currentUserName] = window._userStatus || 'online';
+            if(window.currentUserName) {
+                window._allUserStatus[window.currentUserName] = window._userStatus || 'online';
+                window._allUserData[window.currentUserName] = {
+                    avatarUrl: window.currentUserAvatar || '',
+                    cargo: window.currentUserRole || '',
+                    ultimoAcesso: Date.now()
+                };
+            }
             window.renderAdminUsers && window.renderAdminUsers();
             window.renderChatMessages && window.renderChatMessages();
+            window.renderDashOnline && window.renderDashOnline();
+            window.renderChatOnlineCount && window.renderChatOnlineCount();
         });
+    };
+
+    // ── Heartbeat de presença ──
+    const HEARTBEAT_INTERVAL = 30000;  // grava a cada 30s
+    const PRESENCA_TIMEOUT   = 90000;  // ausente após 90s sem heartbeat
+    let _heartbeatTimer = null;
+    let _heartbeatDocId = null;
+
+    window.isUsuarioOnline = (nome) => {
+        const data = window._allUserData?.[nome];
+        if(!data?.ultimoAcesso) return false;
+        return (Date.now() - data.ultimoAcesso) < PRESENCA_TIMEOUT;
+    };
+
+    window.startHeartbeat = async () => {
+        // Encontrar o doc do utilizador no portal_users
+        try {
+            const q = query(collection(db,'portal_users'), where('email','==', window.currentUserEmail||''));
+            const snap = await getDocs(q);
+            if(!snap.empty) _heartbeatDocId = snap.docs[0].id;
+        } catch(e) { console.error('[PRZ Heartbeat]', e); }
+
+        const bat = async () => {
+            try {
+                const ts = Date.now();
+                if(_heartbeatDocId) {
+                    await setDoc(doc(db,'portal_users',_heartbeatDocId), { ultimoAcesso: ts }, { merge:true });
+                }
+                // Sempre actualizar o mapa local
+                if(window.currentUserName && window._allUserData) {
+                    if(!window._allUserData[window.currentUserName]) window._allUserData[window.currentUserName] = {};
+                    window._allUserData[window.currentUserName].ultimoAcesso = ts;
+                }
+                window.renderDashOnline && window.renderDashOnline();
+                window.renderChatOnlineCount && window.renderChatOnlineCount();
+            } catch(e) { console.error('[PRZ Heartbeat]', e); }
+        };
+
+        await bat(); // primeiro bat imediato
+        _heartbeatTimer = setInterval(bat, HEARTBEAT_INTERVAL);
+    };
+
+    window.stopHeartbeat = () => {
+        if(_heartbeatTimer) { clearInterval(_heartbeatTimer); _heartbeatTimer = null; }
+    };
+
+    // Parar heartbeat ao fechar/sair da aba
+    document.addEventListener('visibilitychange', () => {
+        if(document.hidden) window.stopHeartbeat();
+        else window.startHeartbeat();
+    });
+
+    window.renderDashOnline = () => {
+        const avatarsEl = document.getElementById('dash-online-avatars');
+        const countEl   = document.getElementById('dash-online-count');
+        if(!avatarsEl) return;
+        const statusMap = window._allUserStatus || {};
+        const dataMap   = window._allUserData   || {};
+        const todos = Object.entries(statusMap).map(([nome, status]) => ({
+            nome, status, ...dataMap[nome]
+        }));
+        const online  = todos.filter(u => window.isUsuarioOnline(u.nome));
+        const inativos = todos.filter(u => !window.isUsuarioOnline(u.nome));
+        if(countEl) countEl.innerText = `${online.length} de ${todos.length}`;
+
+        const mkAvatar = (u, isOnline, idx) => {
+            const cfg = STATUS_CFG[u.status] || STATUS_CFG.online;
+            const iniciais = (u.nome||'?').trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+            const dotCor = isOnline ? '#22c55e' : '#6b7280';
+            const imgOrDiv = u.avatarUrl
+                ? `<img src="${escapeHTML(u.avatarUrl)}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;border:2px solid #09090b;" title="${escapeHTML(u.nome)} — ${cfg.label}" onerror="this.outerHTML='<div style=\\'width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid #09090b;display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:7px;font-weight:900;color:var(--text);\\'>${iniciais}</div>'">`
+                : `<div style="width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid #09090b;display:flex;align-items:center;justify-content:center;font-family:'Orbitron';font-size:7px;font-weight:900;color:var(--text);" title="${escapeHTML(u.nome)} — ${cfg.label}">${iniciais}</div>`;
+            return `<div style="position:relative;flex-shrink:0;margin-left:${idx===0?'0':'-6px'};z-index:${20-idx};${!isOnline?'opacity:0.35;filter:grayscale(1);':''}">
+                ${imgOrDiv}
+                <div style="position:absolute;bottom:0;right:0;width:6px;height:6px;border-radius:50%;background:${dotCor};border:1.5px solid #09090b;${isOnline?'box-shadow:0 0 4px #22c55e;':''}"></div>
+            </div>`;
+        };
+
+        avatarsEl.innerHTML = [
+            ...online.map((u, i) => mkAvatar(u, true, i)),
+            ...inativos.map((u, i) => mkAvatar(u, false, online.length + i))
+        ].join('');
+    };
+
+    window.renderChatOnlineCount = () => {
+        const countEl   = document.getElementById('chat-online-count');
+        const avatarsEl = document.getElementById('chat-online-avatars');
+        const statusMap = window._allUserStatus || {};
+        const dataMap   = window._allUserData   || {};
+        const todos = Object.entries(statusMap).map(([nome, status]) => ({ nome, status, ...dataMap[nome] }));
+        const online  = todos.filter(u => window.isUsuarioOnline(u.nome));
+        const inativos = todos.filter(u => !window.isUsuarioOnline(u.nome));
+        if(countEl) countEl.innerText = online.length > 0 ? `${online.length}` : '';
+
+        if(!avatarsEl) return;
+        const mkA = (u, isOnline, idx) => {
+            const cfg = STATUS_CFG[u.status] || STATUS_CFG.online;
+            const iniciais = (u.nome||'?').trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+            // Ponto: verde se online real, cor do status manual se está presente mas com outro status
+            const dotCor = !isOnline ? '#6b7280' : (cfg.cor || '#22c55e');
+            const dotGlow = isOnline && u.status === 'online' ? 'box-shadow:0 0 4px #22c55e;' : '';
+            const imgOrDiv = u.avatarUrl
+                ? `<img src="${escapeHTML(u.avatarUrl)}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;border:2px solid #0d0d12;" title="${escapeHTML(u.nome)} — ${cfg.label}" onerror="this.outerHTML='<div style=\\'width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid #0d0d12;display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:6px;font-weight:900;color:var(--text);\\'>${iniciais}</div>'">`
+                : `<div style="width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid #0d0d12;display:flex;align-items:center;justify-content:center;font-family:'Orbitron';font-size:6px;font-weight:900;color:var(--text);" title="${escapeHTML(u.nome)} — ${cfg.label}">${iniciais}</div>`;
+            return `<div style="position:relative;flex-shrink:0;margin-left:${idx===0?'0':'-5px'};z-index:${20-idx};${!isOnline?'opacity:0.3;filter:grayscale(1);':''}">
+                ${imgOrDiv}
+                <div style="position:absolute;bottom:0;right:0;width:5px;height:5px;border-radius:50%;background:${dotCor};border:1.5px solid #0d0d12;${dotGlow}"></div>
+            </div>`;
+        };
+        avatarsEl.innerHTML = [
+            ...online.map((u, i) => mkA(u, true, i)),
+            ...inativos.map((u, i) => mkA(u, false, online.length + i))
+        ].join('');
     };
 
     window.resetChat = async (automatico = false) => {
@@ -8232,6 +8381,44 @@ ${r.motivo}`;
         window.showToast(`${candidatos.length} membro(s) adicionado(s)!`,'success');
     };
 
+    // Limites de up por grupo (quantos cargos pode avançar numa semana)
+    const UP_LIMITES = { 'Iniciantes':6, 'Operadores':4, 'Moderadores¹':2, 'Moderadores²':2 };
+
+    // Retorna cargos permitidos a partir do cargo atual respeitando o limite do grupo
+    window.getCargoPermitidos = (cargoAtual, tipoUp) => {
+        const grupos = window.opcoesDeCargo[tipoUp] || [];
+        // Lista plana em ordem crescente (Iniciante → Operador → Mod¹ → Mod²)
+        const todosEmOrdem = [...grupos].reverse().flatMap(g => {
+            const nomeGrupo = g.grupo.replace(/☘[\uFE0E]?\s*/g, '').trim();
+            return [...g.roles].reverse().map(r => ({ cargo: r.v, grupo: nomeGrupo }));
+        });
+        const idxAtual = todosEmOrdem.findIndex(c => c.cargo === cargoAtual);
+        if(idxAtual === -1 || idxAtual + 1 >= todosEmOrdem.length) return [];
+        const grupoAtual = todosEmOrdem[idxAtual].grupo;
+        const proximoIdx = idxAtual + 1;
+        const proximoGrupo = todosEmOrdem[proximoIdx].grupo;
+
+        // Transição de grupo → usa o limite do PRÓXIMO grupo
+        if(proximoGrupo !== grupoAtual) {
+            const limiteProximo = UP_LIMITES[proximoGrupo] || 1;
+            const permitidos = [];
+            for(let i = proximoIdx; i < todosEmOrdem.length && permitidos.length < limiteProximo; i++) {
+                if(todosEmOrdem[i].grupo !== proximoGrupo) break;
+                permitidos.push(todosEmOrdem[i]);
+            }
+            return permitidos;
+        }
+
+        // Dentro do mesmo grupo → até o limite do grupo atual
+        const limite = UP_LIMITES[grupoAtual] || 1;
+        const permitidos = [];
+        for(let i = proximoIdx; i < todosEmOrdem.length && permitidos.length < limite; i++) {
+            if(todosEmOrdem[i].grupo !== grupoAtual) break;
+            permitidos.push(todosEmOrdem[i]);
+        }
+        return permitidos;
+    };
+
     window.onUpCargoChange = () => {
         const u = window._state.upamentos.find(x=>x._id===document.getElementById('up-approve-id').value);
         if(!u) return;
@@ -8248,32 +8435,41 @@ ${r.motivo}`;
         document.getElementById('up-approve-id').value = id;
         document.getElementById('up-approve-obs').value = '';
 
-        // Popular select com todos os cargos do tipo do membro (meta)
         const tipoUp = window._state.members.find(m=>m._id===u.membroId)?.tipoUp || 'meta';
-        const grupos = window.opcoesDeCargo[tipoUp] || [];
+        const permitidos = window.getCargoPermitidos(u.cargoAtual, tipoUp);
         const sel = document.getElementById('up-cargo-destino');
         sel.innerHTML = '';
-        grupos.forEach(g => {
-            const og = document.createElement('optgroup');
-            og.label = g.grupo;
-            g.roles.forEach(r => {
+
+        if(!permitidos.length) {
+            // Fallback: só o próximo sugerido
+            const opt = document.createElement('option');
+            opt.value = u.proximoCargo; opt.textContent = u.proximoCargo + ' ⭐ (sugerido)';
+            opt.style.color = '#34d399'; sel.appendChild(opt);
+        } else {
+            permitidos.forEach((c, i) => {
                 const opt = document.createElement('option');
-                opt.value = r.v;
-                opt.textContent = r.v + (r.v === u.proximoCargo ? ' ⭐ (sugerido)' : '');
-                if(r.v === u.proximoCargo) opt.style.color = '#34d399';
-                og.appendChild(opt);
+                opt.value = c.cargo;
+                const isSug = c.cargo === u.proximoCargo;
+                opt.textContent = c.cargo + (isSug ? ' ⭐ (sugerido)' : ` (+${i+1})`);
+                if(isSug) opt.style.color = '#34d399';
+                sel.appendChild(opt);
             });
-            sel.appendChild(og);
-        });
-        sel.value = u.proximoCargo; // pré-selecionar o sugerido
+        }
+
+        const hasSug = permitidos.some(c => c.cargo === u.proximoCargo);
+        sel.value = hasSug ? u.proximoCargo : (permitidos[0]?.cargo || u.proximoCargo);
         document.getElementById('up-cargo-aviso').style.display = 'none';
-        document.getElementById('up-cargo-sugestao').style.display = 'inline';
+        document.getElementById('up-cargo-sugestao').style.display = hasSug ? 'inline' : 'none';
+
+        const limiteInfo = permitidos.length > 1
+            ? `<br><span style="font-size:11px;color:var(--purple);">📊 Pode avançar até <b>${permitidos.length}</b> cargos nesta semana</span>`
+            : '';
 
         const cfgAtual = META_CARGOS[u.cargoAtual] || {};
         document.getElementById('up-approve-info').innerHTML =
             `<b style="color:var(--white);">${escapeHTML(u.membroNome)}</b><br>` +
             `Cargo atual: <span style="color:var(--warning);">${escapeHTML(u.cargoAtual)}</span> (Meta: ${u.metaAtual} pts)<br>` +
-            `Próximo sugerido: <span style="color:var(--success);">${escapeHTML(u.proximoCargo)}</span><br>` +
+            `Próximo sugerido: <span style="color:var(--success);">${escapeHTML(u.proximoCargo)}</span>${limiteInfo}` +
             `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0;font-family:'Share Tech Mono';font-size:11px;">` +
             `<div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:6px;padding:6px;text-align:center;"><div style="color:var(--warning);font-size:9px;">MOVs</div><b style="color:var(--white);">${u.ptMovs||0} pts</b></div>` +
             `<div style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);border-radius:6px;padding:6px;text-align:center;"><div style="color:var(--purple);font-size:9px;">LV UP</div><b style="color:var(--white);">${u.ptLvup||0} pts</b></div>` +
